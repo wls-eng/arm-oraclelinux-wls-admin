@@ -321,14 +321,13 @@ then
 	echo_stderr "wlsDomainName is required. "
 fi
 
-if [[ -z "$wlsUserName" ] || -z "$wlsPassword" ]]
+if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
 then
 	echo_stderr "wlsUserName or wlsPassword is required. "
 	exit 1
 fi	
 
 export WLS_VER="12.2.1.3.0"
-export domainName='base_domain'
 samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
 
 #add oracle group and user
