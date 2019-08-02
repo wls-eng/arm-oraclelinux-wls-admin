@@ -316,7 +316,7 @@ then
 	exit 1
 fi	
 
-if [[ -z "$wlsDomainName" ]]
+if [ -z "$wlsDomainName" ];
 then
 	echo_stderr "wlsDomainName is required. "
 fi
