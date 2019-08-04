@@ -48,7 +48,7 @@ function cleanup()
     rm -rf $DOMAIN_PATH/weblogic-deploy.zip
     rm -rf $DOMAIN_PATH/weblogic-deploy
     rm -rf $DOMAIN_PATH/deploy-app.yaml
-    rm -rf $DOMAIN_PATH/shoppingcart.*
+    rm -rf $DOMAIN_PATH/shoppingcart.zip
  
     echo "Cleanup completed."
 }
@@ -195,7 +195,7 @@ domainInfo:
    ServerStartMode: prod
 appDeployments:
    Application:
-     simplewar :
+     shoppingcart :
           SourcePath: $DOMAIN_PATH/shoppingcart.war
           Target: admin
           ModuleType: war
