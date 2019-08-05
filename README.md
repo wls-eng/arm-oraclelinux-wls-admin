@@ -46,15 +46,15 @@ So, when this template is run, user will be required to accept the <a href="http
 Follow steps once after successful deployment.
  <p> 1. Login to created VM using ssh </p>
  <p> 2. Switch to "oracle" user using sudo and then su </p>
- <p> 3. Change the directory "/u01/domains/wlsDomainName" </p>
+ <p> 3. Change the directory "/u01/domains/{wlsDomainName}" </p>
  <p> 4. Start the weblogic server using startWeblogic.sh </p>
  <p> 5. Enter wlsUsername and wlsPassword credentials </p>
  <p> 6. Access the weblogic console using </p>
- <p>    http://<public ip address>:7001/console </p>
- <p>    https://<public ip address>:7002/console </p>
+ <p>    http://{public ip address}:7001/console </p>
+ <p>    https://{public ip address}:7002/console </p>
  <p> 7. Accessing the sample deployed application </p>
- <p>    http://<public ip address>:7001/shoppingcart </p>
- <p>    https://<public ip address>:7002/shoppingcart </p>
+ <p>    http://{public ip address}:7001/shoppingcart </p>
+ <p>    https://{public ip address}:7002/shoppingcart </p>
 </p>
 
 If you are new to Azure virtual machines, see:
