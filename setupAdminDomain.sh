@@ -167,11 +167,11 @@ function create_admin_model()
     echo "Creating admin domain model"
     cat <<EOF >$DOMAIN_PATH/admin-domain.yaml
 domainInfo:
-   AdminUserName: $wlsUserName
-   AdminPassword: $wlsPassword
+   AdminUserName: "$wlsUserName"
+   AdminPassword: "$wlsPassword"
    ServerStartMode: prod
 topology:
-   Name: $wlsDomainName
+   Name: "$wlsDomainName"
    AdminServerName: admin
    Server:
         'admin':
