@@ -394,6 +394,11 @@ fi
 echo "Installing zip unzip wget vnc-server rng-tools"
 sudo yum install -y zip unzip wget vnc-server rng-tools
 
+#Setting up rngd utils
+sudo systemctl status rngd
+sudo systemctl start rngd
+sudo systemctl status rngd
+
 echo "unzipping fmw_12.2.1.3.0_wls_Disk1_1of1.zip..."
 sudo unzip -o $WLS_PATH/fmw_12.2.1.3.0_wls_Disk1_1of1.zip -d $WLS_PATH
 
