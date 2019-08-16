@@ -296,7 +296,7 @@
      },
      "adminConsoleSecureURL":{
         "type":"string",
-        "value":"[concat('http://',reference(variables('publicIPAddressName')).dnsSettings.fqdn,':7002/onsole')]"
+        "value":"[concat('https://',reference(variables('publicIPAddressName')).dnsSettings.fqdn,':7002/console')]"
      }
    }
 }
