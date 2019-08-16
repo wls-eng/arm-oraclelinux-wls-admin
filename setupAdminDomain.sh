@@ -175,10 +175,11 @@ topology:
    AdminServerName: admin
    Server:
         'admin':
-            ListenPort: 7001
+	    ListenAddress: "$adminHost"
+            ListenPort: $wlsAdminPort
             RestartDelaySeconds: 10
             SSL:
-               ListenPort: 7002
+               ListenPort: $wlsSSLAdminPort
                Enabled: true
 EOF
 }
@@ -222,6 +223,65 @@ function create_adminDomain()
        echo "Error : Domain creation failed"
        exit 1
     fi
+}
+
+# Boot properties for admin server
+function admin_boot_setup()
+{
+ #Create the boot.properties directory
+ mkdir -p "$DOMAIN_PATH/$wlsDomainName/servers/admin/security"
+ echo "username=$wlsUserName" > "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
+ echo "password=$wlsPassword" >> "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
+ sudo chown -R $username:$groupname $DOMAIN_PATH/$wlsDomainName/servers
+}
+
+# Create adminserver as service
+function create_adminserver_service()
+{
+cat <<EOF >/etc/systemd/system/wls_admin.service
+[Unit]
+Description=WebLogic Adminserver service
+ 
+[Service]
+Type=simple
+WorkingDirectory="/u01/domains/$wlsDomainName"
+ExecStart="/u01/domains/$wlsDomainName/startWebLogic.sh"
+ExecStop="/u01/domains/$wlsDomainName/bin/stopWebLogic.sh"
+User=oracle
+Group=oracle
+KillMode=process
+LimitNOFILE=65535
+ 
+[Install]
+WantedBy=multi-user.target
+EOF
+}
+
+#This function to wait for admin server 
+function wait_for_admin()
+{
+ #wait for admin to start
+count=1
+export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
+while [[ "$status" != "200" ]]
+do
+  echo "Waiting for admin server to start"
+  count=$((count+1))
+  if [ $count -le 30 ];
+  then
+      sleep 1m
+  else
+     echo "Error : Maximum attempts exceeded while starting admin server"
+     exit 1
+  fi
+  status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
+  if [ "$status" == "200" ];
+  then
+     echo "Server $wlsServerName started succesfully..."
+     break
+  fi
+done  
 }
 
 #Function to deploy application in offline mode
@@ -300,6 +360,11 @@ export otnpassword="$3"
 export wlsDomainName="$4"
 export wlsUserName="$5"
 export wlsPassword="$6"
+# Always index 0 is set as admin server
+export wlsAdminPort=7001
+export wlsSSLAdminPort=7002
+export adminHost="$(dig +short myip.opendns.com @resolver1.opendns.com)"
+export wlsAdminURL="$adminHost:$wlsAdminPort"
 
 if [ -z "$acceptOTNLicenseAgreement" ];
 then
@@ -392,7 +457,7 @@ else
 fi
 
 echo "Installing zip unzip wget vnc-server rng-tools"
-sudo yum install -y zip unzip wget vnc-server rng-tools
+sudo yum install -y zip unzip wget vnc-server rng-tools bind-utils
 
 #Setting up rngd utils
 sudo systemctl enable rngd
@@ -431,3 +496,17 @@ deploy_sampleApp
 echo "Completed Depploying Application"
 
 cleanup
+
+echo "Creating weblogic admin server service"
+create_adminserver_service
+echo "Completed weblogic admin server service"
+echo "Creating admin server boot properties"
+admin_boot_setup
+echo "Completed admin server boot properties"
+echo "Starting weblogic admin server as service"
+sudo systemctl enable wls_admin
+sudo systemctl daemon-reload
+sudo systemctl start wls_admin
+echo "Waiting for admin server to be available"
+wait_for_admin
+echo "Weblogic admin server is up and running"
