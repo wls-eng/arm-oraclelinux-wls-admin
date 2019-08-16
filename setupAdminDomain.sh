@@ -395,6 +395,7 @@ echo "Installing zip unzip wget vnc-server rng-tools"
 sudo yum install -y zip unzip wget vnc-server rng-tools
 
 #Setting up rngd utils
+sudo systemctl enable rngd
 sudo systemctl status rngd
 sudo systemctl start rngd
 sudo systemctl status rngd
