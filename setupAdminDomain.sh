@@ -360,11 +360,6 @@ export otnpassword="$3"
 export wlsDomainName="$4"
 export wlsUserName="$5"
 export wlsPassword="$6"
-# Always index 0 is set as admin server
-export wlsAdminPort=7001
-export wlsSSLAdminPort=7002
-export adminHost="$(dig +short myip.opendns.com @resolver1.opendns.com)"
-export wlsAdminURL="$adminHost:$wlsAdminPort"
 
 if [ -z "$acceptOTNLicenseAgreement" ];
 then
@@ -461,7 +456,6 @@ sudo yum install -y zip unzip wget vnc-server rng-tools bind-utils
 
 #Setting up rngd utils
 sudo systemctl enable rngd
-sudo systemctl status rngd
 sudo systemctl start rngd
 sudo systemctl status rngd
 
@@ -478,6 +472,11 @@ export WLS_JAR="$WLS_PATH/fmw_12.2.1.3.0_wls.jar"
 
 mkdir -p $INSTALL_PATH
 sudo chown -R $username:$groupname $INSTALL_PATH
+
+export wlsAdminPort=7001
+export wlsSSLAdminPort=7002
+export adminHost="$(dig +short myip.opendns.com @resolver1.opendns.com)"
+export wlsAdminURL="$adminHost:$wlsAdminPort"
 
 create_oraInstlocTemplate
 create_oraResponseTemplate
