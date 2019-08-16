@@ -175,7 +175,6 @@ topology:
    AdminServerName: admin
    Server:
         'admin':
-	    ListenAddress: "$adminHost"
             ListenPort: $wlsAdminPort
             RestartDelaySeconds: 10
             SSL:
