@@ -112,7 +112,7 @@
       "storageAccountType":"Standard_LRS",
       "publicIPAddressName":"olvmPublicIP",
       "publicIPAddressType":"Dynamic",
-      "vmName":"WebLogicServerVM",
+      "vmName":"AdminServerVM",
       "vmSize":"[parameters('vmSizeSelect')]",
       "virtualNetworkName":"olvmVNET",
       "ScriptFolder": "scripts",
