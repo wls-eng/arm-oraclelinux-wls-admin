@@ -112,7 +112,7 @@
       "storageAccountType":"Standard_LRS",
       "publicIPAddressName":"olvmPublicIP",
       "publicIPAddressType":"Dynamic",
-      "vmName":"WebLogicServerVM",
+      "vmName":"AdminServerVM",
       "vmSize":"[parameters('vmSizeSelect')]",
       "virtualNetworkName":"olvmVNET",
       "ScriptFolder": "scripts",
@@ -234,7 +234,7 @@
                },
                "dataDisks":[
                   {
-                     "diskSizeGB":1023,
+                     "diskSizeGB":900,
                      "lun":0,
                      "createOption":"Empty"
                   }
@@ -289,6 +289,14 @@
       "wlsDomainLocation":{
          "type":"string",
          "value":"[concat('/u01/domains/', parameters('wlsDomainName'))]"
-      }
+      },
+      "adminConsoleURL":{
+         "type":"string",
+         "value":"[concat('http://',reference(variables('publicIPAddressName')).dnsSettings.fqdn,':7001/console')]"
+     },
+     "adminConsoleSecureURL":{
+        "type":"string",
+        "value":"[concat('https://',reference(variables('publicIPAddressName')).dnsSettings.fqdn,':7002/console')]"
+     }
    }
 }
