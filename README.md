@@ -41,18 +41,17 @@ So, when this template is run, user will be required to accept the <a href="http
 
 *az group deployment create --resource-group &lt;resource-group-name&gt; --template-uri https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-admin/master/admindeploy.json*
 
-**Post Deployment**
+**Weblogic Admin Domain Setup**
+<p> 1. Weblogic domain created is available under /u01/domains/<domain name>
+<p> 2. Weblogic Admin server is enabled as syetmctl service
+
+**Accessing Weblogic Admin Console**
 <p>
 Follow steps once after successful deployment.
- <p> 1. Login to created VM using ssh </p>
- <p> 2. Switch to "oracle" user using sudo and then su </p>
- <p> 3. Change the directory "/u01/domains/{wlsDomainName}" </p>
- <p> 4. Start the weblogic server using startWeblogic.sh </p>
- <p> 5. Enter wlsUsername and wlsPassword credentials </p>
- <p> 6. Access the weblogic console using </p>
+ <p> 1. Access the weblogic console using </p>
  <p>    http://{public ip address}:7001/console </p>
  <p>    https://{public ip address}:7002/console </p>
- <p> 7. Accessing the sample deployed application </p>
+ <p> 2. Accessing the sample deployed application </p>
  <p>    http://{public ip address}:7001/shoppingcart </p>
  <p>    https://{public ip address}:7002/shoppingcart </p>
 </p>
