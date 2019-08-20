@@ -42,7 +42,7 @@ So, when this template is run, user will be required to accept the <a href="http
 *az group deployment create --resource-group &lt;resource-group-name&gt; --template-uri https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-admin/master/admindeploy.json*
 
 **Weblogic Admin Domain Setup**
-<p> 1. Weblogic domain created is available under /u01/domains/<domain name>
+<p> 1. Weblogic domain created is available under /u01/domains/{domain name}
 <p> 2. Weblogic Admin server is enabled as syetmctl service
 
 **Accessing Weblogic Admin Console**
