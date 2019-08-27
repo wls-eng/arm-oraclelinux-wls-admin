@@ -29,8 +29,8 @@ function setupInstallPath()
 
 function installUtilities()
 {
-    echo "Installing zip unzip wget vnc-server rng-tools"
-    sudo yum install -y zip unzip wget vnc-server rng-tools
+    echo "Installing zip unzip wget vnc-server rng-tools bind-utils"
+    sudo yum install -y zip unzip wget vnc-server rng-tools bind-utils
 
     #Setting up rngd utils
     sudo systemctl status rngd
@@ -532,6 +532,10 @@ validateInput
 export WLS_VER="12.2.1.3.0"
 export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.1.1/weblogic-deploy.zip
 export samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
+export wlsAdminPort=7001
+export wlsSSLAdminPort=7002
+export adminHost="$(dig +short myip.opendns.com @resolver1.opendns.com)"
+export wlsAdminURL="$adminHost:$wlsAdminPort"
 
 addOracleGroupAndUser
 
