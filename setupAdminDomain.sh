@@ -529,6 +529,8 @@ export wlsPassword="$6"
 
 validateInput
 
+installUtilities
+
 export WLS_VER="12.2.1.3.0"
 export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.1.1/weblogic-deploy.zip
 export samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
@@ -542,8 +544,6 @@ addOracleGroupAndUser
 cleanup
 
 setupInstallPath
-
-installUtilities
 
 downloadJDK
 
