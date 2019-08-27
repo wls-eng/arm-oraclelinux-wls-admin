@@ -12,9 +12,133 @@ function usage()
   echo_stderr "./setupAdminDomain.sh <acceptOTNLicenseAgreement> <otnusername> <otnpassword> <wlsDomainName> <wlsUserName> <wlsPassword>"  
 }
 
+function setupInstallPath()
+{
+    JDK_PATH="/u01/app/jdk"
+    WLS_PATH="/u01/app/wls"
+    DOMAIN_PATH="/u01/domains"
+
+    #create custom directory for setting up wls and jdk
+    sudo mkdir -p $JDK_PATH
+    sudo mkdir -p $WLS_PATH
+    sudo mkdir -p $DOMAIN_PATH
+    sudo rm -rf $JDK_PATH/*
+    sudo rm -rf $WLS_PATH/*
+    sudo rm -rf $DOMAIN_PATH/*
+}
+
+function installUtilities()
+{
+    echo "Installing zip unzip wget vnc-server rng-tools"
+    sudo yum install -y zip unzip wget vnc-server rng-tools
+
+    #Setting up rngd utils
+    sudo systemctl status rngd
+    sudo systemctl start rngd
+    sudo systemctl status rngd
+}
+
+function addOracleGroupAndUser()
+{
+    #add oracle group and user
+    echo "Adding oracle user and group..."
+    groupname="oracle"
+    username="oracle"
+    user_home_dir="/u01/oracle"
+    USER_GROUP=${groupname}
+    sudo groupadd $groupname
+    sudo useradd -d ${user_home_dir} -g $groupname $username
+}
+
+#download jdk from OTN
+function downloadJDK()
+{
+   echo "Downloading jdk from OTN..."
+
+   for in in {1..5}
+   do
+     curl -s https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | bash -s -- --cookie=accept-weblogicserver-server --username="${otnusername}" --password="${otnpassword}" https://download.oracle.com/otn/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.tar.gz
+     tar -tzf jdk-8u131-linux-x64.tar.gz 
+     if [ $? != 0 ];
+     then
+        echo "Download failed. Trying again..."
+        rm -f jdk-8u131-linux-x64.tar.gz
+     else 
+        echo "Downloaded JDK successfully"
+        break
+     fi
+   done
+}
+
+function setupJDK()
+{
+    sudo cp $BASE_DIR/jdk-8u131-linux-x64.tar.gz $JDK_PATH/jdk-8u131-linux-x64.tar.gz
+
+    echo "extracting and setting up jdk..."
+    sudo tar -zxvf $JDK_PATH/jdk-8u131-linux-x64.tar.gz --directory $JDK_PATH
+    sudo chown -R $username:$groupname $JDK_PATH
+
+    export JAVA_HOME=$JDK_PATH/jdk1.8.0_131
+    export PATH=$JAVA_HOME/bin:$PATH
+
+    java -version
+
+    if [ $? == 0 ];
+    then
+        echo "JAVA HOME set succesfully."
+    else
+        echo_stderr "Failed to set JAVA_HOME. Please check logs and re-run the setup"
+        exit 1
+    fi
+}
+
+function setupWLS()
+{
+    sudo cp $BASE_DIR/fmw_12.2.1.3.0_wls_Disk1_1of1.zip $WLS_PATH/fmw_12.2.1.3.0_wls_Disk1_1of1.zip
+    echo "unzipping fmw_12.2.1.3.0_wls_Disk1_1of1.zip..."
+    sudo unzip -o $WLS_PATH/fmw_12.2.1.3.0_wls_Disk1_1of1.zip -d $WLS_PATH
+
+    export SILENT_FILES_DIR=$WLS_PATH/silent-template
+    sudo mkdir -p $SILENT_FILES_DIR
+    sudo rm -rf $WLS_PATH/silent-template/*
+    sudo chown -R $username:$groupname $WLS_PATH
+
+    export INSTALL_PATH="$WLS_PATH/install"
+    export WLS_JAR="$WLS_PATH/fmw_12.2.1.3.0_wls.jar"
+
+    mkdir -p $INSTALL_PATH
+    sudo chown -R $username:$groupname $INSTALL_PATH
+
+    create_oraInstlocTemplate
+    create_oraResponseTemplate
+    create_oraUninstallResponseTemplate
+
+}
+
+#Download Weblogic install jar from OTN
+function downloadWLS()
+{
+  echo "Downloading weblogic install kit from OTN..."
+
+  for in in {1..5}
+  do
+     curl -s https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | bash -s -- --cookie=accept-weblogicserver-server --username="${otnusername}" --password="${otnpassword}" http://download.oracle.com/otn/nt/middleware/12c/12213/fmw_12.2.1.3.0_wls_Disk1_1of1.zip
+     unzip -l fmw_12.2.1.3.0_wls_Disk1_1of1.zip
+     if [ $? != 0 ];
+     then
+        echo "Download failed. Trying again..."
+        rm -f fmw_12.2.1.3.0_wls_Disk1_1of1.zip
+     else 
+        echo "Downloaded WLS successfully"
+        break
+     fi
+  done
+}
+
+
 function validateJDKZipCheckSum()
 {
-  jdkZipFile="$1"
+  jdkZipFile="$BASE_DIR/jdk-8u131-linux-x64.tar.gz"
   jdk18u131Sha256Checksum="62b215bdfb48bace523723cdbb2157c665e6a25429c73828a32f00e587301236"
 
   downloadedJDKZipCheckSum=$(sha256sum $jdkZipFile | cut -d ' ' -f 1)
@@ -227,16 +351,19 @@ function create_adminDomain()
 # Boot properties for admin server
 function admin_boot_setup()
 {
+echo "Creating admin server boot properties"
  #Create the boot.properties directory
  mkdir -p "$DOMAIN_PATH/$wlsDomainName/servers/admin/security"
  echo "username=$wlsUserName" > "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
  echo "password=$wlsPassword" >> "$DOMAIN_PATH/$wlsDomainName/servers/admin/security/boot.properties"
  sudo chown -R $username:$groupname $DOMAIN_PATH/$wlsDomainName/servers
+ echo "Completed admin server boot properties"
 }
 
 # Create adminserver as service
 function create_adminserver_service()
 {
+echo "Creating weblogic admin server service"
 cat <<EOF >/etc/systemd/system/wls_admin.service
 [Unit]
 Description=WebLogic Adminserver service
@@ -254,6 +381,7 @@ LimitNOFILE=65535
 [Install]
 WantedBy=multi-user.target
 EOF
+echo "Completed weblogic admin server service"
 }
 
 #This function to wait for admin server 
@@ -288,7 +416,7 @@ done
 function deploy_sampleApp()
 {
     create_app_deploy_model
-	echo "Downloading Sample Application"
+	echo "Downloading and Deploying Sample Application"
 	wget -q $samplApp
 	sudo unzip -o shoppingcart.zip -d $DOMAIN_PATH
 	sudo chown -R $username:$groupname $DOMAIN_PATH/shoppingcart.*
@@ -342,6 +470,45 @@ function installWLS()
 }
 
 
+function validateInput()
+{
+    if [ -z "$acceptOTNLicenseAgreement" ];
+    then
+            echo _stderr "acceptOTNLicenseAgreement is required. Value should be either Y/y or N/n"
+            exit 1
+    fi
+    if [[ ! ${acceptOTNLicenseAgreement} =~ ^[Yy]$ ]];
+    then
+        echo "acceptOTNLicenseAgreement value not specified as Y/y (yes). Exiting installation Weblogic Server process."
+        exit 1
+    fi
+
+    if [[ -z "$otnusername" || -z "$otnpassword" ]]
+    then
+        echo_stderr "otnusername or otnpassword is required. "
+        exit 1
+    fi	
+
+    if [ -z "$wlsDomainName" ];
+    then
+        echo_stderr "wlsDomainName is required. "
+    fi
+
+    if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
+    then
+        echo_stderr "wlsUserName or wlsPassword is required. "
+        exit 1
+    fi	
+}
+
+function enableAndStartAdminServerService()
+{
+    echo "Starting weblogic admin server as service"
+    sudo systemctl enable wls_admin
+    sudo systemctl daemon-reload
+    sudo systemctl start wls_admin
+}
+
 #main script starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -360,151 +527,43 @@ export wlsDomainName="$4"
 export wlsUserName="$5"
 export wlsPassword="$6"
 
-if [ -z "$acceptOTNLicenseAgreement" ];
-then
-        echo _stderr "acceptOTNLicenseAgreement is required. Value should be either Y/y or N/n"
-        exit 1
-fi
-if [[ ! ${acceptOTNLicenseAgreement} =~ ^[Yy]$ ]];
-then
-    echo "acceptOTNLicenseAgreement value not specified as Y/y (yes). Exiting installation Weblogic Server process."
-    exit 1
-fi
-
-if [[ -z "$otnusername" || -z "$otnpassword" ]]
-then
-	echo_stderr "otnusername or otnpassword is required. "
-	exit 1
-fi	
-
-if [ -z "$wlsDomainName" ];
-then
-	echo_stderr "wlsDomainName is required. "
-fi
-
-if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
-then
-	echo_stderr "wlsUserName or wlsPassword is required. "
-	exit 1
-fi	
+validateInput
 
 export WLS_VER="12.2.1.3.0"
-samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
+export samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
 
-#add oracle group and user
-echo "Adding oracle user and group..."
-groupname="oracle"
-username="oracle"
-user_home_dir="/u01/oracle"
-USER_GROUP=${groupname}
-sudo groupadd $groupname
-sudo useradd -d ${user_home_dir} -g $groupname $username
-
-
-JDK_PATH="/u01/app/jdk"
-WLS_PATH="/u01/app/wls"
-DOMAIN_PATH="/u01/domains"
-
-#create custom directory for setting up wls and jdk
-sudo mkdir -p $JDK_PATH
-sudo mkdir -p $WLS_PATH
-sudo mkdir -p $DOMAIN_PATH
-sudo rm -rf $JDK_PATH/*
-sudo rm -rf $WLS_PATH/*
-sudo rm -rf $DOMAIN_PATH/*
+addOracleGroupAndUser
 
 cleanup
 
-#download jdk from OTN
-echo "Downloading jdk from OTN..."
-curl -s https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | bash -s -- --cookie=accept-weblogicserver-server --username="${otnusername}" --password="${otnpassword}" https://download.oracle.com/otn/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.tar.gz
+setupInstallPath
 
-validateJDKZipCheckSum $BASE_DIR/jdk-8u131-linux-x64.tar.gz
+installUtilities
 
-#Download Weblogic install jar from OTN
-echo "Downloading weblogic install kit from OTN..."
-curl -s https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | bash -s -- --cookie=accept-weblogicserver-server --username="${otnusername}" --password="${otnpassword}" http://download.oracle.com/otn/nt/middleware/12c/12213/fmw_12.2.1.3.0_wls_Disk1_1of1.zip
+downloadJDK
 
+validateJDKZipCheckSum 
 
-sudo chown -R $username:$groupname /u01/app
-sudo chown -R $username:$groupname $DOMAIN_PATH
+downloadWLS
 
-sudo cp $BASE_DIR/fmw_12.2.1.3.0_wls_Disk1_1of1.zip $WLS_PATH/fmw_12.2.1.3.0_wls_Disk1_1of1.zip
-sudo cp $BASE_DIR/jdk-8u131-linux-x64.tar.gz $JDK_PATH/jdk-8u131-linux-x64.tar.gz
+setupJDK
 
-echo "extracting and setting up jdk..."
-sudo tar -zxvf $JDK_PATH/jdk-8u131-linux-x64.tar.gz --directory $JDK_PATH
-sudo chown -R $username:$groupname $JDK_PATH
-
-export JAVA_HOME=$JDK_PATH/jdk1.8.0_131
-export PATH=$JAVA_HOME/bin:$PATH
-export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.1.1/weblogic-deploy.zip
-
-java -version
-
-if [ $? == 0 ];
-then
-    echo "JAVA HOME set succesfully."
-else
-    echo_stderr "Failed to set JAVA_HOME. Please check logs and re-run the setup"
-    exit 1
-fi
-
-echo "Installing zip unzip wget vnc-server rng-tools"
-sudo yum install -y zip unzip wget vnc-server rng-tools bind-utils
-
-#Setting up rngd utils
-sudo systemctl enable rngd
-sudo systemctl start rngd
-sudo systemctl status rngd
-
-echo "unzipping fmw_12.2.1.3.0_wls_Disk1_1of1.zip..."
-sudo unzip -o $WLS_PATH/fmw_12.2.1.3.0_wls_Disk1_1of1.zip -d $WLS_PATH
-
-export SILENT_FILES_DIR=$WLS_PATH/silent-template
-sudo mkdir -p $SILENT_FILES_DIR
-sudo rm -rf $WLS_PATH/silent-template/*
-sudo chown -R $username:$groupname $WLS_PATH
-
-export INSTALL_PATH="$WLS_PATH/install"
-export WLS_JAR="$WLS_PATH/fmw_12.2.1.3.0_wls.jar"
-
-mkdir -p $INSTALL_PATH
-sudo chown -R $username:$groupname $INSTALL_PATH
-
-export wlsAdminPort=7001
-export wlsSSLAdminPort=7002
-export adminHost="$(dig +short myip.opendns.com @resolver1.opendns.com)"
-export wlsAdminURL="$adminHost:$wlsAdminPort"
-
-create_oraInstlocTemplate
-create_oraResponseTemplate
-create_oraUninstallResponseTemplate
+setupWLS
 
 installWLS
 
-echo "Weblogic Server Installation Completed succesfully."
-
-echo "Creating Admin Only Domain"
 create_adminDomain
-echo "Completed Admin Only Domain"
 
-echo "Deploying Sample Application"
 deploy_sampleApp
-echo "Completed Depploying Application"
 
 cleanup
 
-echo "Creating weblogic admin server service"
 create_adminserver_service
-echo "Completed weblogic admin server service"
-echo "Creating admin server boot properties"
+
 admin_boot_setup
-echo "Completed admin server boot properties"
-echo "Starting weblogic admin server as service"
-sudo systemctl enable wls_admin
-sudo systemctl daemon-reload
-sudo systemctl start wls_admin
+
+enableAndStartAdminServerService
+
 echo "Waiting for admin server to be available"
 wait_for_admin
 echo "Weblogic admin server is up and running"
