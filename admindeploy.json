@@ -56,7 +56,7 @@
          }
       },
       "wlsPassword":{
-         "type":"string",
+         "type":"securestring",
          "metadata":{
             "description":"Password for your Weblogic domain name"
          }
