@@ -69,7 +69,7 @@
       },
       "linuxOSVersion":{
          "type":"string",
-         "defaultValue":"7.3",
+         "defaultValue":"7.4",
          "allowedValues":[
             "7.6",
             "7.5",
@@ -102,19 +102,19 @@
      }    
    },
    "variables":{
-      "storageAccountName":"[concat(uniquestring(resourceGroup().id), 'olvm')]",
+      "storageAccountName":"[concat('storage',uniquestring(resourceGroup().id))]",
       "imagePublisher":"Oracle",
       "imageOffer":"Oracle-Linux",
-      "nicName":"olvmNIC",
+      "nicName":"adminServerVM_NIC",
       "addressPrefix":"10.0.0.0/16",
       "subnetName":"Subnet",
       "subnetPrefix":"10.0.0.0/24",
       "storageAccountType":"Standard_LRS",
-      "publicIPAddressName":"olvmPublicIP",
+      "publicIPAddressName":"adminServerVM_PublicIP",
       "publicIPAddressType":"Dynamic",
-      "vmName":"AdminServerVM",
+      "vmName":"adminServerVM",
       "vmSize":"[parameters('vmSizeSelect')]",
-      "virtualNetworkName":"olvmVNET",
+      "virtualNetworkName": "[concat(parameters('wlsDomainName'),'_VNET')]",
       "ScriptFolder": "scripts",
       "ScriptFileName": "setupAdminDomain.sh",
       "linuxConfiguration":{
