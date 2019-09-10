@@ -270,7 +270,7 @@
             "autoUpgradeMinorVersion":true,
             "settings":{
                    "fileUris": [
-                   "https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-admin/develop/setupAdminDomain.sh"
+                   "https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-admin/master/setupAdminDomain.sh"
                    ],
                    "commandToExecute": "[concat('sh setupAdminDomain.sh',' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'))]"
             }
