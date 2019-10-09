@@ -2,6 +2,20 @@
    "$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
    "contentVersion":"1.0.0.0",
    "parameters":{
+       "_artifactsLocation": {
+               "type": "string",
+               "metadata": {
+                       "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
+               },
+               "defaultValue": "${artifactsLocationBase}/${project.artifactId}/${git.tag}/${project.artifactId}/src/main/scripts/"
+       },
+       "_artifactsLocationSasToken": {
+           "type": "securestring",
+           "metadata": {
+               "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+           },
+           "defaultValue": ""
+       },
       "adminUsername":{
          "type":"string",
          "metadata":{
@@ -115,7 +129,6 @@
       "vmName":"adminServerVM",
       "vmSize":"[parameters('vmSizeSelect')]",
       "virtualNetworkName": "[concat(parameters('wlsDomainName'),'_VNET')]",
-      "ScriptFolder": "scripts",
       "ScriptFileName": "setupAdminDomain.sh",
       "linuxConfiguration":{
          "disablePasswordAuthentication":true,
@@ -270,9 +283,9 @@
             "autoUpgradeMinorVersion":true,
             "settings":{
                    "fileUris": [
-                   "https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls-admin/master/setupAdminDomain.sh"
+            "[uri(parameters('_artifactsLocation'), concat(variables('ScriptFileName'), parameters('_artifactsLocationSasToken')))]"
                    ],
-                   "commandToExecute": "[concat('sh setupAdminDomain.sh',' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'))]"
+                   "commandToExecute": "[concat('sh',' ',variables('ScriptFileName'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'))]"
             }
          }
       }
