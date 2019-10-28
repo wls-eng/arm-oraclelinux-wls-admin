@@ -40,7 +40,7 @@
 
     <properties>
       <tracking.pid>pid-18f4b80a-6ca2-5840-8f88-4e7156ed6db0</tracking.pid>
-      <template.validation.tests.directory>${basedir}/../arm-oraclelinux-wls/target/azure-quickstart-templates/test/template-tests</template.validation.tests.directory>
+      <template.validation.tests.directory>${basedir}/../azure-quickstart-templates/test/arm-ttk</template.validation.tests.directory>
     </properties>
     
     <description>
