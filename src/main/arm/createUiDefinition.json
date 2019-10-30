@@ -99,9 +99,9 @@
                         "defaultValue": "Y",
                         "visible": true,
                         "constraints": {
-                            "required": false,
-                            "regex": "^[YN]$",
-                            "validationMessage": "The value must be either Y or N."
+                            "required": true,
+                            "regex": "^[Yy]$",
+                            "validationMessage": "The value must be Y/y to proceed with deployment."
                         }
                     },
                     {
