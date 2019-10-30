@@ -69,7 +69,7 @@
       },
       "linuxOSVersion":{
          "type":"string",
-         "defaultValue":"7.4",
+         "defaultValue":"7.6",
          "allowedValues":[
             "7.6",
             "7.5",
