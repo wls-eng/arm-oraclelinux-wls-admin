@@ -12,8 +12,8 @@
                 "defaultValue": "adminDomain",
                 "constraints": {
                     "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,79}$",
-                    "validationMessage": "The Domain Name must be between 3 and 79 characters long and contain letters, numbers only."
+                    "regex": "^[a-z0-9A-Z]{3,20}$",
+                    "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
                 }
             },
             {
@@ -24,8 +24,8 @@
                 "defaultValue": "wls",
                 "constraints": {
                     "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,79}$",
-                    "validationMessage": "The prefix must be between 3 and 79 characters long and contain letters, numbers only."
+                    "regex": "^[a-z0-9A-Z]{3,20}$",
+                    "validationMessage": "The prefix must be between 3 and 20 characters long and contain letters, numbers only."
                 }
             }
         ],
@@ -127,8 +127,8 @@
                         "toolTip": "Password for admin account of VMs",
                         "constraints": {
                             "required": true,
-                            "regex": "",
-                            "validationMessage": ""
+                            "regex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,72}$",
+                            "validationMessage": "Password must be at least 6 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character"
                         },
                         "options": {
                             "hideConfirmation": false
@@ -158,8 +158,8 @@
                         "toolTip": "Password for WebLogic Administrator",
                         "constraints": {
                             "required": true,
-                            "regex": "",
-                            "validationMessage": ""
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{9,}$",
+                            "validationMessage": "The password must contain at least 9 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
                         },
                         "options": {
                             "hideConfirmation": false
