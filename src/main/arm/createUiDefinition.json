@@ -158,8 +158,8 @@
                         "toolTip": "Password for WebLogic Administrator",
                         "constraints": {
                             "required": true,
-                            "regex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,72}$",
-                            "validationMessage": "Password must be at least 6 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character"
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{9,}$",
+                            "validationMessage": "The password must contain at least 9 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
                         },
                         "options": {
                             "hideConfirmation": false
