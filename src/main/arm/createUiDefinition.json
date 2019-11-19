@@ -71,7 +71,7 @@
                         "toolTip": "The username of a pre-existing OTN account.",
                         "constraints": {
                             "required": true,
-                            "regex": "^.*$",
+                            "regex": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
                             "validationMessage": "The value must be a valid email address"
                         }
                     },
