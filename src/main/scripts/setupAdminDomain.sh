@@ -66,7 +66,6 @@ function addOracleGroupAndUser()
 function downloadJDK()
 {
    echo "Downloading jdk from OTN..."
-   chmod ugo+x ${SCRIPT_PWD}/oradown.sh 
 
    for in in {1..5}
    do
@@ -187,7 +186,7 @@ function downloadWLS()
 
   for in in {1..5}
   do
-     curl -s https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | bash -s -- --cookie=accept-weblogicserver-server --username="${otnusername}" --password="${otnpassword}" http://download.oracle.com/otn/nt/middleware/12c/12213/fmw_12.2.1.3.0_wls_Disk1_1of1.zip
+     ${SCRIPT_PWD}/oradown.sh --cookie=accept-weblogicserver-server --username="${otnusername}" --password="${otnpassword}" http://download.oracle.com/otn/nt/middleware/12c/12213/fmw_12.2.1.3.0_wls_Disk1_1of1.zip
      unzip -l fmw_12.2.1.3.0_wls_Disk1_1of1.zip
      if [ $? != 0 ];
      then
@@ -614,6 +613,7 @@ export MSSQL_JDBC_DRIVER_URL=https://repo.maven.apache.org/maven2/com/microsoft/
 export MSSQL_JDBC_DRIVER=${MSSQL_JDBC_DRIVER_URL##*/}
 
 export SCRIPT_PWD=`pwd`
+chmod ugo+x ${SCRIPT_PWD}/oradown.sh 
 
 addOracleGroupAndUser
 
