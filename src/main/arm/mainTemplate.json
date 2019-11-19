@@ -168,7 +168,10 @@
          "sku": {
             "name": "[variables('storageAccountType')]"
          },
-         "kind": "Storage"
+         "kind":"Storage",
+         "properties": {
+
+         }
       },
       {
          "type": "Microsoft.Network/publicIPAddresses",
