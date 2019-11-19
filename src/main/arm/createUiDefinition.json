@@ -140,7 +140,7 @@
                         "type": "Microsoft.Common.TextBox",
                         "label": "Username for WebLogic Administrator",
                         "defaultValue": "weblogic",
-                        "toolTip": "Use only allowed characters",
+                        "toolTip": "Use only letters and numbers",
                         "constraints": {
                             "required": true,
                             "regex": "^[a-z0-9A-Z]{1,30}$",
