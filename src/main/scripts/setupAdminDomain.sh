@@ -66,10 +66,11 @@ function addOracleGroupAndUser()
 function downloadJDK()
 {
    echo "Downloading jdk from OTN..."
+   chmod ugo+x ${SCRIPT_PWD}/oradown.sh 
 
    for in in {1..5}
    do
-     curl -s https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | bash -s -- --cookie=accept-weblogicserver-server --username="${otnusername}" --password="${otnpassword}" https://download.oracle.com/otn/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.tar.gz
+     ${SCRIPT_PWD}/oradown.sh --cookie=accept-weblogicserver-server --username="${otnusername}" --password="${otnpassword}" https://download.oracle.com/otn/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.tar.gz
      tar -tzf jdk-8u131-linux-x64.tar.gz 
      if [ $? != 0 ];
      then
@@ -612,6 +613,7 @@ export POSTGRESQL_JDBC_DRIVER=${POSTGRESQL_JDBC_DRIVER_URL##*/}
 export MSSQL_JDBC_DRIVER_URL=https://repo.maven.apache.org/maven2/com/microsoft/sqlserver/mssql-jdbc/7.4.1.jre8/mssql-jdbc-7.4.1.jre8.jar
 export MSSQL_JDBC_DRIVER=${MSSQL_JDBC_DRIVER_URL##*/}
 
+export SCRIPT_PWD=`pwd`
 
 addOracleGroupAndUser
 
