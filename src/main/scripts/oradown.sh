@@ -35,19 +35,6 @@ Logging and info arguments:
   -H, --help                   print this help and exit
   -V, --version                display the version of oradown and exit.
 
-Examples:
-
-  Downloads weblogic 12c (oradown downloaded via wget):
-    wget -O - -q https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | \
-        bash -s -- --cookie=accept-weblogicserver-server \
-            --username=foo --password=bar \
-            http://download.oracle.com/otn/nt/middleware/12c/12212/fmw_12.2.1.2.0_wls_Disk1_1of1.zip
-
-    Downloads weblogic 12c (oradown downloaded via curl):
-    curl -s https://raw.githubusercontent.com/typekpb/oradown/master/oradown.sh  | \
-        bash -s -- --cookie=accept-weblogicserver-server \
-            --username=foo --password=bar \
-            http://download.oracle.com/otn/nt/middleware/12c/12212/fmw_12.2.1.2.0_wls_Disk1_1of1.zip
 EOF
 `
 
