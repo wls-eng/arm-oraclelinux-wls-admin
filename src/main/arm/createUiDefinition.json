@@ -129,7 +129,7 @@
                         "toolTip": "Password for OTN Account",
                         "constraints": {
                             "required": true,
-                            "regex": "^.*$",
+                            "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{8,}$",
                             "validationMessage": "Validation constraints for OTN accounts apply here."
                         },
                         "options": {
