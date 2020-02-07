@@ -1,4 +1,5 @@
 name: Build and Test
+
 on: 
   push:
     branches:
@@ -8,6 +9,7 @@ on:
       - master
   schedule:
       - cron:  '0 7 * * *'
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -33,10 +35,33 @@ jobs:
       - name: Build azure-javaee-iaas
         run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
       - name: Built and test arm-oraclelinux-wls-admin
-        run: mvn -Ptemplate-validation-tests clean install --file arm-oraclelinux-wls-admin/pom.xml
+        run: mvn -Ptemplate-validation-tests clean install --file arm-oraclelinux-wls-admin/pom.xml  
+        
+      - name: Get version information from pom.xml
+        id: version
+        run: echo "##[set-env name=version;]$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-admin/pom.xml)"
+      - name: Print version
+        run: echo $version 
+      - name: Generate artifact name         
+        run: echo "##[set-env name=artifactName;]arm-oraclelinux-wls-admin-$version-arm-assembly"  
+      - name: Print artifact name
+        run: echo $artifactName
+      - name: Output artifact name
+        id: artifact_file
+        run: echo "##[set-output name=artifactName;]arm-oraclelinux-wls-admin-$version-arm-assembly"
+      - name: Generate zip package path
+        id: artifact_path
+        run: echo "##[set-output name=artifactPath;]arm-oraclelinux-wls-admin/target/$artifactName"
+      - name: Output artifact path
+        run: echo $artifactPath
+        env: 
+          artifactPath: ${{steps.package.outputs.artifactPath}}
+      - name: Unzip the package as upload action will zip again 
+        run: unzip arm-oraclelinux-wls-admin/target/$artifactName.zip -d arm-oraclelinux-wls-admin/target/$artifactName
+
       - name: Archive arm-oraclelinux-wls-admin target
         uses: actions/upload-artifact@v1 
         if: success()
         with:
-          name: target
-          path: arm-oraclelinux-wls-admin/target
+          name: ${{steps.artifact_file.outputs.artifactName}}.zip
+          path: ${{steps.artifact_path.outputs.artifactPath}}
