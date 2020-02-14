@@ -19,11 +19,11 @@ jobs:
         with:
           repository: Azure/azure-javaee-iaas
           path: azure-javaee-iaas        
-      - name: Checkout azure-quickstart-templates
+      - name: Checkout arm-ttk
         uses: actions/checkout@v2
         with:
-          repository: Azure/azure-quickstart-templates
-          path: azure-quickstart-templates     
+          repository: Azure/arm-ttk
+          path: arm-ttk     
       - name: Checkout arm-oraclelinux-wls-admin
         uses: actions/checkout@v2
         with:
