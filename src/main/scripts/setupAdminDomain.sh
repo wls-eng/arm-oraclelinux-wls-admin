@@ -9,7 +9,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setupAdminDomain.sh <acceptOTNLicenseAgreement> <otnusername> <otnpassword> <wlsDomainName> <wlsUserName> <wlsPassword>"  
+  echo_stderr "./setupAdminDomain.sh <acceptOTNLicenseAgreement> <otnusername> <otnpassword> <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost>"  
 }
 
 function setupInstallPath()
@@ -565,7 +565,12 @@ function validateInput()
     then
         echo_stderr "wlsUserName or wlsPassword is required. "
         exit 1
-    fi	
+    fi
+
+    if [ -z "$wlsAdminHost" ];
+    then
+        echo_stderr "wlsAdminHost is required. "
+    fi
 }
 
 function enableAndStartAdminServerService()
@@ -593,6 +598,7 @@ export otnpassword="$3"
 export wlsDomainName="$4"
 export wlsUserName="$5"
 export wlsPassword="$6"
+export wlsAdminHost="$7"
 
 validateInput
 
@@ -603,8 +609,7 @@ export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/re
 export samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
 export wlsAdminPort=7001
 export wlsSSLAdminPort=7002
-export adminHost="$(dig +short myip.opendns.com @resolver1.opendns.com)"
-export wlsAdminURL="$adminHost:$wlsAdminPort"
+export wlsAdminURL="$wlsAdminHost:$wlsAdminPort"
 
 export POSTGRESQL_JDBC_DRIVER_URL=https://jdbc.postgresql.org/download/postgresql-42.2.8.jar 
 export POSTGRESQL_JDBC_DRIVER=${POSTGRESQL_JDBC_DRIVER_URL##*/}
