@@ -559,6 +559,7 @@ function validateInput()
     if [ -z "$wlsDomainName" ];
     then
         echo_stderr "wlsDomainName is required. "
+        exit 1
     fi
 
     if [[ -z "$wlsUserName" || -z "$wlsPassword" ]]
@@ -570,6 +571,7 @@ function validateInput()
     if [ -z "$wlsAdminHost" ];
     then
         echo_stderr "wlsAdminHost is required. "
+        exit 1
     fi
 }
 
