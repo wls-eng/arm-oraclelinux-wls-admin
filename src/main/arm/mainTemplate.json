@@ -1,5 +1,5 @@
 {
-   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
    "contentVersion": "1.0.0.0",
    "parameters": {
       "_artifactsLocation": {
@@ -17,8 +17,8 @@
          "defaultValue": ""
       },
       "guidValue": {
-            "type": "string",
-            "defaultValue": "[newGuid()]"
+         "type": "string",
+         "defaultValue": "[newGuid()]"
       },
       "adminUsername": {
          "type": "string",
@@ -59,6 +59,13 @@
          "type": "securestring",
          "metadata": {
             "description": "Password for your Oracle Technology Network account"
+         }
+      },
+      "portsToExpose": {
+         "type": "string",
+         "defaultValue": "80,443,7001-9000",
+         "metadata": {
+            "description": "Ports and port ranges to expose"
          }
       },
       "wlsDomainName": {
@@ -144,7 +151,10 @@
             ]
          }
       },
-      "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]"
+      "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
+      "networkSecurityGroupName": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
+      "networkSecurityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+      "requiredPortrange": ",65200-65535,5556"
    },
    "resources": [
       {
@@ -156,8 +166,32 @@
             "template": {
                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                "contentVersion": "1.0.0.0",
-               "resources": []
+               "resources": [
+               ]
             }
+         }
+      },
+      {
+         "type": "Microsoft.Network/networkSecurityGroups",
+         "apiVersion": "2019-06-01",
+         "name": "[variables('networkSecurityGroupName')]",
+         "location": "[parameters('location')]",
+         "properties": {
+            "securityRules": [
+               {
+                  "name": "WebLogicPorts",
+                  "properties": {
+                     "protocol": "TCP",
+                     "sourcePortRange": "*",
+                     "sourceAddressPrefix": "*",
+                     "destinationAddressPrefix": "*",
+                     "access": "Allow",
+                     "priority": 320,
+                     "direction": "Inbound",
+                     "destinationPortRanges": "[split(concat(parameters('portsToExpose'),variables('requiredPortrange')), ',')]"
+                  }
+               }
+            ]
          }
       },
       {
@@ -168,9 +202,8 @@
          "sku": {
             "name": "[variables('storageAccountType')]"
          },
-         "kind":"Storage",
+         "kind": "Storage",
          "properties": {
-
          }
       },
       {
@@ -190,6 +223,9 @@
          "apiVersion": "2018-11-01",
          "name": "[variables('virtualNetworkName')]",
          "location": "[parameters('location')]",
+         "dependsOn": [
+            "[variables('networkSecurityGroupRef')]"
+         ],
          "properties": {
             "addressSpace": {
                "addressPrefixes": [
@@ -200,7 +236,10 @@
                {
                   "name": "[variables('subnetName')]",
                   "properties": {
-                     "addressPrefix": "[variables('subnetPrefix')]"
+                     "addressPrefix": "[variables('subnetPrefix')]",
+                     "networkSecurityGroup": {
+                        "id": "[variables('networkSecurityGroupRef')]"
+                     }
                   }
                }
             ]
@@ -302,7 +341,7 @@
                   "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('ScriptFileName'), parameters('_artifactsLocationSasToken')))]",
                   "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('oradownScript'), parameters('_artifactsLocationSasToken')))]"
                ],
-               "commandToExecute": "[concat('sh',' ',variables('ScriptFileName'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'))]"
+               "commandToExecute": "[concat('sh',' ',variables('ScriptFileName'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',variables('vmName'))]"
             }
          }
       }

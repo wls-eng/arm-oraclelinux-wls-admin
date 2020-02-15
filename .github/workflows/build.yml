@@ -12,6 +12,7 @@ on:
 
 jobs:
   build:
+    if: "! contains(toJSON(github.event.commits.*.msg), '[skip-ci]')"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout azure-javaee-iaas
