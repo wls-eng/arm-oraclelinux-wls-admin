@@ -19,12 +19,14 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: Azure/azure-javaee-iaas
-          path: azure-javaee-iaas        
+          path: azure-javaee-iaas
+          ref: 7ace9c4c8a9a9260f1ee3852276285ae2a0df8c2
       - name: Checkout arm-ttk
         uses: actions/checkout@v2
         with:
           repository: Azure/arm-ttk
           path: arm-ttk     
+          ref: e2fbdcb93a4b2004c9ea953956b85248e0ef8c1c
       - name: Checkout arm-oraclelinux-wls-admin
         uses: actions/checkout@v2
         with:
