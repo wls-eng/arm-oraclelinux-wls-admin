@@ -344,6 +344,23 @@
                "commandToExecute": "[concat('sh',' ',variables('ScriptFileName'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',variables('vmName'))]"
             }
          }
+      },
+      {
+         "apiVersion": "2019-10-01",
+         "name": "${admin.end}",
+         "type": "Microsoft.Resources/deployments",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('vmName'), 'newuserscript')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
       }
    ],
    "outputs": {

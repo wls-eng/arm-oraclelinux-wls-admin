@@ -37,13 +37,27 @@
     
     <packaging>jar</packaging>
     <name>${project.artifactId}</name>
-
-    <properties>
-      <tracking.pid>pid-18f4b80a-6ca2-5840-8f88-4e7156ed6db0</tracking.pid>
-    </properties>
     
     <description>
         
     </description>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <properties>
+                <template.pid.properties.url>https://raw.githubusercontent.com/galiacheng/arm-oraclelinux-wls/microsoft-pids/src/main/resources/pid.properties</template.pid.properties.url>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <template.pid.properties.url>https://raw.githubusercontent.com/wls-eng/arm-oraclelinux-wls/master/src/main/resources/pid.properties</template.pid.properties.url>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>
