@@ -20,7 +20,7 @@ jobs:
         with:
           repository: Azure/azure-javaee-iaas
           path: azure-javaee-iaas        
-          ref: 7ace9c4c8a9a9260f1ee3852276285ae2a0df8c2
+          ref: 73a32b834ec75969bb33d505167c6ba331354833
       - name: Checkout arm-ttk
         uses: actions/checkout@v2
         with:
