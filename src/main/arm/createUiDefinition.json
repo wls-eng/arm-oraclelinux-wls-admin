@@ -27,6 +27,15 @@
                     "regex": "^[a-z0-9A-Z]{3,20}$",
                     "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
                 }
+            },
+            {
+                "name": "About",
+                "type": "Microsoft.Common.InfoBox",
+                "options": {
+                    "icon": "None",
+                    "text": "Template version ${project.version}"
+                },
+                "visible": "[bool('${template.version.visible}')]"
             }
         ],
         "steps": [
