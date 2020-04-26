@@ -31,6 +31,36 @@
     },
     "vmSizeSelect":{
       "value": "GEN-UNIQUE"
-    }    
+    },
+    "configureAAD":{
+      "value": "GEN-UNIQUE"
+    },
+    "wlsLDAPProviderName":{
+      "value": "GEN-UNIQUE"
+    },
+    "addsServerHost":{
+      "value": "GEN-UNIQUE"
+    },
+    "addsPublicIP":{
+      "value": "GEN-UNIQUE"
+    },
+    "aadsPortNumber":{
+      "value": "GEN-UNIQUE"
+    },
+    "wlsLDAPPrincipal":{
+      "value": "GEN-UNIQUE"
+    },
+    "wlsLDAPPrincipalPassword":{
+      "value": "GEN-UNIQUE"
+    },
+    "wlsLDAPUserBaseDN":{
+      "value": "GEN-UNIQUE"
+    },
+    "wlsLDAPGroupBaseDN":{
+      "value": "GEN-UNIQUE"
+    },
+    "wlsLDAPSSLCertificate":{
+      "value": "GEN-UNIQUE"
+    }
   }
 }

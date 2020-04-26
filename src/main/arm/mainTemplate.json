@@ -122,6 +122,73 @@
          "metadata": {
             "description": "Select appropriate VM Size as per requirement (Standard_A1, Standard_A2, Standard_A3, Standard_A4)"
          }
+      },
+      "configureAAD": {
+         "type": "bool",
+         "defaultValue": false,
+         "metadata": {
+            "description": "Bool value, if it's set to true, will enable Azure Active Directory after WebLogic Server starts."
+         }
+      },
+      "wlsLDAPProviderName": {
+         "type": "string",
+         "defaultValue": "AzureActiveDirectoryProvider",
+          "metadata": {
+            "description": "The value used for creating authentication provider name of WebLogic Server."
+         }
+      },
+      "addsServerHost": {
+         "type": "string",
+         "defaultValue": "ldaps.example.com",
+         "metadata": {
+            "description": "The LDAP server host."
+         }
+      },
+      "addsPublicIP": {
+         "type": "string",
+         "defaultValue": "The LDAP server public IP address"
+      },
+      "aadsPortNumber": {
+         "type": "string",
+         "defaultValue": "636",
+         "metadata": {
+            "description": "Accessible port of the LDAP server."
+         }
+      },
+      "wlsLDAPPrincipal": {
+         "type": "string",
+         "defaultValue": "null",
+         "metadata": {
+            "description": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server."
+         }
+      },
+      "wlsLDAPPrincipalPassword": {
+         "type": "securestring",
+         "defaultValue":"[newGuid()]",
+         "metadata": {
+            "description": "The credential (usually a password) used to connect to the LDAP server."
+         }
+      },
+      "wlsLDAPUserBaseDN": {
+         "type": "string",
+         "defaultValue": "null",
+         "metadata": {
+            "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
+         }
+      },
+      "wlsLDAPGroupBaseDN": {
+         "type": "string",
+         "defaultValue": "null",
+         "metadata": {
+            "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
+         }
+      },
+      "wlsLDAPSSLCertificate": {
+         "type": "string",
+         "defaultValue": "null",
+         "metadata": {
+            "description": "Client certificate that will be imported to trust store of SSL."
+         }
       }
    },
    "variables": {
@@ -140,6 +207,8 @@
       "virtualNetworkName": "[concat(parameters('wlsDomainName'),'_VNET')]",
       "oradownScript": "oradown.sh",
       "ScriptFileName": "setupAdminDomain.sh",
+      "pyConfigureSSL": "configure-ssl.py",
+      "pyConfigureLDAP": "configure-active-directory.py",
       "linuxConfiguration": {
          "disablePasswordAuthentication": true,
          "ssh": {
@@ -154,7 +223,8 @@
       "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
       "networkSecurityGroupName": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
       "networkSecurityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
-      "requiredPortrange": ",65200-65535,5556"
+      "requiredPortrange": ",65200-65535,5556",
+      "executeCustomScriptArguments1": "[if(parameters('configureAAD'),concat(parameters('wlsLDAPProviderName'), ' ',  parameters('addsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', parameters('wlsLDAPSSLCertificate'), ' ', parameters('addsPublicIP'), ' ', parameters('adminPasswordOrKey')),'')]"
    },
    "resources": [
       {
@@ -203,8 +273,7 @@
             "name": "[variables('storageAccountType')]"
          },
          "kind": "Storage",
-         "properties": {
-         }
+         "properties": {}
       },
       {
          "type": "Microsoft.Network/publicIPAddresses",
@@ -339,9 +408,11 @@
             "settings": {
                "fileUris": [
                   "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('ScriptFileName'), parameters('_artifactsLocationSasToken')))]",
-                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('oradownScript'), parameters('_artifactsLocationSasToken')))]"
+                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('oradownScript'), parameters('_artifactsLocationSasToken')))]",
+                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('pyConfigureSSL'), parameters('_artifactsLocationSasToken')))]",
+                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('pyConfigureLDAP'), parameters('_artifactsLocationSasToken')))]"
                ],
-               "commandToExecute": "[concat('sh',' ',variables('ScriptFileName'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',variables('vmName'))]"
+               "commandToExecute": "[concat('sh',' ',variables('ScriptFileName'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',variables('vmName'),' ',parameters('configureAAD'),' ',variables('executeCustomScriptArguments1'),' ')]"
             }
          }
       },

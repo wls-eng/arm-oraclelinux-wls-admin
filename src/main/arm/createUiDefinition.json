@@ -26,16 +26,16 @@
                     "required": true,
                     "regex": "^[a-z0-9A-Z]{3,20}$",
                     "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
-                }
-            },
-            {
-                "name": "About",
-                "type": "Microsoft.Common.InfoBox",
-                "options": {
-                    "icon": "None",
-                    "text": "Template version ${project.version}"
                 },
-                "visible": "[bool('${template.version.visible}')]"
+				{
+	                "name": "About",
+	                "type": "Microsoft.Common.InfoBox",
+	                "options": {
+	                    "icon": "None",
+	                    "text": "Template version ${project.version}"
+	                },
+	                "visible": "[bool('${template.version.visible}')]"
+	            }
             }
         ],
         "steps": [
@@ -201,15 +201,182 @@
                         }
                     }
                 ]
+            },
+            {
+                "name": "AzureActiveDirectoryIntegration",
+                "label": "Azure Active Directory Settings",
+                "subLabel": {
+                    "preValidation": "Configure the Azure Active Directory.",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Azure Active Directory Settings",
+                "elements": [
+                    {
+                        "name": "configureAAD",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Configure Azure Active Directory?",
+                        "defaultValue": "Yes",
+                        "toolTip": "Select 'Yes' and provide required info to configure Azure Active Directory.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "false"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "configurationInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Configuration Information",
+                        "visible": "[bool(steps('AzureActiveDirectoryIntegration').configureAAD)]",
+                        "elements": [
+                            {
+                                "name": "addsLDAPInfo",
+                                "type": "Microsoft.Common.TextBlock",
+                                "options": {
+                                    "text": "Please add a security rule to your LDAP server network security group to allow inbound secure LDAP access over TCP port 636 from WebLogic Server after the offer is provisioned. Security threat will be created automatically for you managed domain, it will block WebLogic Server machine to access the LDAP server.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://docs.microsoft.com/en-us/azure/active-directory-domain-services/tutorial-configure-ldaps#lock-down-secure-ldap-access-over-the-internet"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "addsNewLDAPInfo",
+                                "type": "Microsoft.Common.TextBlock",
+                                "options": {
+                                    "text": "If you don't have a LDAP server, please create one following the guide.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://docs.microsoft.com/en-us/azure/active-directory-domain-services/tutorial-configure-ldaps"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "addsServerHost",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Server Host",
+                                "toolTip": "The LDAP server host.",
+                                "defaultValue": "ldaps.example.com",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]",
+                                    "validationMessage": "The value must be a valid host name."
+                                }
+                            },
+                            {
+                                "name": "addsPublicIP",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "LDAP external IP address",
+                                "toolTip": "Secure LDAP external IP address.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "\\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}\\b",
+                                    "validationMessage": "The value must be a valid IP address."
+                                }
+                            },
+                            {
+                                "name": "aadsPortNumber",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Port",
+                                "toolTip": "The port number of LDAP Server, default is 636.",
+                                "defaultValue": "636",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[0-9]+$",
+                                    "validationMessage": "The value must be numbers."
+                                }
+                            },
+                            {
+                                "name": "wlsLDAPProviderName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Provider Name",
+                                "defaultValue": "AzureActiveDirectoryProvider",
+                                "toolTip": "The value used for creating authentication provider name of WebLogic Server.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{3,50}$",
+                                    "validationMessage": "The Provider Name must be between 3 and 50 characters long and contain letters, numbers only."
+                                }
+                            },
+                            {
+                                "name": "wlsLDAPPrincipal",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Principal",
+                                "toolTip": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
+                                    "validationMessage": "The value must be valid LDAP user distinguished name."
+                                }
+                            },
+                            {
+                                "name": "wlsLDAPPrincipalPassword",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password for Principal",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": "The credential (usually a password) used to connect to the LDAP server.",
+                                "constraints": {
+                                    "required": true
+                                }
+                            },
+                            {
+                                "name": "wlsLDAPUserBaseDN",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "User Base DN",
+                                "toolTip": "The base distinguished name (DN) of the tree in the LDAP directory that contains users.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
+                                    "validationMessage": "The value must be valid LDAP user based distinguished name."
+                                }
+                            },
+                            {
+                                "name": "wlsLDAPGroupBaseDN",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Group Base DN",
+                                "toolTip": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
+                                    "validationMessage": "The value must be valid LDAP group based distinguished name."
+                                }
+                            },
+                            {
+                                "name": "wlsLDAPSSLCertificate",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": ".cer Certificate for LDAP",
+                                "toolTip": "Client certificate that will be imported to trust store of SSL.",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".cer"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "binary",
+                                    "openMode": "binary",
+                                    "encoding": "base64"
+                                }
+                            }
+                        ]
+                    }
+                ]
             }
-            
         ],
         "outputs": {
-
             "acceptOTNLicenseAgreement": "[steps('Credentials').acceptOTNLicenseAgreement]",
             "adminPasswordOrKey": "[steps('Credentials').adminPasswordOrKey]",
             "adminUsername": "[steps('Credentials').adminUsername]",
-            "dnsLabelPrefix": "[basics('dnsLabelPrefix')]", 
+            "dnsLabelPrefix": "[basics('dnsLabelPrefix')]",
             "otnAccountPassword": "[steps('Credentials').otnAccountPassword]",
             "otnAccountUsername": "[steps('Credentials').otnAccountUsername]",
             "portsToExpose": "[steps('Network').portsToExpose]",
@@ -217,7 +384,17 @@
             "wlsDomainName": "[basics('wlsDomainName')]",
             "wlsPassword": "[steps('Credentials').wlsPassword]",
             "wlsUserName": "[steps('Credentials').wlsUserName]",
-            "Location": "[location()]"
+            "Location": "[location()]",
+            "configureAAD": "[bool(steps('AzureActiveDirectoryIntegration').configureAAD)]",
+            "addsServerHost": "[steps('AzureActiveDirectoryIntegration').configurationInfo.addsServerHost]",
+            "addsPublicIP": "[steps('AzureActiveDirectoryIntegration').configurationInfo.addsPublicIP]",
+            "aadsPortNumber":"[steps('AzureActiveDirectoryIntegration').configurationInfo.aadsPortNumber]",
+            "wlsLDAPProviderName":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPProviderName]",
+            "wlsLDAPPrincipal":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPPrincipal]",
+            "wlsLDAPPrincipalPassword":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPPrincipalPassword]",
+            "wlsLDAPUserBaseDN":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPUserBaseDN]",
+            "wlsLDAPGroupBaseDN":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPGroupBaseDN]",
+            "wlsLDAPSSLCertificate":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPSSLCertificate]"
         }
     }
 }
