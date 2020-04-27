@@ -196,8 +196,8 @@
                   "properties": {
                      "protocol": "TCP",
                      "sourcePortRange": "*",
-                     "sourceconst_addressPrefix": "*",
-                     "destinationconst_addressPrefix": "*",
+                     "sourceAddressPrefix": "*",
+                     "destinationAddressPrefix": "*",
                      "access": "Allow",
                      "priority": 320,
                      "direction": "Inbound",
@@ -241,7 +241,7 @@
          ],
          "properties": {
             "addressSpace": {
-               "const_addressPrefixes": [
+               "addressPrefixes": [
                   "[variables('const_addressPrefix')]"
                ]
             },
@@ -249,7 +249,7 @@
                {
                   "name": "[variables('name_subnet')]",
                   "properties": {
-                     "const_addressPrefix": "[variables('const_subnetPrefix')]",
+                     "addressPrefix": "[variables('const_subnetPrefix')]",
                      "networkSecurityGroup": {
                         "id": "[variables('ref_networkSecurityGroup')]"
                      }
