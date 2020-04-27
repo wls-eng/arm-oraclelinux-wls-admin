@@ -222,7 +222,7 @@
          "properties": {
             "mode": "Incremental",
             "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('arm/nestedtemplates/', variables('name_adminLinkedTemplateName')))]",
+               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_adminLinkedTemplateName')))]",
                "contentVersion": "1.0.0.0"
             },
             "parameters": {
