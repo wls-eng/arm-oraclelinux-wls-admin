@@ -175,19 +175,18 @@ function parseLDAPCertificate()
     cer_begin=0
     cer_size=${#wlsADSSLCer}
     cer_line_len=64
-    touch ~/AzureADLDAPCerBase64String.txt
+    mkdir ${SCRIPT_PWD}/security
+    touch ${SCRIPT_PWD}/security/AzureADLDAPCerBase64String.txt
     while [ ${cer_begin} -lt ${cer_size} ]
     do
         cer_sub=${wlsADSSLCer:$cer_begin:$cer_line_len}
-        echo ${cer_sub} >> ~/AzureADLDAPCerBase64String.txt
+        echo ${cer_sub} >> ${SCRIPT_PWD}/security/AzureADLDAPCerBase64String.txt
         cer_begin=$((cer_begin+64))
     done
 
-    openssl base64 -d -in ~/AzureADLDAPCerBase64String.txt -out ~/AzureADTrust.cer
-    cp ~/AzureADTrust.cer $DOMAIN_PATH/$wlsDomainName/security/AzureADTrust.cer
-    export addsCertificate=$DOMAIN_PATH/$wlsDomainName/security/AzureADTrust.cer
-    rm ~/AzureADTrust.cer
-    rm ~/AzureADLDAPCerBase64String.txt
+    openssl base64 -d -in ${SCRIPT_PWD}/security/AzureADLDAPCerBase64String.txt -out ${SCRIPT_PWD}/security/AzureADTrust.cer
+    cp ${SCRIPT_PWD}/security/AzureADTrust.cer ${SCRIPT_PWD}/security/AzureADTrust.cer
+    export addsCertificate=${SCRIPT_PWD}/security/AzureADTrust.cer
 }
 
 function importAADCertificate()
@@ -267,11 +266,13 @@ function cleanup()
     echo "Cleaning up temporary files..."
     rm -f configure-ssl.py
     rm -f configure-active-directory.py 
+    rm -rf ${SCRIPT_PWD}/security/*
     echo "Cleanup completed."
 }
 
 export LDAP_USER_NAME='sAMAccountName'
 export LDAP_USER_FROM_NAME_FILTER='(&(sAMAccountName=%u)(objectclass=user))'
+export SCRIPT_PWD=`pwd`
 
 if [ $# -ne 16 ]
 then
