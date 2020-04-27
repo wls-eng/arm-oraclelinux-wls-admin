@@ -5,7 +5,7 @@ function echo_stderr ()
 }
 
 #Function to display usage message
-function usage_aad()
+function usage()
 {
   echo_stderr "./aadIntegration.sh <adProviderName> <addsServerHost> <addsPublicIP> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <wlsLDAPSSLCertificate>"  
 }
@@ -107,32 +107,32 @@ try:
    edit()
    startEdit()
    # Configure DefaultAuthenticator.
-   cd('/SecurityConfiguration/' + ${wlsDomainName} + '/Realms/myrealm/AuthenticationProviders/DefaultAuthenticator')
+   cd('/SecurityConfiguration/' + '${wlsDomainName}' + '/Realms/myrealm/AuthenticationProviders/DefaultAuthenticator')
    cmo.setControlFlag('SUFFICIENT')
 
    # Configure Active Directory.
-   cd('/SecurityConfiguration/' + ${wlsDomainName} + '/Realms/myrealm')
-   cmo.createAuthenticationProvider(${adProviderName}, 'weblogic.security.providers.authentication.ActiveDirectoryAuthenticator')
+   cd('/SecurityConfiguration/' + '${wlsDomainName}' + '/Realms/myrealm')
+   cmo.createAuthenticationProvider('${adProviderName}', 'weblogic.security.providers.authentication.ActiveDirectoryAuthenticator')
 
-   cd('/SecurityConfiguration/' + ${wlsDomainName} + '/Realms/myrealm/AuthenticationProviders/' + ${adProviderName})
+   cd('/SecurityConfiguration/' + '${wlsDomainName}' + '/Realms/myrealm/AuthenticationProviders/' + '${adProviderName}')
    cmo.setControlFlag('OPTIONAL')
 
-   cd('/SecurityConfiguration/' + ${wlsDomainName} + '/Realms/myrealm')
-   set('AuthenticationProviders',jarray.array([ObjectName('Security:Name=myrealm' + ${adProviderName}), 
+   cd('/SecurityConfiguration/' + '${wlsDomainName}' + '/Realms/myrealm')
+   set('AuthenticationProviders',jarray.array([ObjectName('Security:Name=myrealm' + '${adProviderName}'), 
       ObjectName('Security:Name=myrealmDefaultAuthenticator'), 
       ObjectName('Security:Name=myrealmDefaultIdentityAsserter')], ObjectName))
 
 
-   cd('/SecurityConfiguration/' + ${wlsDomainName} + '/Realms/myrealm/AuthenticationProviders/' + ${adProviderName})
+   cd('/SecurityConfiguration/' + '${wlsDomainName}' + '/Realms/myrealm/AuthenticationProviders/' + '${adProviderName}')
    cmo.setControlFlag('SUFFICIENT')
-   cmo.setUserNameAttribute(LDAP_USER_NAME)
-   cmo.setUserFromNameFilter(LDAP_USER_FROM_NAME_FILTER)
-   cmo.setPrincipal(${adPrincipal})
-   cmo.setHost(${adServerHost})
-   set('Credential', ${adPassword})
-   cmo.setGroupBaseDN(${adGroupBaseDN})
-   cmo.setUserBaseDN(${adUserBaseDN})
-   cmo.setPort(int(${adServerPort}))
+   cmo.setUserNameAttribute('${LDAP_USER_NAME}')
+   cmo.setUserFromNameFilter('${LDAP_USER_FROM_NAME_FILTER}')
+   cmo.setPrincipal('${adPrincipal}')
+   cmo.setHost('${adServerHost}')
+   set('Credential', '${adPassword}')
+   cmo.setGroupBaseDN('${adGroupBaseDN}')
+   cmo.setUserBaseDN('${adUserBaseDN}')
+   cmo.setPort(int('${adServerPort}'))
    cmo.setSSLEnabled(true)
 
    # for performance tuning
@@ -304,10 +304,10 @@ export wlsUserName=$1
 export wlsPassword=$2
 export wlsDomainName=$3
 export adProviderName=$4
-export adPassword=$5
-export adPrincipal=$6
-export adServerHost=$7
-export adServerPort=$8
+export adServerHost=$5
+export adServerPort=$6
+export adPrincipal=$7
+export adPassword=$8
 export adGroupBaseDN=$9
 export adUserBaseDN=${10}
 export oracleHome=${11}
