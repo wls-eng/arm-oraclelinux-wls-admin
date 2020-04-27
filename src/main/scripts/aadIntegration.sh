@@ -167,8 +167,8 @@ connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 try:
    edit()
    startEdit()
-   print "set keystore to  Adminserver"
-   cd('/Servers/Adminserver/SSL/Adminserver')
+   print "set keystore to ${wlsServerName}"
+   cd('/Servers/${wlsServerName}/SSL/${wlsServerName}')
    cmo.setHostnameVerificationIgnored(true)
    save()
    activate()
@@ -206,7 +206,6 @@ function parseLDAPCertificate()
     done
 
     openssl base64 -d -in ${SCRIPT_PWD}/security/AzureADLDAPCerBase64String.txt -out ${SCRIPT_PWD}/security/AzureADTrust.cer
-    cp ${SCRIPT_PWD}/security/AzureADTrust.cer ${SCRIPT_PWD}/security/AzureADTrust.cer
     export addsCertificate=${SCRIPT_PWD}/security/AzureADTrust.cer
 }
 
@@ -318,6 +317,7 @@ export wlsADSSLCer="${14}"
 export wlsLDAPPublicIP="${15}"
 export vituralMachinePassword="${16}"
 export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
+export wlsServerName=admin
 
 echo "check status of admin server"
 wait_for_admin
