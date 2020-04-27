@@ -16,14 +16,47 @@
          },
          "defaultValue": ""
       },
-      "guidValue": {
+      "aadsPortNumber": {
          "type": "string",
-         "defaultValue": "[newGuid()]"
+         "defaultValue": "636",
+         "metadata": {
+            "description": "Accessible port of the LDAP server."
+         }
+      },
+      "acceptOTNLicenseAgreement": {
+         "type": "string",
+         "metadata": {
+            "description": "Do you agree to provide OTN credentials to accept OTN License Agreement? Enter Y or y to agree, else N or n"
+         }
+      },
+      "addsPublicIP": {
+         "type": "string",
+         "defaultValue": "The LDAP server public IP address"
+      },
+      "addsServerHost": {
+         "type": "string",
+         "defaultValue": "ldaps.example.com",
+         "metadata": {
+            "description": "The LDAP server host."
+         }
+      },
+      "adminPasswordOrKey": {
+         "type": "securestring",
+         "metadata": {
+            "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+         }
       },
       "adminUsername": {
          "type": "string",
          "metadata": {
             "description": "User name for the Virtual Machine."
+         }
+      },
+      "adminVMName": {
+         "type": "string",
+         "defaultValue": "adminVM",
+         "metadata": {
+            "description": "Admin Server hosting VM name."
          }
       },
       "authenticationType": {
@@ -37,60 +70,22 @@
             "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
          }
       },
-      "adminPasswordOrKey": {
-         "type": "securestring",
-         "metadata": {
-            "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
-         }
-      },
-      "acceptOTNLicenseAgreement": {
-         "type": "string",
-         "metadata": {
-            "description": "Do you agree to provide OTN credentials to accept OTN License Agreement? Enter Y or y to agree, else N or n"
-         }
-      },
-      "otnAccountUsername": {
-         "type": "string",
-         "metadata": {
-            "description": "Username for your Oracle Technology Network account"
-         }
-      },
-      "otnAccountPassword": {
-         "type": "securestring",
-         "metadata": {
-            "description": "Password for your Oracle Technology Network account"
-         }
-      },
-      "portsToExpose": {
-         "type": "string",
-         "defaultValue": "80,443,7001-9000",
-         "metadata": {
-            "description": "Ports and port ranges to expose"
-         }
-      },
-      "wlsDomainName": {
-         "type": "string",
-         "metadata": {
-            "description": "Provide Weblogic domain name"
-         }
-      },
-      "wlsUserName": {
-         "type": "string",
-         "metadata": {
-            "description": "Username for your Weblogic domain name"
-         }
-      },
-      "wlsPassword": {
-         "type": "securestring",
-         "metadata": {
-            "description": "Password for your Weblogic domain name"
-         }
-      },
       "dnsLabelPrefix": {
          "type": "string",
          "metadata": {
             "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
          }
+      },
+      "enableAAD": {
+         "type": "bool",
+         "defaultValue": false,
+         "metadata": {
+            "description": "Bool value, if it's set to true, will enable Azure Active Directory after WebLogic Server starts."
+         }
+      },
+      "guidValue": {
+         "type": "string",
+         "defaultValue": "[newGuid()]"
       },
       "linuxOSVersion": {
          "type": "string",
@@ -110,6 +105,25 @@
             "description": "Location for all resources."
          }
       },
+      "otnAccountPassword": {
+         "type": "securestring",
+         "metadata": {
+            "description": "Password for your Oracle Technology Network account"
+         }
+      },
+      "otnAccountUsername": {
+         "type": "string",
+         "metadata": {
+            "description": "Username for your Oracle Technology Network account"
+         }
+      },
+      "portsToExpose": {
+         "type": "string",
+         "defaultValue": "80,443,7001-9000",
+         "metadata": {
+            "description": "Ports and port ranges to expose"
+         }
+      },
       "vmSizeSelect": {
          "type": "string",
          "defaultValue": "Standard_A3",
@@ -123,36 +137,17 @@
             "description": "Select appropriate VM Size as per requirement (Standard_A1, Standard_A2, Standard_A3, Standard_A4)"
          }
       },
-      "configureAAD": {
-         "type": "bool",
-         "defaultValue": false,
+      "wlsDomainName": {
+         "type": "string",
          "metadata": {
-            "description": "Bool value, if it's set to true, will enable Azure Active Directory after WebLogic Server starts."
+            "description": "Provide Weblogic domain name"
          }
       },
-      "wlsLDAPProviderName": {
+      "wlsLDAPGroupBaseDN": {
          "type": "string",
-         "defaultValue": "AzureActiveDirectoryProvider",
-          "metadata": {
-            "description": "The value used for creating authentication provider name of WebLogic Server."
-         }
-      },
-      "addsServerHost": {
-         "type": "string",
-         "defaultValue": "ldaps.example.com",
+         "defaultValue": "null",
          "metadata": {
-            "description": "The LDAP server host."
-         }
-      },
-      "addsPublicIP": {
-         "type": "string",
-         "defaultValue": "The LDAP server public IP address"
-      },
-      "aadsPortNumber": {
-         "type": "string",
-         "defaultValue": "636",
-         "metadata": {
-            "description": "Accessible port of the LDAP server."
+            "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
          }
       },
       "wlsLDAPPrincipal": {
@@ -164,9 +159,23 @@
       },
       "wlsLDAPPrincipalPassword": {
          "type": "securestring",
-         "defaultValue":"[newGuid()]",
+         "defaultValue": "[newGuid()]",
          "metadata": {
             "description": "The credential (usually a password) used to connect to the LDAP server."
+         }
+      },
+      "wlsLDAPProviderName": {
+         "type": "string",
+         "defaultValue": "AzureActiveDirectoryProvider",
+         "metadata": {
+            "description": "The value used for creating authentication provider name of WebLogic Server."
+         }
+      },
+      "wlsLDAPSSLCertificate": {
+         "type": "string",
+         "defaultValue": "null",
+         "metadata": {
+            "description": "Client certificate that will be imported to trust store of SSL."
          }
       },
       "wlsLDAPUserBaseDN": {
@@ -176,55 +185,22 @@
             "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
          }
       },
-      "wlsLDAPGroupBaseDN": {
-         "type": "string",
-         "defaultValue": "null",
+      "wlsPassword": {
+         "type": "securestring",
          "metadata": {
-            "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
+            "description": "Password for your Weblogic domain name"
          }
       },
-      "wlsLDAPSSLCertificate": {
+      "wlsUserName": {
          "type": "string",
-         "defaultValue": "null",
          "metadata": {
-            "description": "Client certificate that will be imported to trust store of SSL."
+            "description": "Username for your Weblogic domain name"
          }
       }
    },
    "variables": {
-      "storageAccountName": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
-      "imagePublisher": "Oracle",
-      "imageOffer": "Oracle-Linux",
-      "nicName": "adminServerVM_NIC",
-      "addressPrefix": "10.0.0.0/16",
-      "subnetName": "Subnet",
-      "subnetPrefix": "10.0.0.0/24",
-      "storageAccountType": "Standard_LRS",
-      "publicIPAddressName": "adminServerVM_PublicIP",
-      "publicIPAddressType": "Dynamic",
-      "vmName": "adminServerVM",
-      "vmSize": "[parameters('vmSizeSelect')]",
-      "virtualNetworkName": "[concat(parameters('wlsDomainName'),'_VNET')]",
-      "oradownScript": "oradown.sh",
-      "ScriptFileName": "setupAdminDomain.sh",
-      "pyConfigureSSL": "configure-ssl.py",
-      "pyConfigureLDAP": "configure-active-directory.py",
-      "linuxConfiguration": {
-         "disablePasswordAuthentication": true,
-         "ssh": {
-            "publicKeys": [
-               {
-                  "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-                  "keyData": "[parameters('adminPasswordOrKey')]"
-               }
-            ]
-         }
-      },
-      "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
-      "networkSecurityGroupName": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
-      "networkSecurityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
-      "requiredPortrange": ",65200-65535,5556",
-      "name_aadLinkedTemplateName":"aadNestedTemplate.json"
+      "name_aadLinkedTemplateName": "aadNestedTemplate.json",
+      "name_adminLinkedTemplateName": "adminNestedTemplate.json"
    },
    "resources": [
       {
@@ -242,252 +218,151 @@
          }
       },
       {
-         "type": "Microsoft.Network/networkSecurityGroups",
-         "apiVersion": "2019-06-01",
-         "name": "[variables('networkSecurityGroupName')]",
-         "location": "[parameters('location')]",
+         "name": "adminLinkedTemplate",
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "2019-10-01",
          "properties": {
-            "securityRules": [
-               {
-                  "name": "WebLogicPorts",
-                  "properties": {
-                     "protocol": "TCP",
-                     "sourcePortRange": "*",
-                     "sourceAddressPrefix": "*",
-                     "destinationAddressPrefix": "*",
-                     "access": "Allow",
-                     "priority": 320,
-                     "direction": "Inbound",
-                     "destinationPortRanges": "[split(concat(parameters('portsToExpose'),variables('requiredPortrange')), ',')]"
-                  }
-               }
-            ]
-         }
-      },
-      {
-         "type": "Microsoft.Storage/storageAccounts",
-         "apiVersion": "2019-06-01",
-         "name": "[variables('storageAccountName')]",
-         "location": "[parameters('location')]",
-         "sku": {
-            "name": "[variables('storageAccountType')]"
-         },
-         "kind": "Storage",
-         "properties": {}
-      },
-      {
-         "type": "Microsoft.Network/publicIPAddresses",
-         "apiVersion": "2018-11-01",
-         "name": "[variables('publicIPAddressName')]",
-         "location": "[parameters('location')]",
-         "properties": {
-            "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-            "dnsSettings": {
-               "domainNameLabel": "[concat(toLower(parameters('dnsLabelPrefix')),'-',take(replace(parameters('guidValue'), '-', ''), 10),'-',toLower(parameters('wlsDomainName')))]"
-            }
-         }
-      },
-      {
-         "type": "Microsoft.Network/virtualNetworks",
-         "apiVersion": "2018-11-01",
-         "name": "[variables('virtualNetworkName')]",
-         "location": "[parameters('location')]",
-         "dependsOn": [
-            "[variables('networkSecurityGroupRef')]"
-         ],
-         "properties": {
-            "addressSpace": {
-               "addressPrefixes": [
-                  "[variables('addressPrefix')]"
-               ]
+            "mode": "Incremental",
+            "templateLink": {
+               "uri": "[uri(parameters('_artifactsLocation'), concat('arm/nestedtemplates/', variables('name_adminLinkedTemplateName')))]",
+               "contentVersion": "1.0.0.0"
             },
-            "subnets": [
-               {
-                  "name": "[variables('subnetName')]",
-                  "properties": {
-                     "addressPrefix": "[variables('subnetPrefix')]",
-                     "networkSecurityGroup": {
-                        "id": "[variables('networkSecurityGroupRef')]"
-                     }
-                  }
-               }
-            ]
-         }
-      },
-      {
-         "type": "Microsoft.Network/networkInterfaces",
-         "apiVersion": "2018-11-01",
-         "name": "[variables('nicName')]",
-         "location": "[parameters('location')]",
-         "dependsOn": [
-            "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-            "[resourceId('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-         ],
-         "properties": {
-            "ipConfigurations": [
-               {
-                  "name": "ipconfig1",
-                  "properties": {
-                     "privateIPAllocationMethod": "Dynamic",
-                     "publicIPAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
-                     },
-                     "subnet": {
-                        "id": "[variables('subnetRef')]"
-                     }
-                  }
-               }
-            ]
-         }
-      },
-      {
-         "type": "Microsoft.Compute/virtualMachines",
-         "apiVersion": "2018-10-01",
-         "name": "[variables('vmName')]",
-         "location": "[parameters('location')]",
-         "dependsOn": [
-            "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-            "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
-         ],
-         "properties": {
-            "hardwareProfile": {
-               "vmSize": "[variables('vmSize')]"
-            },
-            "osProfile": {
-               "computerName": "[variables('vmName')]",
-               "adminUsername": "[parameters('adminUsername')]",
-               "adminPassword": "[parameters('adminPasswordOrKey')]",
-               "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
-            },
-            "storageProfile": {
-               "imageReference": {
-                  "publisher": "[variables('imagePublisher')]",
-                  "offer": "[variables('imageOffer')]",
-                  "sku": "[parameters('linuxOSVersion')]",
-                  "version": "latest"
+            "parameters": {
+               "_artifactsLocation": {
+                  "value": "[parameters('_artifactsLocation')]"
                },
-               "osDisk": {
-                  "createOption": "FromImage"
+               "_artifactsLocationSasToken": {
+                  "value": "[parameters('_artifactsLocationSasToken')]"
                },
-               "dataDisks": [
-                  {
-                     "diskSizeGB": 900,
-                     "lun": 0,
-                     "createOption": "Empty"
-                  }
-               ]
-            },
-            "networkProfile": {
-               "networkInterfaces": [
-                  {
-                     "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
-                  }
-               ]
-            },
-            "diagnosticsProfile": {
-               "bootDiagnostics": {
-                  "enabled": true,
-                  "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName')), '2019-06-01').primaryEndpoints.blob]"
+               "acceptOTNLicenseAgreement": {
+                  "value": "[parameters('acceptOTNLicenseAgreement')]"
+               },
+               "adminPasswordOrKey": {
+                  "value": "[parameters('adminPasswordOrKey')]"
+               },
+               "adminUsername": {
+                  "value": "[parameters('adminUsername')]"
+               },
+               "adminVMName": {
+                  "value": "[parameters('adminVMName')]"
+               },
+               "authenticationType": {
+                  "value": "[parameters('authenticationType')]"
+               },
+               "dnsLabelPrefix": {
+                  "value": "[parameters('dnsLabelPrefix')]"
+               },
+               "linuxOSVersion": {
+                  "value": "[parameters('linuxOSVersion')]"
+               },
+               "location": {
+                  "value": "[parameters('location')]"
+               },
+               "otnAccountPassword": {
+                  "value": "[parameters('otnAccountPassword')]"
+               },
+               "otnAccountUsername": {
+                  "value": "[parameters('otnAccountUsername')]"
+               },
+               "portsToExpose": {
+                  "value": "[parameters('portsToExpose')]"
+               },
+               "vmSizeSelect": {
+                  "value": "[parameters('vmSizeSelect')]"
+               },
+               "wlsDomainName": {
+                  "value": "[parameters('wlsDomainName')]"
+               },
+               "wlsPassword": {
+                  "value": "[parameters('wlsPassword')]"
+               },
+               "wlsUserName": {
+                  "value": "[parameters('wlsUserName')]"
                }
             }
          }
       },
       {
-         "type": "Microsoft.Compute/virtualMachines/extensions",
-         "name": "[concat(variables('vmName'),'/newuserscript')]",
-         "apiVersion": "2019-07-01",
-         "location": "[parameters('location')]",
+         "name": "aadLinkedTemplate",
+         "type": "Microsoft.Resources/deployments",
          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            "[resourceId('Microsoft.Resources/deployments', 'adminLinkedTemplate')]"
          ],
+         "apiVersion": "2019-10-01",
+         "condition": "[parameters('enableAAD')]",
          "properties": {
-            "publisher": "Microsoft.Azure.Extensions",
-            "type": "CustomScript",
-            "typeHandlerVersion": "2.0",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-               "fileUris": [
-                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('ScriptFileName'), parameters('_artifactsLocationSasToken')))]",
-                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('oradownScript'), parameters('_artifactsLocationSasToken')))]"
-               ],
-               "commandToExecute": "[concat('sh',' ',variables('ScriptFileName'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',variables('vmName'),' ')]"
+            "mode": "Incremental",
+            "templateLink": {
+               "uri": "[uri(parameters('_artifactsLocation'), concat('arm/nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
+               "contentVersion": "1.0.0.0"
+            },
+            "parameters": {
+               "_artifactsLocation": {
+                  "value": "[parameters('_artifactsLocation')]"
+               },
+               "_artifactsLocationSasToken": {
+                  "value": "[parameters('_artifactsLocationSasToken')]"
+               },
+               "aadsPortNumber": {
+                  "value": "[parameters('aadsPortNumber')]"
+               },
+               "acceptOTNLicenseAgreement": {
+                  "value": "[parameters('acceptOTNLicenseAgreement')]"
+               },
+               "addsPublicIP": {
+                  "value": "[parameters('addsPublicIP')]"
+               },
+               "addsServerHost": {
+                  "value": "[parameters('addsServerHost')]"
+               },
+               "adminPassword": {
+                  "value": "[parameters('adminPasswordOrKey')]"
+               },
+               "adminUsername": {
+                  "value": "[parameters('adminUsername')]"
+               },
+               "adminVMName": {
+                  "value": "[parameters('adminVMName')]"
+               },
+               "location": {
+                  "value": "[parameters('location')]"
+               },
+               "wlsDomainName": {
+                  "value": "[parameters('wlsDomainName')]"
+               },
+               "wlsLDAPGroupBaseDN": {
+                  "value": "[parameters('wlsLDAPGroupBaseDN')]"
+               },
+               "wlsLDAPPrincipal": {
+                  "value": "[parameters('wlsLDAPPrincipal')]"
+               },
+               "wlsLDAPPrincipalPassword": {
+                  "value": "[parameters('wlsLDAPPrincipalPassword')]"
+               },
+               "wlsLDAPProviderName": {
+                  "value": "[parameters('wlsLDAPProviderName')]"
+               },
+               "wlsLDAPSSLCertificate": {
+                  "value": "[parameters('wlsLDAPSSLCertificate')]"
+               },
+               "wlsLDAPUserBaseDN": {
+                  "value": "[parameters('wlsLDAPUserBaseDN')]"
+               },
+               "wlsPassword": {
+                  "value": "[parameters('wlsPassword')]"
+               },
+               "wlsUserName": {
+                  "value": "[parameters('wlsUserName')]"
+               }
             }
          }
-      },
-      {
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-10-01",
-            "name": "aadLinkedTemplate",
-            "condition": "[parameters('configureAAD')]",
-            "properties": {
-                "mode": "Incremental",
-                "templateLink": {
-                    "uri": "[uri(parameters('_artifactsLocation'), concat('arm/nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
-                    "contentVersion": "1.0.0.0"
-                },
-                "parameters": {
-                    "_artifactsLocation": {
-                        "value": "[concat(parameters('_artifactsLocation'),'arm/')]"
-                    },
-                    "_artifactsLocationSasToken": {
-                        "value": "[parameters('_artifactsLocationSasToken')]"
-                    },
-                    "wlsLDAPProviderName": {
-                       "value":"[parameters('wlsLDAPProviderName')]"
-                    },
-                    "addsServerHost": {
-                       "value":"[parameters('addsServerHost')]"
-                    },
-                    "addsPublicIP": {
-                       "value":"[parameters('addsPublicIP')]"
-                    },
-                    "aadsPortNumber": {
-                       "value":"[parameters('aadsPortNumber')]"
-                    },
-                    "wlsLDAPPrincipal": {
-                       "value":"[parameters('wlsLDAPPrincipal')]"
-                    },
-                    "wlsLDAPPrincipalPassword": {
-                       "value":"[parameters('wlsLDAPPrincipalPassword')]"
-                    },
-                    "wlsLDAPUserBaseDN": {
-                       "value":"[parameters('wlsLDAPUserBaseDN')]"
-                    },
-                    "wlsLDAPGroupBaseDN": {
-                       "value":"[parameters('wlsLDAPGroupBaseDN')]"
-                    },
-                    "wlsLDAPSSLCertificate": {
-                       "value":"[parameters('wlsLDAPSSLCertificate')]"
-                    },
-                    "location": {
-                       "value":"[parameters('location')]"
-                    },
-                    "adminPassword": {
-                       "value":"[parameters('adminPasswordOrKey')]"
-                    },
-                    "adminVMName": {
-                       "value":"[variables('vmName')]"
-                    },
-                    "wlsDomainName": {
-                        "value": "[parameters('wlsDomainName')]"
-                    },
-                    "wlsUserName": {
-                        "value": "[parameters('wlsUserName')]"
-                    },
-                    "wlsPassword": {
-                        "value": "[parameters('wlsPassword')]"
-                    }
-                }
-            },
-            "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('vmName'), 'newuserscript')]"
-            ]
       },
       {
          "apiVersion": "2019-10-01",
          "name": "${admin.end}",
          "type": "Microsoft.Resources/deployments",
          "dependsOn": [
+            "[resourceId('Microsoft.Resources/deployments', 'adminLinkedTemplate')]",
             "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]"
          ],
          "properties": {
@@ -504,23 +379,23 @@
    "outputs": {
       "hostname": {
          "type": "string",
-         "value": "[reference(variables('publicIPAddressName')).dnsSettings.fqdn]"
+         "value": "[reference('adminLinkedTemplate','2019-10-01').outputs.hostname.value]"
       },
       "sshCommand": {
          "type": "string",
-         "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('publicIPAddressName')).dnsSettings.fqdn)]"
+         "value": "[concat('ssh ', parameters('adminUsername'), '@', reference('adminLinkedTemplate','2019-10-01').outputs.hostname.value)]"
       },
       "wlsDomainLocation": {
          "type": "string",
-         "value": "[concat('/u01/domains/', parameters('wlsDomainName'))]"
+         "value": "[reference('adminLinkedTemplate','2019-10-01').outputs.wlsDomainLocation.value]"
       },
       "adminConsoleURL": {
          "type": "string",
-         "value": "[concat('http://',reference(variables('publicIPAddressName')).dnsSettings.fqdn,':7001/console')]"
+         "value": "[reference('adminLinkedTemplate','2019-10-01').outputs.adminConsoleURL.value]"
       },
       "adminConsoleSecureURL": {
          "type": "string",
-         "value": "[concat('https://',reference(variables('publicIPAddressName')).dnsSettings.fqdn,':7002/console')]"
+         "value": "[reference('adminLinkedTemplate','2019-10-01').outputs.adminConsoleSecureURL.value]"
       }
    }
 }

@@ -22,12 +22,16 @@
             },
             "defaultValue": ""
         },
-        "wlsLDAPProviderName": {
+        "aadsPortNumber": {
             "type": "string",
-            "defaultValue": "AzureActiveDirectoryProvider",
+            "defaultValue": "636",
             "metadata": {
-                "description": "The value used for creating authentication provider name of WebLogic Server."
+                "description": "Accessible port of the LDAP server."
             }
+        },
+        "addsPublicIP": {
+            "type": "string",
+            "defaultValue": "The LDAP server public IP address"
         },
         "addsServerHost": {
             "type": "string",
@@ -36,15 +40,36 @@
                 "description": "The LDAP server host."
             }
         },
-        "addsPublicIP": {
-            "type": "string",
-            "defaultValue": "The LDAP server public IP address"
-        },
-        "aadsPortNumber": {
-            "type": "string",
-            "defaultValue": "636",
+        "adminPassword": {
+            "type": "securestring",
             "metadata": {
-                "description": "Accessible port of the LDAP server."
+                "description": "Password for the Virtual Machine"
+            }
+        },
+        "adminVMName": {
+            "type": "string",
+            "defaultValue": "adminVM",
+            "metadata": {
+                "description": "Admin Server hosting VM name."
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Location for all resources."
+            }
+        },
+        "wlsDomainName": {
+            "type": "string",
+            "metadata": {
+                "description": "Provide Weblogic domain name"
+            }
+        },
+        "wlsLDAPGroupBaseDN": {
+            "type": "string",
+            "defaultValue": "null",
+            "metadata": {
+                "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
             }
         },
         "wlsLDAPPrincipal": {
@@ -61,18 +86,11 @@
                 "description": "The credential (usually a password) used to connect to the LDAP server."
             }
         },
-        "wlsLDAPUserBaseDN": {
+        "wlsLDAPProviderName": {
             "type": "string",
-            "defaultValue": "null",
+            "defaultValue": "AzureActiveDirectoryProvider",
             "metadata": {
-                "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
-            }
-        },
-        "wlsLDAPGroupBaseDN": {
-            "type": "string",
-            "defaultValue": "null",
-            "metadata": {
-                "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
+                "description": "The value used for creating authentication provider name of WebLogic Server."
             }
         },
         "wlsLDAPSSLCertificate": {
@@ -82,28 +100,11 @@
                 "description": "Client certificate that will be imported to trust store of SSL."
             }
         },
-        "location": {
+        "wlsLDAPUserBaseDN": {
             "type": "string",
+            "defaultValue": "null",
             "metadata": {
-                "description": "Location for all resources."
-            }
-        },
-        "adminPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for the Virtual Machine"
-            }
-        },
-        "wlsDomainName": {
-            "type": "string",
-            "metadata": {
-                "description": "Provide Weblogic domain name"
-            }
-        },
-        "wlsUserName": {
-            "type": "string",
-            "metadata": {
-                "description": "Username for your Weblogic domain name"
+                "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
             }
         },
         "wlsPassword": {
@@ -112,26 +113,24 @@
                 "description": "Password for your Weblogic domain name"
             }
         },
-        "adminVMName": {
+        "wlsUserName": {
             "type": "string",
-            "defaultValue": "adminVM",
             "metadata": {
-                "description": "Admin Server hosting VM name."
+                "description": "Username for your Weblogic domain name"
             }
         }
     },
     "variables": {
+        "const_aadParameters": "[concat(parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsLDAPProviderName'), ' ',  parameters('addsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsLDAPSSLCertificate'), ' ', parameters('addsPublicIP'), ' ', parameters('adminPassword'), ' ', variables('const_adminServerName'))]",
+        "const_adminServerName": "admin",
         "const_wlsAdminPort": "7001",
         "const_wlsHome": "/u01/app/wls/install/Oracle/Middleware/Oracle_Home",
-        "const_adminServerName": "admin",
-        "name_scriptAADConfiguration": "aadIntegration.sh",
-        "const_aadParameters": "[concat(parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsLDAPProviderName'), ' ',  parameters('addsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsLDAPSSLCertificate'), ' ', parameters('addsPublicIP'), ' ', parameters('adminPassword'), ' ', variables('const_adminServerName'))]"
-
+        "name_scriptAADConfiguration": "aadIntegration.sh"
     },
     "resources": [
         {
             "apiVersion": "2019-10-01",
-            "name": "pid-fc7e031d-111d-5a3a-8b5a-e08602237dca",
+            "name": "${admin.aad.start}",
             "type": "Microsoft.Resources/deployments",
             "properties": {
                 "mode": "Incremental",
@@ -163,7 +162,7 @@
         },
         {
             "apiVersion": "2019-10-01",
-            "name": "pid-8295df19-fe6b-5745-ad24-51ef66522b24",
+            "name": "${admin.aad.end}",
             "type": "Microsoft.Resources/deployments",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
