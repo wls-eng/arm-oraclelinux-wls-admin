@@ -422,12 +422,12 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('arm/nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
                     "contentVersion": "1.0.0.0"
                 },
                 "parameters": {
                     "_artifactsLocation": {
-                        "value": "[parameters('_artifactsLocation')]"
+                        "value": "[concat(parameters('_artifactsLocation'),'arm/')]"
                     },
                     "_artifactsLocationSasToken": {
                         "value": "[parameters('_artifactsLocationSasToken')]"
