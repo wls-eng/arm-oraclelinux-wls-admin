@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #Function to output message to StdErr
-function echo_stderr()
+function echo_stderr ()
 {
     echo "$@" >&2
 }
@@ -9,12 +9,7 @@ function echo_stderr()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setupAdminDomain.sh <acceptOTNLicenseAgreement> <otnusername> <otnpassword> <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost> <configureAAD>"  
-}
-
-function usage_aad()
-{
-  echo_stderr "./setupAdminDomain.sh <acceptOTNLicenseAgreement> <otnusername> <otnpassword> <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost> <configureAAD> <wlsLDAPProviderName> <addsServerHost> <addsPublicIP> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <wlsLDAPSSLCertificate>"  
+  echo_stderr "./setupAdminDomain.sh <acceptOTNLicenseAgreement> <otnusername> <otnpassword> <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost>"  
 }
 
 function setupInstallPath()
@@ -578,63 +573,6 @@ function validateInput()
         echo_stderr "wlsAdminHost is required. "
         exit 1
     fi
-
-    if [ -z "$configureAAD" ]
-    then
-        echo_stderr "configureAAD is required. "
-        exit 1
-    fi
-
-    if [ "${lcConfigureAAD}" = "true" ]
-    then
-        if [ -z "$wlsADProviderName" ];
-        then
-            echo_stderr "wlsADProviderName is required. "
-            exit 1
-        fi
-
-        if [ -z "$wlsLDAPServerHost" ];
-        then
-            echo_stderr "wlsLDAPServerHost is required. "
-            exit 1
-        fi
-
-       if [ -z "$wlsLDAPPublicIP" ];
-        then
-            echo_stderr "wlsLDAPPublicIP is required. "
-            exit 1
-        fi
-
-        if [ -z "${vituralMachinePassword}"];
-        then
-            echo_stderr "vituralMachinePassword is required. "
-            exit 1
-        fi
-
-        if [[ -z "$wlsADPrinciple" || -z "$wlsADPrinciplePassword" ]];
-        then
-            echo_stderr "wlsADPrinciple and wlsADPrinciplePassword are required. "
-            exit 1
-        fi
-
-        if [ -z "$wlsADUserBaseDN" ];
-        then
-            echo_stderr "wlsADUserBaseDN is required. "
-            exit 1
-        fi
-
-        if [ -z "$wlsADGroupBaseDN" ];
-        then
-            echo_stderr "wlsADGroupBaseDN is required. "
-            exit 1
-        fi
-
-        if [ -z "$wlsADPort" ]
-        then
-            echo_stderr "wlsADPort is required. "
-            exit 1
-        fi
-    fi
 }
 
 function enableAndStartAdminServerService()
@@ -645,117 +583,12 @@ function enableAndStartAdminServerService()
     sudo systemctl start wls_admin
 }
 
-function restartAdminServerService()
-{
-     echo "Restart weblogic admin server service"
-     sudo systemctl stop wls_admin
-     sudo systemctl start wls_admin
-}
-
-function mapLDAPHostWithPublicIP()
-{
-    echo "map LDAP host with pubilc IP"
-    # change to superuser
-    echo "${vituralMachinePassword}"
-    sudo -S su -
-    sudo echo "${wlsLDAPPublicIP}  ${wlsLDAPServerHost}" >> /etc/hosts
-}
-
-function parseLDAPCertificate()
-{
-    echo "create key store"
-    cer_begin=0
-    cer_size=${#wlsADSSLCer}
-    cer_line_len=64
-    touch ~/AzureADLDAPCerBase64String.txt
-    while [ ${cer_begin} -lt ${cer_size} ]
-    do
-        cer_sub=${wlsADSSLCer:$cer_begin:$cer_line_len}
-        echo ${cer_sub} >> ~/AzureADLDAPCerBase64String.txt
-        cer_begin=$((cer_begin+64))
-    done
-
-    openssl base64 -d -in ~/AzureADLDAPCerBase64String.txt -out ~/AzureADTrust.cer
-    cp ~/AzureADTrust.cer $DOMAIN_PATH/$wlsDomainName/security/AzureADTrust.cer
-    export addsCertificate=$DOMAIN_PATH/$wlsDomainName/security/AzureADTrust.cer
-    rm ~/AzureADTrust.cer
-    rm ~/AzureADLDAPCerBase64String.txt
-}
-
-function importAADCertificate()
-{
-    # import the key to java security 
-    java_cacerts_path=${JAVA_HOME}/jre/lib/security/cacerts    
-    sudo ${JAVA_HOME}/bin/keytool -noprompt -import -alias aadtrust -file ${addsCertificate} -keystore ${java_cacerts_path} -storepass changeit
-
-}
-
-function configureSSL()
-{
-    echo "configure ladp ssl"
-    sudo sh ${WLS_PATH}/install/Oracle/Middleware/Oracle_Home/oracle_common/common/bin/wlst.sh ${SCRIPT_PWD}/configure-ssl.py \
-    "${wlsUserName}" \
-    "${wlsPassword}" \
-    "Adminserver" 
-
-    errorCode=$?
-    if [ $errorCode -eq 1 ]
-    then 
-        echo "Exception occurs during SSL configuration, please check."
-        exit 1
-    fi
-}
-
-function configureAzureActiveDirectory()
-{
-    echo "create Azure Active Directory provider"
-    sudo sh ${WLS_PATH}/install/Oracle/Middleware/Oracle_Home/oracle_common/common/bin/wlst.sh ${SCRIPT_PWD}/configure-active-directory.py \
-    "${wlsUserName}" \
-    "${wlsPassword}" \
-    "${wlsDomainName}" \
-    "${wlsADProviderName}" \
-    "${wlsADPrinciplePassword}" \
-    "${wlsADPrinciple}" \
-    "${wlsLDAPServerHost}" \
-    "${wlsADPort}" \
-    "${wlsADGroupBaseDN}" \
-    "${wlsADUserBaseDN}"
-
-    errorCode=$?
-    if [ $errorCode -eq 1 ]
-    then 
-        echo "Exception occurs during Azure Active Directory configuration, please check."
-        exit 1
-    fi
-}
-
-function configureAAD()
-{
-    echo "configure Azure Active Directory? ${configureAAD}"
-    if [ "${lcConfigureAAD}" != "true" ]
-    then
-        exit 0
-    fi
-
-    echo "start to configure Azure Active Directory"
-    mapLDAPHostWithPublicIP
-    parseLDAPCertificate
-    importAADCertificate
-    configureSSL
-    configureAzureActiveDirectory
-    restartAdminServerService
-
-    echo "Waiting for admin server to be available"
-    wait_for_admin
-    echo "Weblogic admin server is up and running"
-}
-
 #main script starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-if [ $# -lt 8 ]
+if [ $# -ne 7 ]
 then
     usage
 	exit 1
@@ -768,28 +601,6 @@ export wlsDomainName="$4"
 export wlsUserName="$5"
 export wlsPassword="$6"
 export wlsAdminHost="$7"
-export configureAAD="$8"
-
-export lcConfigureAAD=${configureAAD,,}
-if [ "${lcConfigureAAD}" = "true" ];
-then
-    if [ $# -ne 18 ]
-    then
-        usage_aad
-        exit 1
-    fi
-    
-    export wlsADProviderName="${9}"
-    export wlsLDAPServerHost="${10}"
-    export wlsADPort="${11}"
-    export wlsADPrinciple="${12}"
-    export wlsADPrinciplePassword="${13}"
-    export wlsADUserBaseDN="${14}"
-    export wlsADGroupBaseDN="${15}"
-    export wlsADSSLCer="${16}"
-    export wlsLDAPPublicIP="${17}"
-    export vituralMachinePassword="${18}"
-fi
 
 validateInput
 
@@ -810,8 +621,6 @@ export MSSQL_JDBC_DRIVER=${MSSQL_JDBC_DRIVER_URL##*/}
 
 export SCRIPT_PWD=`pwd`
 chmod ugo+x ${SCRIPT_PWD}/oradown.sh 
-chmod ugo+x ${SCRIPT_PWD}/configure-active-directory.py 
-chmod ugo+x ${SCRIPT_PWD}/configure-ssl.py 
 
 addOracleGroupAndUser
 
@@ -852,6 +661,3 @@ enableAndStartAdminServerService
 echo "Waiting for admin server to be available"
 wait_for_admin
 echo "Weblogic admin server is up and running"
-
-configureAAD
-

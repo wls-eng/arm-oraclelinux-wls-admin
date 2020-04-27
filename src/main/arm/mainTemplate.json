@@ -224,7 +224,7 @@
       "networkSecurityGroupName": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
       "networkSecurityGroupRef": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
       "requiredPortrange": ",65200-65535,5556",
-      "executeCustomScriptArguments1": "[if(parameters('configureAAD'),concat(parameters('wlsLDAPProviderName'), ' ',  parameters('addsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', parameters('wlsLDAPSSLCertificate'), ' ', parameters('addsPublicIP'), ' ', parameters('adminPasswordOrKey')),'')]"
+      "name_aadLinkedTemplateName":"aadNestedTemplate.json"
    },
    "resources": [
       {
@@ -408,20 +408,87 @@
             "settings": {
                "fileUris": [
                   "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('ScriptFileName'), parameters('_artifactsLocationSasToken')))]",
-                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('oradownScript'), parameters('_artifactsLocationSasToken')))]",
-                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('pyConfigureSSL'), parameters('_artifactsLocationSasToken')))]",
-                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('pyConfigureLDAP'), parameters('_artifactsLocationSasToken')))]"
+                  "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('oradownScript'), parameters('_artifactsLocationSasToken')))]"
                ],
-               "commandToExecute": "[concat('sh',' ',variables('ScriptFileName'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',variables('vmName'),' ',parameters('configureAAD'),' ',variables('executeCustomScriptArguments1'),' ')]"
+               "commandToExecute": "[concat('sh',' ',variables('ScriptFileName'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',variables('vmName'),' ')]"
             }
          }
+      },
+      {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2019-10-01",
+            "name": "aadLinkedTemplate",
+            "condition": "[parameters('configureAAD')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "_artifactsLocation": {
+                        "value": "[parameters('_artifactsLocation')]"
+                    },
+                    "_artifactsLocationSasToken": {
+                        "value": "[parameters('_artifactsLocationSasToken')]"
+                    },
+                    "wlsLDAPProviderName": {
+                       "value":"[parameters('wlsLDAPProviderName')]"
+                    },
+                    "addsServerHost": {
+                       "value":"[parameters('addsServerHost')]"
+                    },
+                    "addsPublicIP": {
+                       "value":"[parameters('addsPublicIP')]"
+                    },
+                    "aadsPortNumber": {
+                       "value":"[parameters('aadsPortNumber')]"
+                    },
+                    "wlsLDAPPrincipal": {
+                       "value":"[parameters('wlsLDAPPrincipal')]"
+                    },
+                    "wlsLDAPPrincipalPassword": {
+                       "value":"[parameters('wlsLDAPPrincipalPassword')]"
+                    },
+                    "wlsLDAPUserBaseDN": {
+                       "value":"[parameters('wlsLDAPUserBaseDN')]"
+                    },
+                    "wlsLDAPGroupBaseDN": {
+                       "value":"[parameters('wlsLDAPGroupBaseDN')]"
+                    },
+                    "wlsLDAPSSLCertificate": {
+                       "value":"[parameters('wlsLDAPSSLCertificate')]"
+                    },
+                    "location": {
+                       "value":"[parameters('location')]"
+                    },
+                    "adminPassword": {
+                       "value":"[parameters('adminPasswordOrKey')]"
+                    },
+                    "adminVMName": {
+                       "value":"[variables('vmName')]"
+                    },
+                    "wlsDomainName": {
+                        "value": "[parameters('wlsDomainName')]"
+                    },
+                    "wlsUserName": {
+                        "value": "[parameters('wlsUserName')]"
+                    },
+                    "wlsPassword": {
+                        "value": "[parameters('wlsPassword')]"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('vmName'), 'newuserscript')]"
+            ]
       },
       {
          "apiVersion": "2019-10-01",
          "name": "${admin.end}",
          "type": "Microsoft.Resources/deployments",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/extensions', variables('vmName'), 'newuserscript')]"
+            "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]"
          ],
          "properties": {
             "mode": "Incremental",
