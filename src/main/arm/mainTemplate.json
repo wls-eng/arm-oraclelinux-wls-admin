@@ -70,6 +70,20 @@
             "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
          }
       },
+      "connectToDatabase": {
+         "defaultValue": false,
+         "type": "bool",
+         "metadata": {
+            "description": "If true, use the supplied parameters to connect the cluster to a pre-provisioned database."
+         }
+      },
+      "databaseType": {
+         "defaultValue": "oracle",
+         "type": "string",
+         "metadata": {
+            "description": "One of the supported database types"
+         }
+      },
       "dnsLabelPrefix": {
          "defaultValue": "wls",
          "type": "string",
@@ -77,11 +91,39 @@
             "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
          }
       },
+      "dsConnectionURL": {
+         "defaultValue": "",
+         "type": "string",
+         "metadata": {
+            "description": "JDBC Connection String"
+         }
+      },
+      "dsPassword": {
+         "defaultValue": "",
+         "type": "securestring",
+         "metadata": {
+            "description": "Password for Database"
+         }
+      },
+      "dsUser": {
+         "defaultValue": "",
+         "type": "string",
+         "metadata": {
+            "description": "Userid of Database"
+         }
+      },
       "enableAAD": {
          "type": "bool",
          "defaultValue": false,
          "metadata": {
             "description": "Bool value, if it's set to true, will enable Azure Active Directory after WebLogic Server starts."
+         }
+      },
+      "jdbcDataSourceName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "JNDI Name for JDBC Datasource"
          }
       },
       "linuxOSVersion": {
@@ -198,7 +240,8 @@
    },
    "variables": {
       "name_aadLinkedTemplateName": "aadNestedTemplate.json",
-      "name_adminLinkedTemplateName": "adminTemplate.json"
+      "name_adminLinkedTemplateName": "adminTemplate.json",
+      "name_dbLinkedTemplate": "dbTemplate.json"
    },
    "resources": [
       {
@@ -281,10 +324,62 @@
          }
       },
       {
-         "name": "aadLinkedTemplate",
+         "name": "dbLinkedTemplate",
          "type": "Microsoft.Resources/deployments",
          "dependsOn": [
             "[resourceId('Microsoft.Resources/deployments', 'adminLinkedTemplate')]"
+         ],
+         "apiVersion": "2019-10-01",
+         "condition": "[parameters('connectToDatabase')]",
+         "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+               "uri": "[uri(parameters('_artifactsLocation'), concat('arm/nestedtemplates/', variables('name_dbLinkedTemplate')))]",
+               "contentVersion": "1.0.0.0"
+            },
+            "parameters": {
+               "_artifactsLocation": {
+                  "value": "[parameters('_artifactsLocation')]"
+               },
+               "_artifactsLocationSasToken": {
+                  "value": "[parameters('_artifactsLocationSasToken')]"
+               },
+               "adminVMName": {
+                  "value": "[parameters('adminVMName')]"
+               },
+               "databaseType": {
+                  "value": "[parameters('databaseType')]"
+               },
+               "dsConnectionURL": {
+                  "value": "[parameters('dsConnectionURL')]"
+               },
+               "dsPassword": {
+                  "value": "[parameters('dsPassword')]"
+               },
+               "dsUser": {
+                  "value": "[parameters('dsUser')]"
+               },
+               "jdbcDataSourceName": {
+                  "value": "[parameters('jdbcDataSourceName')]"
+               },
+               "location": {
+                  "value": "[parameters('location')]"
+               },
+               "wlsPassword": {
+                  "value": "[parameters('wlsPassword')]"
+               },
+               "wlsUserName": {
+                  "value": "[parameters('wlsUserName')]"
+               }
+
+            }
+         }
+      },
+      {
+         "name": "aadLinkedTemplate",
+         "type": "Microsoft.Resources/deployments",
+         "dependsOn": [
+            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
          ],
          "apiVersion": "2019-10-01",
          "condition": "[parameters('enableAAD')]",
@@ -361,6 +456,7 @@
          "type": "Microsoft.Resources/deployments",
          "dependsOn": [
             "[resourceId('Microsoft.Resources/deployments', 'adminLinkedTemplate')]",
+            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
             "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]"
          ],
          "properties": {
