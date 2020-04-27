@@ -198,7 +198,7 @@
    },
    "variables": {
       "name_aadLinkedTemplateName": "aadNestedTemplate.json",
-      "name_adminLinkedTemplateName": "adminNestedTemplate.json"
+      "name_adminLinkedTemplateName": "adminTemplate.json"
    },
    "resources": [
       {
