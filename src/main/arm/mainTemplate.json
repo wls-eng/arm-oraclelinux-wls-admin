@@ -71,6 +71,7 @@
          }
       },
       "dnsLabelPrefix": {
+         "defaultValue": "wls",
          "type": "string",
          "metadata": {
             "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
@@ -82,10 +83,6 @@
          "metadata": {
             "description": "Bool value, if it's set to true, will enable Azure Active Directory after WebLogic Server starts."
          }
-      },
-      "guidValue": {
-         "type": "string",
-         "defaultValue": "[newGuid()]"
       },
       "linuxOSVersion": {
          "type": "string",
@@ -138,6 +135,7 @@
          }
       },
       "wlsDomainName": {
+         "defaultValue": "adminDomain",
          "type": "string",
          "metadata": {
             "description": "Provide Weblogic domain name"
