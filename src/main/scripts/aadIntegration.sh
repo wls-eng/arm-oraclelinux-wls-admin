@@ -101,8 +101,7 @@ function validateInput()
 
 function createAADProvider_model()
 {
-    echo "Creating JDBC data source with name $jdbcDataSourceName"
-    cat <<EOF >create_aadprovider.py
+    cat <<EOF >configure-active-directory.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 try:
    edit()
@@ -149,6 +148,28 @@ try:
    cmo.setGroupHierarchyCacheTTL(300)
    cmo.setEnableSIDtoGroupLookupCaching(true)
 
+   save()
+   activate()
+except:
+   stopEdit('y')
+   sys.exit(1)
+
+disconnect()
+sys.exit(0)
+EOF
+}
+
+function createSSL_model()
+{
+    cat <<EOF >configure-ssl.py
+# Connect to the AdminServer.
+connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
+try:
+   edit()
+   startEdit()
+   print "set keystore to  Adminserver"
+   cd('/Servers/Adminserver/SSL/Adminserver')
+   cmo.setHostnameVerificationIgnored(true)
    save()
    activate()
 except:
@@ -302,6 +323,8 @@ echo "check status of admin server"
 wait_for_admin
 
 echo "start to configure Azure Active Directory"
+createAADProvider_model
+createSSL_model
 mapLDAPHostWithPublicIP
 parseLDAPCertificate
 importAADCertificate
