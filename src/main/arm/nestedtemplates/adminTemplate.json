@@ -301,7 +301,7 @@
                "computerName": "[parameters('adminVMName')]",
                "adminUsername": "[parameters('adminUsername')]",
                "adminPassword": "[parameters('adminPasswordOrKey')]",
-               "const_linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]"
+               "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('const_linuxConfiguration'))]"
             },
             "storageProfile": {
                "imageReference": {
