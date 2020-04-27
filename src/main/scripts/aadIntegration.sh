@@ -7,7 +7,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./aadIntegration.sh <adProviderName> <addsServerHost> <addsPublicIP> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <wlsLDAPSSLCertificate>"  
+  echo_stderr "./aadIntegration.sh <wlsUserName> <wlsPassword> <wlsDomainName> <wlsLDAPProviderName> <addsServerHost> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <oracleHome> <adminVMName> <wlsAdminPort> <wlsLDAPSSLCertificate> <addsPublicIP> <adminPassword> <wlsAdminServerName>"  
 }
 
 function validateInput()
@@ -93,15 +93,15 @@ function validateInput()
         echo_stderr "vituralMachinePassword is required. "
     fi
 
-    if [ -z "$oracleHome" ];
+    if [ -z "$wlsAdminServerName" ];
     then
-        echo_stderr "oracleHome is required. "
+        echo_stderr "wlsAdminServerName is required. "
     fi
 }
 
 function createAADProvider_model()
 {
-    cat <<EOF >configure-active-directory.py
+    cat <<EOF >${SCRIPT_PWD}/configure-active-directory.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 try:
    edit()
@@ -161,14 +161,14 @@ EOF
 
 function createSSL_model()
 {
-    cat <<EOF >configure-ssl.py
+    cat <<EOF >${SCRIPT_PWD}/configure-ssl.py
 # Connect to the AdminServer.
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 try:
    edit()
    startEdit()
-   print "set keystore to ${wlsServerName}"
-   cd('/Servers/${wlsServerName}/SSL/${wlsServerName}')
+   print "set keystore to ${wlsAdminServerName}"
+   cd('/Servers/${wlsAdminServerName}/SSL/${wlsAdminServerName}')
    cmo.setHostnameVerificationIgnored(true)
    save()
    activate()
@@ -222,7 +222,7 @@ function configureSSL()
 {
     echo "configure ladp ssl"
     . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
-    java $WLST_ARGS weblogic.WLST configure-ssl.py 
+    java $WLST_ARGS weblogic.WLST ${SCRIPT_PWD}/configure-ssl.py 
 
     errorCode=$?
     if [ $errorCode -eq 1 ]
@@ -236,7 +236,7 @@ function configureAzureActiveDirectory()
 {
     echo "create Azure Active Directory provider"
     . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
-    java $WLST_ARGS weblogic.WLST configure-active-directory.py 
+    java $WLST_ARGS weblogic.WLST ${SCRIPT_PWD}/configure-active-directory.py 
 
     errorCode=$?
     if [ $errorCode -eq 1 ]
@@ -284,8 +284,8 @@ function wait_for_admin()
 function cleanup()
 {
     echo "Cleaning up temporary files..."
-    rm -f configure-ssl.py
-    rm -f configure-active-directory.py 
+    rm -f ${SCRIPT_PWD}/configure-ssl.py
+    rm -f ${SCRIPT_PWD}/configure-active-directory.py 
     rm -rf ${SCRIPT_PWD}/security/*
     echo "Cleanup completed."
 }
@@ -294,7 +294,7 @@ export LDAP_USER_NAME='sAMAccountName'
 export LDAP_USER_FROM_NAME_FILTER='(&(sAMAccountName=%u)(objectclass=user))'
 export SCRIPT_PWD=`pwd`
 
-if [ $# -ne 16 ]
+if [ $# -ne 17 ]
 then
     usage
 	exit 1
@@ -316,8 +316,9 @@ export wlsAdminPort=${13}
 export wlsADSSLCer="${14}"
 export wlsLDAPPublicIP="${15}"
 export vituralMachinePassword="${16}"
+export wlsAdminServerName=${17}
 export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
-export wlsServerName=admin
+
 
 echo "check status of admin server"
 wait_for_admin
