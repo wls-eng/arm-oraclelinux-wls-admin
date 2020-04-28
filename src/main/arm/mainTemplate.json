@@ -399,9 +399,6 @@
                "aadsPortNumber": {
                   "value": "[parameters('aadsPortNumber')]"
                },
-               "acceptOTNLicenseAgreement": {
-                  "value": "[parameters('acceptOTNLicenseAgreement')]"
-               },
                "addsPublicIP": {
                   "value": "[parameters('addsPublicIP')]"
                },
@@ -410,9 +407,6 @@
                },
                "adminPassword": {
                   "value": "[parameters('adminPasswordOrKey')]"
-               },
-               "adminUsername": {
-                  "value": "[parameters('adminUsername')]"
                },
                "adminVMName": {
                   "value": "[parameters('adminVMName')]"
