@@ -5,87 +5,23 @@
     "parameters": {
         "basics": [
             {
-                "name": "dnsLabelPrefix",
+                "name": "acceptOTNLicenseAgreement",
+                "label": "Accept OTN License Agreement",
                 "type": "Microsoft.Common.TextBox",
-                "label": "DNS Label Prefix",
-                "toolTip": "The string to prepend to the DNS label.",
-                "defaultValue": "wls",
+                "toolTip": "A value of N indicates you do not accept the OTN License Agreement.  In that case the deployment will fail.",
+                "defaultValue": "Y",
+                "visible": true,
                 "constraints": {
                     "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,10}$",
-                    "validationMessage": "The prefix must be between 3 and 10 characters long and contain letters, numbers only."
+                    "regex": "^[Yy]$",
+                    "validationMessage": "The value must be Y/y to proceed with deployment."
                 }
             },
             {
-                "name": "wlsDomainName",
-                "type": "Microsoft.Common.TextBox",
-                "label": "WebLogic Domain Name",
-                "toolTip": "The name of the WebLogic Domain to create.",
-                "defaultValue": "adminDomain",
-                "constraints": {
-                    "required": true,
-                    "regex": "^[a-z0-9A-Z]{3,20}$",
-                    "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
-                },
-				{
-	                "name": "About",
-	                "type": "Microsoft.Common.InfoBox",
-	                "options": {
-	                    "icon": "None",
-	                    "text": "Template version ${project.version}"
-	                },
-	                "visible": "[bool('${template.version.visible}')]"
-	            }
-            }
-        ],
-        "steps": [
-            {
-                "name": "VirtualMachineConfig",
-                "label": "Virtual Machine Settings",
-                "subLabel": {
-                    "preValidation": "Configure the resources and settings of the virtual machines that comprise the nodes of the WebLogic Domain. ",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Node Virtual Machine Settings",
+                "name": "basicsRequired",
+                "type": "Microsoft.Common.Section",
+                "label": "Credentails for Virtual Machines and WebLogic",
                 "elements": [
-                    {
-                        "name": "vmSizeSelect",
-                        "type": "Microsoft.Compute.SizeSelector",
-                        "label": "Virtual machine size",
-                        "toolTip": "The size of virtual machine to provision.",
-                        "recommendedSizes": [
-                            "Standard_A1",
-                            "Standard_A2",
-                            "Standard_A3",
-                            "Standard_A4"
-                        ],
-                        "osPlatform": "Linux",
-                        "count": "1"
-                    }
-                ]
-            },
-            {
-                "name": "Credentials",
-                "label": "Credentials for Server Creation",
-                "subLabel": {
-                    "preValidation": "Provide credentials Required for Server Creation",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Credentials for Server Creation",
-                "elements": [
-                    {
-                        "name": "acceptOTNLicenseAgreement",
-                        "label": "Accept OTN License Agreement",
-                        "type": "Microsoft.Common.TextBox",
-                        "tooltip": "A value of N indicates you do not accept the OTN License Agreement.  In that case the deployment will fail.",
-                        "defaultValue": "Y",
-                        "visible": true,
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[Yy]$",
-                            "validationMessage": "The value must be Y/y to proceed with deployment."
-                        }
-                    },
                     {
                         "name": "adminUsername",
                         "type": "Microsoft.Common.TextBox",
@@ -175,48 +111,127 @@
                             "hideConfirmation": false
                         },
                         "visible": true
-                    }
-                ]
+                    }                ],
+                "visible": true
             },
             {
-                "name": "Network",
-                "label": "Network",
-                "subLabel": {
-                    "preValidation": "Parameters to customzie network settings",
-                    "postValidation": "Done"
-                },
-                "bladeTitle": "Network",
+                "name": "basicsOptional",
+                "type": "Microsoft.Common.Section",
+                "label": "Optional Basic Configuration",
                 "elements": [
+                    {
+                        "name": "basicsOptionalAcceptDefaults",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Accept defaults for optional configuration?",
+                        "defaultValue": "Yes",
+                        "toolTip": "Select 'No' to edit optional basic configuration.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "false"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "true"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "dnsLabelPrefix",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "DNS Label Prefix",
+                        "toolTip": "The string to prepend to the DNS label.",
+                        "defaultValue": "wls",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{3,10}$",
+                            "validationMessage": "The prefix must be between 3 and 10 characters long and contain letters, numbers only."
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "wlsDomainName",
+                        "type": "Microsoft.Common.TextBox",
+                        "label": "WebLogic Domain Name",
+                        "toolTip": "The name of the WebLogic Domain to create.",
+                        "defaultValue": "clusterDomain",
+                        "constraints": {
+                            "required": true,
+                            "regex": "^[a-z0-9A-Z]{3,20}$",
+                            "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "vmSizeSelect",
+                        "type": "Microsoft.Compute.SizeSelector",
+                        "defaultValue": "Standard_A3",
+                        "label": "Virtual machine size",
+                        "toolTip": "The size of virtual machine to provision.",
+                        "recommendedSizes": [
+                            "Standard_A1",
+                            "Standard_A2",
+                            "Standard_A3",
+                            "Standard_A4"
+                        ],
+                        "osPlatform": "Linux",
+                        "count": "1",
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
                     {
                         "name": "portsToExpose",
                         "label": "Ports and port ranges to expose (N or N-N, comma separated)",
                         "type": "Microsoft.Common.TextBox",
                         "toolTip": "Ports and port ranges to expose (N or N-N, comma separated)",
                         "defaultValue": "80,443,7001-9000",
-                        "visible": true,
                         "constraints": {
                             "required": true,
                             "regex": "^((([0-9]+-[0-9]+)|([0-9]+))[,]?)+[^,]$",
                             "validationMessage": "Only numbers, hyphen separated ranges of numbers, separated by commas"
-                        }
+                        },
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+                    },
+                    {
+                        "name": "About",
+                        "type": "Microsoft.Common.InfoBox",
+                        "options": {
+                            "icon": "None",
+                            "text": "Template version ${project.version}"
+                        },
+                        "visible": "[bool('${template.version.visible}')]"
                     }
-                ]
-            },
+                ],
+                "visible": true
+            }
+        ],
+        "steps": [
             {
-                "name": "AzureActiveDirectoryIntegration",
-                "label": "Azure Active Directory Settings",
+                "name": "section_database",
+                "type": "Microsoft.Common.Section",
+                "label": "Database",
                 "subLabel": {
-                    "preValidation": "Configure the Azure Active Directory.",
+                    "preValidation": "Configure integrations to Database",
                     "postValidation": "Done"
                 },
-                "bladeTitle": "Azure Active Directory Settings",
+                "bladeTitle": "Database",
                 "elements": [
                     {
-                        "name": "configureAAD",
+                        "name": "aboutDatabase",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the WebLogic Server to connect to the desired pre-existing Database.  The database must be network accessible to the VNET and subnets created by the template."
+                        }
+                    },
+                    {
+                        "name": "connectToDatabase",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Configure Azure Active Directory?",
-                        "defaultValue": "Yes",
-                        "toolTip": "Select 'Yes' and provide required info to configure Azure Active Directory.",
+                        "label": "Connect to Database?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' and provide required info to configure the connection to a database.",
                         "constraints": {
                             "allowedValues": [
                                 {
@@ -232,169 +247,117 @@
                         }
                     },
                     {
-                        "name": "configurationInfo",
+                        "name": "databaseConnectionInfo",
                         "type": "Microsoft.Common.Section",
-                        "label": "Configuration Information",
-                        "visible": "[bool(steps('AzureActiveDirectoryIntegration').configureAAD)]",
+                        "label": "Connection settings",
                         "elements": [
                             {
-                                "name": "addsLDAPInfo",
-                                "type": "Microsoft.Common.TextBlock",
-                                "options": {
-                                    "text": "Please add a security rule to your LDAP server network security group to allow inbound secure LDAP access over TCP port 636 from WebLogic Server after the offer is provisioned. Security threat will be created automatically for you managed domain, it will block WebLogic Server machine to access the LDAP server.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://docs.microsoft.com/en-us/azure/active-directory-domain-services/tutorial-configure-ldaps#lock-down-secure-ldap-access-over-the-internet"
-                                    }
-                                }
-                            },
-                            {
-                                "name": "addsNewLDAPInfo",
-                                "type": "Microsoft.Common.TextBlock",
-                                "options": {
-                                    "text": "If you don't have a LDAP server, please create one following the guide.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://docs.microsoft.com/en-us/azure/active-directory-domain-services/tutorial-configure-ldaps"
-                                    }
-                                }
-                            },
-                            {
-                                "name": "addsServerHost",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Server Host",
-                                "toolTip": "The LDAP server host.",
-                                "defaultValue": "ldaps.example.com",
+                                "name": "databaseType",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "Choose database type",
+                                "toolTip": "Choose database type",
+                                "defaultValue": "Oracle Database",
                                 "constraints": {
-                                    "required": true,
-                                    "regex": "(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]",
-                                    "validationMessage": "The value must be a valid host name."
-                                }
+                                    "allowedValues": [
+                                        {
+                                            "label": "Azure Database for PostgreSQL",
+                                            "value": "postgresql"
+                                        },
+                                        {
+                                            "label": "Oracle Database",
+                                            "value": "oracle"
+                                        },
+                                        {
+                                            "label": "Azure SQL",
+                                            "value": "sqlserver"
+                                        }
+                                    ],
+                                    "required": true
+                                },
+                                "visible": true
                             },
                             {
-                                "name": "addsPublicIP",
+                                "name": "jdbcDataSourceName",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "LDAP external IP address",
-                                "toolTip": "Secure LDAP external IP address.",
+                                "label": "JNDI Name",
+                                "toolTip": "The JNDI name for the database JDBC connection",
+                                "defaultValue": "",
                                 "constraints": {
-                                    "required": true,
-                                    "regex": "\\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}\\b",
-                                    "validationMessage": "The value must be a valid IP address."
-                                }
+                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "regex": "^[a-z0-9A-Z/]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                },
+                                "visible": true
                             },
                             {
-                                "name": "aadsPortNumber",
+                                "name": "dsConnectionURL",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "Port",
-                                "toolTip": "The port number of LDAP Server, default is 636.",
-                                "defaultValue": "636",
+                                "label": "DataSource Connection String",
+                                "toolTip": "The JDBC connection string for the database",
+                                "defaultValue": "",
                                 "constraints": {
-                                    "required": true,
-                                    "regex": "^[0-9]+$",
-                                    "validationMessage": "The value must be numbers."
-                                }
+                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
+                                    "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
+                                },
+                                "visible": true
                             },
                             {
-                                "name": "wlsLDAPProviderName",
+                                "name": "dsUser",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "Provider Name",
-                                "defaultValue": "AzureActiveDirectoryProvider",
-                                "toolTip": "The value used for creating authentication provider name of WebLogic Server.",
+                                "label": "Database Username",
+                                "toolTip": "Use only letters and numbers",
+                                "defaultValue": "",
                                 "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{3,50}$",
-                                    "validationMessage": "The Provider Name must be between 3 and 50 characters long and contain letters, numbers only."
-                                }
+                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "regex": "^(([a-zA-Z0-9@]){6,30})$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers and the at sign."
+                                },
+                                "visible": true
                             },
                             {
-                                "name": "wlsLDAPPrincipal",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Principal",
-                                "toolTip": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
-                                    "validationMessage": "The value must be valid LDAP user distinguished name."
-                                }
-                            },
-                            {
-                                "name": "wlsLDAPPrincipalPassword",
+                                "name": "dsPassword",
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
-                                    "password": "Password for Principal",
+                                    "password": "Database Password",
                                     "confirmPassword": "Confirm password"
                                 },
-                                "toolTip": "The credential (usually a password) used to connect to the LDAP server.",
+                                "toolTip": "Database Password",
                                 "constraints": {
-                                    "required": true
-                                }
-                            },
-                            {
-                                "name": "wlsLDAPUserBaseDN",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "User Base DN",
-                                "toolTip": "The base distinguished name (DN) of the tree in the LDAP directory that contains users.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
-                                    "validationMessage": "The value must be valid LDAP user based distinguished name."
-                                }
-                            },
-                            {
-                                "name": "wlsLDAPGroupBaseDN",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Group Base DN",
-                                "toolTip": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
-                                    "validationMessage": "The value must be valid LDAP group based distinguished name."
-                                }
-                            },
-                            {
-                                "name": "wlsLDAPSSLCertificate",
-                                "type": "Microsoft.Common.FileUpload",
-                                "label": ".cer Certificate for LDAP",
-                                "toolTip": "Client certificate that will be imported to trust store of SSL.",
-                                "constraints": {
-                                    "required": true,
-                                    "accept": ".cer"
+                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
+                                    "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
                                 },
                                 "options": {
-                                    "multiple": false,
-                                    "uploadMode": "binary",
-                                    "openMode": "binary",
-                                    "encoding": "base64"
-                                }
+                                    "hideConfirmation": false
+                                },
+                                "visible": true
                             }
-                        ]
+                        ],
+                        "visible": "[bool(steps('section_database').connectToDatabase)]"
                     }
                 ]
             }
         ],
         "outputs": {
-            "acceptOTNLicenseAgreement": "[steps('Credentials').acceptOTNLicenseAgreement]",
-            "adminPasswordOrKey": "[steps('Credentials').adminPasswordOrKey]",
-            "adminUsername": "[steps('Credentials').adminUsername]",
-            "dnsLabelPrefix": "[basics('dnsLabelPrefix')]",
-            "otnAccountPassword": "[steps('Credentials').otnAccountPassword]",
-            "otnAccountUsername": "[steps('Credentials').otnAccountUsername]",
-            "portsToExpose": "[steps('Network').portsToExpose]",
-            "vmSizeSelect": "[steps('VirtualMachineConfig').vmSizeSelect]",
-            "wlsDomainName": "[basics('wlsDomainName')]",
-            "wlsPassword": "[steps('Credentials').wlsPassword]",
-            "wlsUserName": "[steps('Credentials').wlsUserName]",
             "Location": "[location()]",
-            "configureAAD": "[bool(steps('AzureActiveDirectoryIntegration').configureAAD)]",
-            "addsServerHost": "[steps('AzureActiveDirectoryIntegration').configurationInfo.addsServerHost]",
-            "addsPublicIP": "[steps('AzureActiveDirectoryIntegration').configurationInfo.addsPublicIP]",
-            "aadsPortNumber":"[steps('AzureActiveDirectoryIntegration').configurationInfo.aadsPortNumber]",
-            "wlsLDAPProviderName":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPProviderName]",
-            "wlsLDAPPrincipal":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPPrincipal]",
-            "wlsLDAPPrincipalPassword":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPPrincipalPassword]",
-            "wlsLDAPUserBaseDN":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPUserBaseDN]",
-            "wlsLDAPGroupBaseDN":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPGroupBaseDN]",
-            "wlsLDAPSSLCertificate":"[steps('AzureActiveDirectoryIntegration').configurationInfo.wlsLDAPSSLCertificate]"
+            "acceptOTNLicenseAgreement": "[basics('acceptOTNLicenseAgreement')]",
+            "adminPasswordOrKey": "[basics('basicsRequired').adminPasswordOrKey]",
+            "adminUsername": "[basics('basicsRequired').adminUsername]",
+            "connectToDatabase": "[bool(steps('section_database').connectToDatabase)]",
+            "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
+            "dnsLabelPrefix": "[basics('basicsOptional').dnsLabelPrefix]",
+            "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
+            "dsPassword": "[steps('section_database').databaseConnectionInfo.dsPassword]",
+            "dsUser": "[steps('section_database').databaseConnectionInfo.dsUser]",
+            "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
+            "otnAccountPassword": "[basics('basicsRequired').otnAccountPassword]",
+            "otnAccountUsername": "[basics('basicsRequired').otnAccountUsername]",
+            "portsToExpose": "[basics('basicsOptional').portsToExpose]",
+            "vmSizeSelect": "[basics('basicsOptional').vmSizeSelect]",
+            "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
+            "wlsPassword": "[basics('basicsRequired').wlsPassword]",
+            "wlsUserName": "[basics('basicsRequired').wlsUserName]"
         }
     }
 }
