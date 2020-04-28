@@ -334,7 +334,7 @@
          "properties": {
             "mode": "Incremental",
             "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('arm/nestedtemplates/', variables('name_dbLinkedTemplate')))]",
+               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_dbLinkedTemplate')))]",
                "contentVersion": "1.0.0.0"
             },
             "parameters": {
@@ -386,7 +386,7 @@
          "properties": {
             "mode": "Incremental",
             "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('arm/nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
+               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_aadLinkedTemplateName')))]",
                "contentVersion": "1.0.0.0"
             },
             "parameters": {
