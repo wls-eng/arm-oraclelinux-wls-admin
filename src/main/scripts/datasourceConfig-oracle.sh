@@ -117,7 +117,7 @@ try:
   cd('/JDBCSystemResources/$jdbcDataSourceName/JDBCResource/$jdbcDataSourceName/JDBCDataSourceParams/$jdbcDataSourceName')
   cmo.setGlobalTransactionsProtocol('EmulateTwoPhaseCommit')
   cd('/JDBCSystemResources/$jdbcDataSourceName')
-  set('Targets',jarray.array([ObjectName('com.bea:Name=$wlsClusterName,Type=Cluster')], ObjectName))
+  set('Targets',jarray.array([ObjectName('com.bea:Name=admin,Type=Server')], ObjectName))
   save()
   resolve()
   activate()
