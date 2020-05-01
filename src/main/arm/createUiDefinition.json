@@ -337,11 +337,184 @@
                         "visible": "[bool(steps('section_database').connectToDatabase)]"
                     }
                 ]
+            },
+            {
+                "name": "section_aad",
+                "label": "Azure Active Directory",
+                "subLabel": {
+                    "preValidation": "Configure the connection to Azure Active Directory.",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Azure Active Directory",
+                "elements": [
+                    {
+                        "name": "aboutAad",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "icon": "None",
+                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the connection to Azure Active Directory.",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://docs.microsoft.com/en-us/azure/active-directory-domain-services/tutorial-create-instance"
+                            }
+
+                        }
+                    },
+                    {
+                        "name": "enableAAD",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Connect to Azure Active Directory?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' and provide required info to configure the connection to Azure Active Directory.",
+                        "constraints": {
+                        "allowedValues": [
+                            {
+                                "label": "Yes",
+                                "value": "true"
+                            },
+                            {
+                                "label": "No",
+                                "value": "false"
+                            }
+                        ],
+                        "required": true
+                        }
+                    },
+                    {
+                        "name": "aadInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Connection settings",
+                        "elements": [
+                            {
+                                "name": "addsServerHost",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Server Host",
+                                "toolTip": "The LDAP server host.",
+                                "defaultValue": "",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]",
+                                    "validationMessage": "The value must be a valid host name."
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "addsPublicIP",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Secure LDAP external IP address",
+                                "toolTip": "Secure LDAP external IP address.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "\\b((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.|$)){4}\\b",
+                                    "validationMessage": "The value must be a valid IP address."
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "aadsPortNumber",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Port",
+                                "toolTip": "The port number of LDAP Server, default is 636.",
+                                "defaultValue": "636",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[0-9]+$",
+                                    "validationMessage": "The value must be numbers."
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "wlsLDAPProviderName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Provider Name",
+                                "defaultValue": "AzureActiveDirectoryProvider",
+                                "toolTip": "The value used for creating authentication provider name of WebLogic Server.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{3,50}$",
+                                    "validationMessage": "The Provider Name must be between 3 and 50 characters long and contain letters, numbers only."
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "wlsLDAPPrincipal",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Principal",
+                                "toolTip": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
+                                    "validationMessage": "The value must be valid LDAP user distinguished name."
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "wlsLDAPPrincipalPassword",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password for Principal",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": "The credential (usually a password) used to connect to the LDAP server.",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "wlsLDAPUserBaseDN",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "User Base DN",
+                                "toolTip": "The base distinguished name (DN) of the tree in the LDAP directory that contains users.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
+                                    "validationMessage": "The value must be valid LDAP user based distinguished name."
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "wlsLDAPGroupBaseDN",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Group Base DN",
+                                "toolTip": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": ".+,dc|DC=([^,]+),dc|DC=([^,]+)$",
+                                    "validationMessage": "The value must be valid LDAP group based distinguished name."
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "wlsLDAPSSLCertificate",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Trust Keystore for SSL Configuration",
+                                "toolTip": "Custom Trust Keystore of WebLogic Server, used to enable SSL.",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".cer"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "binary",
+                                    "openMode": "binary",
+                                    "encoding": "base64"
+                                },
+                                "required": true
+                            }
+                        ],
+                        "visible": "[bool(steps('section_aad').enableAAD)]"
+                    }
+                ]
             }
         ],
         "outputs": {
             "Location": "[location()]",
+            "aadsPortNumber": "[steps('section_aad').aadInfo.aadsPortNumber]",
             "acceptOTNLicenseAgreement": "[basics('acceptOTNLicenseAgreement')]",
+            "addsPublicIP": "[steps('section_aad').aadInfo.addsPublicIP]",
+            "addsServerHost": "[steps('section_aad').aadInfo.addsServerHost]",
             "adminPasswordOrKey": "[basics('basicsRequired').adminPasswordOrKey]",
             "adminUsername": "[basics('basicsRequired').adminUsername]",
             "connectToDatabase": "[bool(steps('section_database').connectToDatabase)]",
@@ -350,12 +523,19 @@
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
             "dsPassword": "[steps('section_database').databaseConnectionInfo.dsPassword]",
             "dsUser": "[steps('section_database').databaseConnectionInfo.dsUser]",
+            "enableAAD": "[bool(steps('section_aad').enableAAD)]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "otnAccountPassword": "[basics('basicsRequired').otnAccountPassword]",
             "otnAccountUsername": "[basics('basicsRequired').otnAccountUsername]",
             "portsToExpose": "[basics('basicsOptional').portsToExpose]",
             "vmSizeSelect": "[basics('basicsOptional').vmSizeSelect]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
+            "wlsLDAPGroupBaseDN": "[steps('section_aad').aadInfo.wlsLDAPGroupBaseDN]",
+            "wlsLDAPPrincipal": "[steps('section_aad').aadInfo.wlsLDAPPrincipal]",
+            "wlsLDAPPrincipalPassword": "[steps('section_aad').aadInfo.wlsLDAPPrincipalPassword]",
+            "wlsLDAPProviderName": "[steps('section_aad').aadInfo.wlsLDAPProviderName]",
+            "wlsLDAPSSLCertificate": "[steps('section_aad').aadInfo.wlsLDAPSSLCertificate]",
+            "wlsLDAPUserBaseDN": "[steps('section_aad').aadInfo.wlsLDAPUserBaseDN]",
             "wlsPassword": "[basics('basicsRequired').wlsPassword]",
             "wlsUserName": "[basics('basicsRequired').wlsUserName]"
         }
