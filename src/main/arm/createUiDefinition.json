@@ -310,8 +310,8 @@
                                 "defaultValue": "",
                                 "constraints": {
                                     "required": "[bool(steps('section_database').connectToDatabase)]",
-                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,30})([^\\-])$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of Database Username."
+                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
+                                    "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of Database Username."
                                 },
                                 "visible": true
                             },
