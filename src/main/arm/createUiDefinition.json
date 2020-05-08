@@ -227,7 +227,7 @@
                         }
                     },
                     {
-                        "name": "connectToDatabase",
+                        "name": "enableDB",
                         "type": "Microsoft.Common.OptionsGroup",
                         "label": "Connect to Database?",
                         "defaultValue": "No",
@@ -283,7 +283,7 @@
                                 "toolTip": "The JNDI name for the database JDBC connection",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "^[a-z0-9A-Z/]{1,30}$",
                                     "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
                                 },
@@ -296,7 +296,7 @@
                                 "toolTip": "The JDBC connection string for the database",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
                                     "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
                                 },
@@ -309,7 +309,7 @@
                                 "toolTip": "Use only letters and numbers",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
                                     "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of Database Username."
                                 },
@@ -324,7 +324,7 @@
                                 },
                                 "toolTip": "Database Password",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
                                     "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
                                 },
@@ -334,7 +334,7 @@
                                 "visible": true
                             }
                         ],
-                        "visible": "[bool(steps('section_database').connectToDatabase)]"
+                        "visible": "[bool(steps('section_database').enableDB)]"
                     }
                 ]
             },
@@ -387,7 +387,7 @@
                         "label": "Connection settings",
                         "elements": [
                             {
-                                "name": "addsServerHost",
+                                "name": "aadsServerHost",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Server Host",
                                 "toolTip": "The LDAP server host.",
@@ -400,7 +400,7 @@
                                 "required": true
                             },
                             {
-                                "name": "addsPublicIP",
+                                "name": "aadsPublicIP",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Secure LDAP external IP address",
                                 "toolTip": "Secure LDAP external IP address.",
@@ -513,11 +513,11 @@
             "Location": "[location()]",
             "aadsPortNumber": "[steps('section_aad').aadInfo.aadsPortNumber]",
             "acceptOTNLicenseAgreement": "[basics('acceptOTNLicenseAgreement')]",
-            "addsPublicIP": "[steps('section_aad').aadInfo.addsPublicIP]",
-            "addsServerHost": "[steps('section_aad').aadInfo.addsServerHost]",
+            "aadsPublicIP": "[steps('section_aad').aadInfo.aadsPublicIP]",
+            "aadsServerHost": "[steps('section_aad').aadInfo.aadsServerHost]",
             "adminPasswordOrKey": "[basics('basicsRequired').adminPasswordOrKey]",
             "adminUsername": "[basics('basicsRequired').adminUsername]",
-            "connectToDatabase": "[bool(steps('section_database').connectToDatabase)]",
+            "enableDB": "[bool(steps('section_database').enableDB)]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
             "dnsLabelPrefix": "[basics('basicsOptional').dnsLabelPrefix]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
