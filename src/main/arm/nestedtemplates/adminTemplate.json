@@ -21,12 +21,6 @@
             "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
          }
       },
-      "acceptOTNLicenseAgreement": {
-         "type": "string",
-         "metadata": {
-            "description": "Do you agree to provide OTN credentials to accept OTN License Agreement? Enter Y or y to agree, else N or n"
-         }
-      },
       "adminPasswordOrKey": {
          "type": "securestring",
          "metadata": {
@@ -69,31 +63,19 @@
       },
       "linuxOSVersion": {
          "type": "string",
-         "defaultValue": "7.4",
+         "defaultValue": "owls-122130-8u131-ol74",
          "allowedValues": [
-            "7.4",
-            "7.3"
+            "owls-122130-8u131-ol73",
+            "owls-122130-8u131-ol74"
          ],
          "metadata": {
-            "description": "The Oracle Linux version for the VM. This will pick a fully patched image of this given Oracle Linux version."
+            "description": "The Oracle Linux version for the VM. The first number is for WebLogic Server version, the second number is for Java version, and the last if for Oralce Linux version."
          }
       },
       "location": {
          "type": "string",
          "metadata": {
             "description": "Location for all resources."
-         }
-      },
-      "otnAccountPassword": {
-         "type": "securestring",
-         "metadata": {
-            "description": "Password for your Oracle Technology Network account"
-         }
-      },
-      "otnAccountUsername": {
-         "type": "string",
-         "metadata": {
-            "description": "Username for your Oracle Technology Network account"
          }
       },
       "portsToExpose": {
@@ -137,8 +119,8 @@
    },
    "variables": {
       "const_addressPrefix": "10.0.0.0/16",
-      "const_imageOffer": "Oracle-Linux",
-      "const_imagePublisher": "Oracle",
+      "const_imageOffer": "weblogic-122130-jdk8u131-ol74-preview",
+      "const_imagePublisher": "oracle",
       "const_linuxConfiguration": {
          "disablePasswordAuthentication": true,
          "ssh": {
@@ -305,16 +287,25 @@
                   "publisher": "[variables('const_imagePublisher')]",
                   "offer": "[variables('const_imageOffer')]",
                   "sku": "[parameters('linuxOSVersion')]",
-                  "version": "latest"
+                  "version": "1.1.1"
                },
                "osDisk": {
-                  "createOption": "FromImage"
+                  "createOption": "FromImage",
+                  "managedDisk": {
+                     "storageAccountType": "Standard_LRS"
+                  }
                },
-               "dataDisks": [
+               "copy": [
                   {
-                     "diskSizeGB": 900,
-                     "lun": 0,
-                     "createOption": "Empty"
+                     "name": "dataDisks",
+                     "count": 1,
+                     "input": {
+                        "lun": 0,
+                        "createOption": "Empty",
+                        "caching": "ReadOnly",
+                        "writeAcceleratorEnabled": "false",
+                        "diskSizeGB": 900
+                     }
                   }
                ]
             },
@@ -331,6 +322,11 @@
                   "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount')), '2019-06-01').primaryEndpoints.blob]"
                }
             }
+         },
+         "plan": {
+               "name": "[parameters('linuxOSVersion')]",
+               "publisher": "[variables('const_imagePublisher')]",
+               "product": "[variables('const_imageOffer')]"
          }
       },
       {
