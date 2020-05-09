@@ -295,16 +295,13 @@
                      "storageAccountType": "Standard_LRS"
                   }
                },
-               "copy": [
+               "dataDisks": [
                   {
-                     "name": "dataDisks",
-                     "count": 1,
-                     "input": {
-                        "lun": 0,
-                        "createOption": "Empty",
-                        "caching": "ReadOnly",
-                        "writeAcceleratorEnabled": "false",
-                        "diskSizeGB": 900
+                     "lun": 0,
+                     "createOption": "FromImage",
+                     "diskSizeGB": 900,
+                     "managedDisk": {
+                        "storageAccountType": "Standard_LRS"
                      }
                   }
                ]
@@ -324,9 +321,9 @@
             }
          },
          "plan": {
-               "name": "[parameters('linuxOSVersion')]",
-               "publisher": "[variables('const_imagePublisher')]",
-               "product": "[variables('const_imageOffer')]"
+            "name": "[parameters('linuxOSVersion')]",
+            "publisher": "[variables('const_imagePublisher')]",
+            "product": "[variables('const_imageOffer')]"
          }
       },
       {
