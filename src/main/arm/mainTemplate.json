@@ -152,6 +152,13 @@
             "description": "Ports and port ranges to expose"
          }
       },
+      "usePreviewImage": {
+         "type": "bool",
+         "defaultValue": false,
+         "metadata": {
+            "description": "Bool value, if it's set to true, will deploy with preview weblogic image."
+         }
+      },
       "vmSizeSelect": {
          "type": "string",
          "defaultValue": "Standard_A3",
@@ -290,6 +297,9 @@
                },
                "portsToExpose": {
                   "value": "[parameters('portsToExpose')]"
+               },
+               "usePreviewImage":{
+                  "value": "[parameters('usePreviewImage')]"
                },
                "vmSizeSelect": {
                   "value": "[parameters('vmSizeSelect')]"
