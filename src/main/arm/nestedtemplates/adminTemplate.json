@@ -61,7 +61,7 @@
          "type": "string",
          "defaultValue": "[newGuid()]"
       },
-      "linuxOSVersion": {
+      "linuxImageOfferSKU": {
          "type": "string",
          "defaultValue": "owls-122130-8u131-ol74",
          "allowedValues": [
@@ -70,6 +70,13 @@
          ],
          "metadata": {
             "description": "The Oracle Linux version for the VM. The first number is for WebLogic Server version, the second number is for Java version, and the last is for Oralce Linux version."
+         }
+      },
+      "linuxImageVersion":{
+         "type": "string",
+         "defaultValue": "1.1.1",
+         "metadata": {
+            "description": "The Oracle WebLogic image version. "
          }
       },
       "location": {
@@ -119,7 +126,8 @@
    },
    "variables": {
       "const_addressPrefix": "10.0.0.0/16",
-      "const_imageOffer": "weblogic-122130-jdk8u131-ol74-preview",
+      "const_hyphen": "-",
+      "const_imageOffer": "[concat('weblogic-', split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[1],'jdk',split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[2],split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[3])]",
       "const_imagePublisher": "oracle",
       "const_linuxConfiguration": {
          "disablePasswordAuthentication": true,
@@ -286,8 +294,8 @@
                "imageReference": {
                   "publisher": "[variables('const_imagePublisher')]",
                   "offer": "[variables('const_imageOffer')]",
-                  "sku": "[parameters('linuxOSVersion')]",
-                  "version": "1.1.1"
+                  "sku": "[parameters('linuxImageOfferSKU')]",
+                  "version": "[parameters('linuxImageVersion')]"
                },
                "osDisk": {
                   "createOption": "FromImage",
@@ -321,7 +329,7 @@
             }
          },
          "plan": {
-            "name": "[parameters('linuxOSVersion')]",
+            "name": "[parameters('linuxImageOfferSKU')]",
             "publisher": "[variables('const_imagePublisher')]",
             "product": "[variables('const_imageOffer')]"
          }
