@@ -120,7 +120,7 @@
             "description": "JNDI Name for JDBC Datasource"
          }
       },
-      "linuxOSVersion": {
+      "linuxImageOfferSKU": {
          "type": "string",
          "defaultValue": "owls-122130-8u131-ol74",
          "allowedValues": [
@@ -129,6 +129,13 @@
          ],
          "metadata": {
             "description": "The Oracle Linux version for the VM. The first number is for WebLogic Server version, the second number is for Java version, and the last is for Oralce Linux version."
+         }
+      },
+      "linuxImageVersion":{
+         "type": "string",
+         "defaultValue": "1.1.1",
+         "metadata": {
+            "description": "The Oracle WebLogic image version. "
          }
       },
       "location": {
@@ -272,8 +279,11 @@
                "dnsLabelPrefix": {
                   "value": "[parameters('dnsLabelPrefix')]"
                },
-               "linuxOSVersion": {
-                  "value": "[parameters('linuxOSVersion')]"
+               "linuxImageOfferSKU": {
+                  "value": "[parameters('linuxImageOfferSKU')]"
+               },
+               "linuxImageVersion":{
+                  "value": "[parameters('linuxImageVersion')]"
                },
                "location": {
                   "value": "[parameters('location')]"
