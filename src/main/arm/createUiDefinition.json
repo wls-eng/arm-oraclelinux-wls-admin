@@ -5,6 +5,27 @@
     "parameters": {
         "basics": [
             {
+                "name": "linuxImageOfferSKU",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Oracle WebLogic Image",
+                "defaultValue": "weblogic-122130-jdk8u131-ol74-preview",
+                "toolTip": "Choose Oracle Weblogic image, which is provided by Oracle, with Java and Weblogic preinstalled.",
+                "constraints": {
+                    "allowedValues": [
+                        {
+                            "label": "weblogic-122130-jdk8u131-ol74-preview",
+                            "value": "owls-122130-8u131-ol74"
+                        },
+                        {
+                            "label": "weblogic-122130-jdk8u131-ol73-preview",
+                            "value": "owls-122130-8u131-ol73"
+                        }
+                    ],
+                    "required": true
+                },
+                "visible": true
+            },
+            {
                 "name": "basicsRequired",
                 "type": "Microsoft.Common.Section",
                 "label": "Credentails for Virtual Machines and WebLogic",
@@ -70,7 +91,8 @@
                             "hideConfirmation": false
                         },
                         "visible": true
-                    }                ],
+                    }
+                ],
                 "visible": true
             },
             {
@@ -317,7 +339,6 @@
                                 "label": "Learn more",
                                 "uri": "https://docs.microsoft.com/en-us/azure/active-directory-domain-services/tutorial-create-instance"
                             }
-
                         }
                     },
                     {
@@ -327,17 +348,17 @@
                         "defaultValue": "No",
                         "toolTip": "Select 'Yes' and provide required info to configure the connection to Azure Active Directory.",
                         "constraints": {
-                        "allowedValues": [
-                            {
-                                "label": "Yes",
-                                "value": "true"
-                            },
-                            {
-                                "label": "No",
-                                "value": "false"
-                            }
-                        ],
-                        "required": true
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "false"
+                                }
+                            ],
+                            "required": true
                         }
                     },
                     {
@@ -483,6 +504,7 @@
             "dsUser": "[steps('section_database').databaseConnectionInfo.dsUser]",
             "enableAAD": "[bool(steps('section_aad').enableAAD)]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
+            "linuxImageOfferSKU":"[basics('linuxImageOfferSKU')]",
             "portsToExpose": "[basics('basicsOptional').portsToExpose]",
             "vmSizeSelect": "[basics('basicsOptional').vmSizeSelect]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
