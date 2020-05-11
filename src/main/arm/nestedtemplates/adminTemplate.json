@@ -72,7 +72,7 @@
             "description": "The Oracle Linux version for the VM. The first number is for WebLogic Server version, the second number is for Java version, and the last is for Oralce Linux version."
          }
       },
-      "linuxImageVersion":{
+      "linuxImageVersion": {
          "type": "string",
          "defaultValue": "1.1.1",
          "metadata": {
@@ -127,7 +127,7 @@
    "variables": {
       "const_addressPrefix": "10.0.0.0/16",
       "const_hyphen": "-",
-      "const_imageOffer": "[concat('weblogic-', split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[1],'jdk',split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[2],split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[3])]",
+      "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),'jdk',split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[3],variables('const_hyphen'),'preview')]",
       "const_imagePublisher": "oracle",
       "const_linuxConfiguration": {
          "disablePasswordAuthentication": true,
