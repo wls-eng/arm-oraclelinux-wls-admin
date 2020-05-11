@@ -69,7 +69,7 @@
             "owls-122130-8u131-ol74"
          ],
          "metadata": {
-            "description": "The Oracle Linux version for the VM. The first number is for WebLogic Server version, the second number is for Java version, and the last if for Oralce Linux version."
+            "description": "The Oracle Linux version for the VM. The first number is for WebLogic Server version, the second number is for Java version, and the last is for Oralce Linux version."
          }
       },
       "location": {
