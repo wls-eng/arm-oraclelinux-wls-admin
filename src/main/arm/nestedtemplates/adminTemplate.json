@@ -145,6 +145,7 @@
       "const_storageAccountType": "Standard_LRS",
       "const_subnetPrefix": "10.0.0.0/24",
       "const_vmSize": "[parameters('vmSizeSelect')]",
+      "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
       "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
       "name_nic": "adminServerVM_NIC",
       "name_publicIPAddress": "adminServerVM_PublicIP",
@@ -350,7 +351,7 @@
                "fileUris": [
                   "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]"
                ],
-               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ')]"
+               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ')]"
             }
          }
       },
