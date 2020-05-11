@@ -279,8 +279,6 @@ export groupname="oracle"
 
 export SCRIPT_PWD=`pwd`
 
-setWlsEnv
-
 create_adminDomain
 
 deploy_sampleApp
