@@ -34,22 +34,22 @@
                 "description": "One of the supported database types"
             }
         },
-        "dsConnectionURL": {
-            "type": "string",
-            "metadata": {
-                "description": "JDBC Connection String"
-            }
-        },
-        "dsPassword": {
+        "dbPassword": {
             "type": "securestring",
             "metadata": {
                 "description": "Password for Database"
             }
         },
-        "dsUser": {
+        "dbUser": {
             "type": "string",
             "metadata": {
                 "description": "Userid of Database"
+            }
+        },
+        "dsConnectionURL": {
+            "type": "string",
+            "metadata": {
+                "description": "JDBC Connection String"
             }
         },
         "jdbcDataSourceName": {
@@ -118,7 +118,7 @@
                         "[uri(parameters('_artifactsLocationDbTemplate'), concat('../scripts/', variables('name_scriptFilePrefix'), variables('name_scriptFileSuffix-oracle'), parameters('_artifactsLocationSasToken')))]",
                         "[uri(parameters('_artifactsLocationDbTemplate'), concat('../scripts/', variables('name_scriptFilePrefix'), variables('name_scriptFileSuffix-postgresql'), parameters('_artifactsLocationSasToken')))]"
                     ],
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFilePrefix'),parameters('databaseType'),'.sh ',variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',variables('const_singleQuote'),parameters('wlsPassword'),variables('const_singleQuote'),' ',parameters('jdbcDataSourceName'),' ',variables('const_singleQuote'),parameters('dsConnectionURL'),variables('const_singleQuote'),' ',parameters('dsUser'),' ',variables('const_singleQuote'),parameters('dsPassword'),variables('const_singleQuote'))]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptFilePrefix'),parameters('databaseType'),'.sh ',variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsUserName'),' ',variables('const_singleQuote'),parameters('wlsPassword'),variables('const_singleQuote'),' ',parameters('jdbcDataSourceName'),' ',variables('const_singleQuote'),parameters('dsConnectionURL'),variables('const_singleQuote'),' ',parameters('dbUser'),' ',variables('const_singleQuote'),parameters('dbPassword'),variables('const_singleQuote'))]"
                 }
             }
         },
@@ -138,7 +138,7 @@
                     ]
                 }
             }
-        }        
+        }
     ],
     "outputs": {
         "artifactsLocationPassedIn": {

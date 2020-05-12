@@ -23,21 +23,21 @@
             "description": "Accessible port of the LDAP server."
          }
       },
-      "acceptOTNLicenseAgreement": {
-         "type": "string",
-         "metadata": {
-            "description": "Do you agree to provide OTN credentials to accept OTN License Agreement? Enter Y or y to agree, else N or n"
-         }
-      },
-      "addsPublicIP": {
+      "aadsPublicIP": {
          "type": "string",
          "defaultValue": "The LDAP server public IP address"
       },
-      "addsServerHost": {
+      "aadsServerHost": {
          "type": "string",
          "defaultValue": "ldaps.example.com",
          "metadata": {
             "description": "The LDAP server host."
+         }
+      },
+      "acceptOTNLicenseAgreement": {
+         "type": "string",
+         "metadata": {
+            "description": "Do you agree to provide OTN credentials to accept OTN License Agreement? Enter Y or y to agree, else N or n"
          }
       },
       "adminPasswordOrKey": {
@@ -70,18 +70,25 @@
             "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
          }
       },
-      "connectToDatabase": {
-         "defaultValue": false,
-         "type": "bool",
-         "metadata": {
-            "description": "If true, use the supplied parameters to connect the cluster to a pre-provisioned database."
-         }
-      },
       "databaseType": {
          "defaultValue": "oracle",
          "type": "string",
          "metadata": {
             "description": "One of the supported database types"
+         }
+      },
+      "dbPassword": {
+         "defaultValue": "",
+         "type": "securestring",
+         "metadata": {
+            "description": "Password for Database"
+         }
+      },
+      "dbUser": {
+         "defaultValue": "",
+         "type": "string",
+         "metadata": {
+            "description": "Userid of Database"
          }
       },
       "dnsLabelPrefix": {
@@ -98,25 +105,18 @@
             "description": "JDBC Connection String"
          }
       },
-      "dsPassword": {
-         "defaultValue": "",
-         "type": "securestring",
-         "metadata": {
-            "description": "Password for Database"
-         }
-      },
-      "dsUser": {
-         "defaultValue": "",
-         "type": "string",
-         "metadata": {
-            "description": "Userid of Database"
-         }
-      },
       "enableAAD": {
          "type": "bool",
          "defaultValue": false,
          "metadata": {
             "description": "Bool value, if it's set to true, will enable Azure Active Directory after WebLogic Server starts."
+         }
+      },
+      "enableDB": {
+         "defaultValue": false,
+         "type": "bool",
+         "metadata": {
+            "description": "If true, use the supplied parameters to connect the cluster to a pre-provisioned database."
          }
       },
       "jdbcDataSourceName": {
@@ -330,7 +330,7 @@
             "[resourceId('Microsoft.Resources/deployments', 'adminLinkedTemplate')]"
          ],
          "apiVersion": "2019-10-01",
-         "condition": "[parameters('connectToDatabase')]",
+         "condition": "[parameters('enableDB')]",
          "properties": {
             "mode": "Incremental",
             "templateLink": {
@@ -350,14 +350,14 @@
                "databaseType": {
                   "value": "[parameters('databaseType')]"
                },
+               "dbPassword": {
+                  "value": "[parameters('dbPassword')]"
+               },
+               "dbUser": {
+                  "value": "[parameters('dbUser')]"
+               },
                "dsConnectionURL": {
                   "value": "[parameters('dsConnectionURL')]"
-               },
-               "dsPassword": {
-                  "value": "[parameters('dsPassword')]"
-               },
-               "dsUser": {
-                  "value": "[parameters('dsUser')]"
                },
                "jdbcDataSourceName": {
                   "value": "[parameters('jdbcDataSourceName')]"
@@ -399,11 +399,11 @@
                "aadsPortNumber": {
                   "value": "[parameters('aadsPortNumber')]"
                },
-               "addsPublicIP": {
-                  "value": "[parameters('addsPublicIP')]"
+               "aadsPublicIP": {
+                  "value": "[parameters('aadsPublicIP')]"
                },
-               "addsServerHost": {
-                  "value": "[parameters('addsServerHost')]"
+               "aadsServerHost": {
+                  "value": "[parameters('aadsServerHost')]"
                },
                "adminPassword": {
                   "value": "[parameters('adminPasswordOrKey')]"

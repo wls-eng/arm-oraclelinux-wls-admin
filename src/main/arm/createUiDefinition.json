@@ -111,7 +111,8 @@
                             "hideConfirmation": false
                         },
                         "visible": true
-                    }                ],
+                    }
+                ],
                 "visible": true
             },
             {
@@ -227,7 +228,7 @@
                         }
                     },
                     {
-                        "name": "connectToDatabase",
+                        "name": "enableDB",
                         "type": "Microsoft.Common.OptionsGroup",
                         "label": "Connect to Database?",
                         "defaultValue": "No",
@@ -283,7 +284,7 @@
                                 "toolTip": "The JNDI name for the database JDBC connection",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "^[a-z0-9A-Z/]{1,30}$",
                                     "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
                                 },
@@ -296,27 +297,27 @@
                                 "toolTip": "The JDBC connection string for the database",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "[concat('^jdbc:', coalesce(steps('section_database').databaseConnectionInfo.databaseType, ''), '.*$')]",
                                     "validationMessage": "A valid JDBC URL for the chosen database type must be provided"
                                 },
                                 "visible": true
                             },
                             {
-                                "name": "dsUser",
+                                "name": "dbUser",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Database Username",
                                 "toolTip": "Use only letters and numbers",
                                 "defaultValue": "",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
                                     "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of Database Username."
                                 },
                                 "visible": true
                             },
                             {
-                                "name": "dsPassword",
+                                "name": "dbPassword",
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
                                     "password": "Database Password",
@@ -324,7 +325,7 @@
                                 },
                                 "toolTip": "Database Password",
                                 "constraints": {
-                                    "required": "[bool(steps('section_database').connectToDatabase)]",
+                                    "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
                                     "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
                                 },
@@ -334,7 +335,7 @@
                                 "visible": true
                             }
                         ],
-                        "visible": "[bool(steps('section_database').connectToDatabase)]"
+                        "visible": "[bool(steps('section_database').enableDB)]"
                     }
                 ]
             },
@@ -358,7 +359,6 @@
                                 "label": "Learn more",
                                 "uri": "https://docs.microsoft.com/en-us/azure/active-directory-domain-services/tutorial-create-instance"
                             }
-
                         }
                     },
                     {
@@ -368,17 +368,17 @@
                         "defaultValue": "No",
                         "toolTip": "Select 'Yes' and provide required info to configure the connection to Azure Active Directory.",
                         "constraints": {
-                        "allowedValues": [
-                            {
-                                "label": "Yes",
-                                "value": "true"
-                            },
-                            {
-                                "label": "No",
-                                "value": "false"
-                            }
-                        ],
-                        "required": true
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "false"
+                                }
+                            ],
+                            "required": true
                         }
                     },
                     {
@@ -387,7 +387,7 @@
                         "label": "Connection settings",
                         "elements": [
                             {
-                                "name": "addsServerHost",
+                                "name": "aadsServerHost",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Server Host",
                                 "toolTip": "The LDAP server host.",
@@ -400,7 +400,7 @@
                                 "required": true
                             },
                             {
-                                "name": "addsPublicIP",
+                                "name": "aadsPublicIP",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Secure LDAP external IP address",
                                 "toolTip": "Secure LDAP external IP address.",
@@ -512,18 +512,18 @@
         "outputs": {
             "Location": "[location()]",
             "aadsPortNumber": "[steps('section_aad').aadInfo.aadsPortNumber]",
+            "aadsPublicIP": "[steps('section_aad').aadInfo.aadsPublicIP]",
+            "aadsServerHost": "[steps('section_aad').aadInfo.aadsServerHost]",
             "acceptOTNLicenseAgreement": "[basics('acceptOTNLicenseAgreement')]",
-            "addsPublicIP": "[steps('section_aad').aadInfo.addsPublicIP]",
-            "addsServerHost": "[steps('section_aad').aadInfo.addsServerHost]",
             "adminPasswordOrKey": "[basics('basicsRequired').adminPasswordOrKey]",
             "adminUsername": "[basics('basicsRequired').adminUsername]",
-            "connectToDatabase": "[bool(steps('section_database').connectToDatabase)]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
+            "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
+            "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
             "dnsLabelPrefix": "[basics('basicsOptional').dnsLabelPrefix]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
-            "dsPassword": "[steps('section_database').databaseConnectionInfo.dsPassword]",
-            "dsUser": "[steps('section_database').databaseConnectionInfo.dsUser]",
             "enableAAD": "[bool(steps('section_aad').enableAAD)]",
+            "enableDB": "[bool(steps('section_database').enableDB)]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "otnAccountPassword": "[basics('basicsRequired').otnAccountPassword]",
             "otnAccountUsername": "[basics('basicsRequired').otnAccountUsername]",
