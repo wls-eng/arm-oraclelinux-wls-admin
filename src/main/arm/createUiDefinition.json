@@ -304,7 +304,7 @@
                                 "visible": true
                             },
                             {
-                                "name": "dsUser",
+                                "name": "dbUser",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Database Username",
                                 "toolTip": "Use only letters and numbers",
@@ -317,7 +317,7 @@
                                 "visible": true
                             },
                             {
-                                "name": "dsPassword",
+                                "name": "dbPassword",
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
                                     "password": "Database Password",
@@ -518,10 +518,10 @@
             "adminPasswordOrKey": "[basics('basicsRequired').adminPasswordOrKey]",
             "adminUsername": "[basics('basicsRequired').adminUsername]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
+            "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
+            "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
             "dnsLabelPrefix": "[basics('basicsOptional').dnsLabelPrefix]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
-            "dsPassword": "[steps('section_database').databaseConnectionInfo.dsPassword]",
-            "dsUser": "[steps('section_database').databaseConnectionInfo.dsUser]",
             "enableAAD": "[bool(steps('section_aad').enableAAD)]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
