@@ -8,16 +8,16 @@
                 "name": "linuxImageOfferSKU",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Oracle WebLogic Image",
-                "defaultValue": "weblogic-122130-jdk8u131-ol74-preview",
+                "defaultValue": "Weblogic 12.2.1.3.0, JDK 8u131, Oracle Linux 7.4",
                 "toolTip": "Choose Oracle Weblogic image, which is provided by Oracle, with Java and Weblogic preinstalled.",
                 "constraints": {
                     "allowedValues": [
                         {
-                            "label": "weblogic-122130-jdk8u131-ol74",
+                            "label": "Weblogic 12.2.1.3.0, JDK 8u131, Oracle Linux 7.4",
                             "value": "owls-122130-8u131-ol74"
                         },
                         {
-                            "label": "weblogic-122130-jdk8u131-ol73",
+                            "label": "Weblogic 12.2.1.3.0, JDK 8u131, Oracle Linux 7.3",
                             "value": "owls-122130-8u131-ol73"
                         }
                     ],
