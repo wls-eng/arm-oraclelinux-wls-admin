@@ -13,11 +13,11 @@
                 "constraints": {
                     "allowedValues": [
                         {
-                            "label": "weblogic-122130-jdk8u131-ol74-preview",
+                            "label": "weblogic-122130-jdk8u131-ol74",
                             "value": "owls-122130-8u131-ol74"
                         },
                         {
-                            "label": "weblogic-122130-jdk8u131-ol73-preview",
+                            "label": "weblogic-122130-jdk8u131-ol73",
                             "value": "owls-122130-8u131-ol73"
                         }
                     ],
