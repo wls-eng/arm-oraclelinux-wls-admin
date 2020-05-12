@@ -77,6 +77,20 @@
             "description": "One of the supported database types"
          }
       },
+      "dbPassword": {
+         "defaultValue": "",
+         "type": "securestring",
+         "metadata": {
+            "description": "Password for Database"
+         }
+      },
+      "dbUser": {
+         "defaultValue": "",
+         "type": "string",
+         "metadata": {
+            "description": "Userid of Database"
+         }
+      },
       "dnsLabelPrefix": {
          "defaultValue": "wls",
          "type": "string",
@@ -89,20 +103,6 @@
          "type": "string",
          "metadata": {
             "description": "JDBC Connection String"
-         }
-      },
-      "dsPassword": {
-         "defaultValue": "",
-         "type": "securestring",
-         "metadata": {
-            "description": "Password for Database"
-         }
-      },
-      "dsUser": {
-         "defaultValue": "",
-         "type": "string",
-         "metadata": {
-            "description": "Userid of Database"
          }
       },
       "enableAAD": {
@@ -350,14 +350,14 @@
                "databaseType": {
                   "value": "[parameters('databaseType')]"
                },
+               "dbPassword": {
+                  "value": "[parameters('dbPassword')]"
+               },
+               "dbUser": {
+                  "value": "[parameters('dbUser')]"
+               },
                "dsConnectionURL": {
                   "value": "[parameters('dsConnectionURL')]"
-               },
-               "dsPassword": {
-                  "value": "[parameters('dsPassword')]"
-               },
-               "dsUser": {
-                  "value": "[parameters('dsUser')]"
                },
                "jdbcDataSourceName": {
                   "value": "[parameters('jdbcDataSourceName')]"
