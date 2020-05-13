@@ -126,15 +126,22 @@
             "description": "JNDI Name for JDBC Datasource"
          }
       },
-      "linuxOSVersion": {
+      "linuxImageOfferSKU": {
          "type": "string",
-         "defaultValue": "7.4",
+         "defaultValue": "owls-122130-8u131-ol74",
          "allowedValues": [
-            "7.4",
-            "7.3"
+            "owls-122130-8u131-ol73",
+            "owls-122130-8u131-ol74"
          ],
          "metadata": {
-            "description": "The Oracle Linux version for the VM. This will pick a fully patched image of this given Oracle Linux version."
+            "description": "The Oracle Linux image with Weblogic and Java preinstalled. The first number is for WebLogic Server version, the second number is for Java version, and the last is for Oralce Linux version."
+         }
+      },
+      "linuxImageVersion":{
+         "type": "string",
+         "defaultValue": "1.1.1",
+         "metadata": {
+            "description": "The Oracle WebLogic image version. "
          }
       },
       "location": {
@@ -144,23 +151,18 @@
             "description": "Location for all resources."
          }
       },
-      "otnAccountPassword": {
-         "type": "securestring",
-         "metadata": {
-            "description": "Password for your Oracle Technology Network account"
-         }
-      },
-      "otnAccountUsername": {
-         "type": "string",
-         "metadata": {
-            "description": "Username for your Oracle Technology Network account"
-         }
-      },
       "portsToExpose": {
          "type": "string",
          "defaultValue": "80,443,7001-9000",
          "metadata": {
             "description": "Ports and port ranges to expose"
+         }
+      },
+      "usePreviewImage": {
+         "type": "bool",
+         "defaultValue": true,
+         "metadata": {
+            "description": "Bool value, if it's set to true, will deploy with preview weblogic image."
          }
       },
       "vmSizeSelect": {
@@ -275,9 +277,6 @@
                "_artifactsLocationSasToken": {
                   "value": "[parameters('_artifactsLocationSasToken')]"
                },
-               "acceptOTNLicenseAgreement": {
-                  "value": "[parameters('acceptOTNLicenseAgreement')]"
-               },
                "adminPasswordOrKey": {
                   "value": "[parameters('adminPasswordOrKey')]"
                },
@@ -293,20 +292,20 @@
                "dnsLabelPrefix": {
                   "value": "[parameters('dnsLabelPrefix')]"
                },
-               "linuxOSVersion": {
-                  "value": "[parameters('linuxOSVersion')]"
+               "linuxImageOfferSKU": {
+                  "value": "[parameters('linuxImageOfferSKU')]"
+               },
+               "linuxImageVersion":{
+                  "value": "[parameters('linuxImageVersion')]"
                },
                "location": {
                   "value": "[parameters('location')]"
                },
-               "otnAccountPassword": {
-                  "value": "[parameters('otnAccountPassword')]"
-               },
-               "otnAccountUsername": {
-                  "value": "[parameters('otnAccountUsername')]"
-               },
                "portsToExpose": {
                   "value": "[parameters('portsToExpose')]"
+               },
+               "usePreviewImage":{
+                  "value": "[parameters('usePreviewImage')]"
                },
                "vmSizeSelect": {
                   "value": "[parameters('vmSizeSelect')]"

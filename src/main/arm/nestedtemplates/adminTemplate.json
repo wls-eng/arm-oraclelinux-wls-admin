@@ -21,12 +21,6 @@
             "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
          }
       },
-      "acceptOTNLicenseAgreement": {
-         "type": "string",
-         "metadata": {
-            "description": "Do you agree to provide OTN credentials to accept OTN License Agreement? Enter Y or y to agree, else N or n"
-         }
-      },
       "adminPasswordOrKey": {
          "type": "securestring",
          "metadata": {
@@ -67,15 +61,22 @@
          "type": "string",
          "defaultValue": "[newGuid()]"
       },
-      "linuxOSVersion": {
+      "linuxImageOfferSKU": {
          "type": "string",
-         "defaultValue": "7.4",
+         "defaultValue": "owls-122130-8u131-ol74",
          "allowedValues": [
-            "7.4",
-            "7.3"
+            "owls-122130-8u131-ol73",
+            "owls-122130-8u131-ol74"
          ],
          "metadata": {
-            "description": "The Oracle Linux version for the VM. This will pick a fully patched image of this given Oracle Linux version."
+            "description": "The Oracle Linux image with Weblogic and Java preinstalled. The first number is for WebLogic Server version, the second number is for Java version, and the last is for Oralce Linux version."
+         }
+      },
+      "linuxImageVersion": {
+         "type": "string",
+         "defaultValue": "1.1.1",
+         "metadata": {
+            "description": "The Oracle WebLogic image version. "
          }
       },
       "location": {
@@ -84,23 +85,18 @@
             "description": "Location for all resources."
          }
       },
-      "otnAccountPassword": {
-         "type": "securestring",
-         "metadata": {
-            "description": "Password for your Oracle Technology Network account"
-         }
-      },
-      "otnAccountUsername": {
-         "type": "string",
-         "metadata": {
-            "description": "Username for your Oracle Technology Network account"
-         }
-      },
       "portsToExpose": {
          "type": "string",
          "defaultValue": "80,443,7001-9000",
          "metadata": {
             "description": "Ports and port ranges to expose"
+         }
+      },
+      "usePreviewImage": {
+         "type": "bool",
+         "defaultValue": true,
+         "metadata": {
+            "description": "Bool value, if it's set to true, will deploy with preview weblogic image."
          }
       },
       "vmSizeSelect": {
@@ -137,8 +133,9 @@
    },
    "variables": {
       "const_addressPrefix": "10.0.0.0/16",
-      "const_imageOffer": "Oracle-Linux",
-      "const_imagePublisher": "Oracle",
+      "const_hyphen": "-",
+      "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),'jdk',split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
+      "const_imagePublisher": "oracle",
       "const_linuxConfiguration": {
          "disablePasswordAuthentication": true,
          "ssh": {
@@ -155,9 +152,9 @@
       "const_storageAccountType": "Standard_LRS",
       "const_subnetPrefix": "10.0.0.0/24",
       "const_vmSize": "[parameters('vmSizeSelect')]",
+      "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
       "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
       "name_nic": "adminServerVM_NIC",
-      "name_oradownScript": "oradown.sh",
       "name_publicIPAddress": "adminServerVM_PublicIP",
       "name_scriptFile": "setupAdminDomain.sh",
       "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
@@ -304,17 +301,23 @@
                "imageReference": {
                   "publisher": "[variables('const_imagePublisher')]",
                   "offer": "[variables('const_imageOffer')]",
-                  "sku": "[parameters('linuxOSVersion')]",
-                  "version": "latest"
+                  "sku": "[parameters('linuxImageOfferSKU')]",
+                  "version": "[parameters('linuxImageVersion')]"
                },
                "osDisk": {
-                  "createOption": "FromImage"
+                  "createOption": "FromImage",
+                  "managedDisk": {
+                     "storageAccountType": "Standard_LRS"
+                  }
                },
                "dataDisks": [
                   {
-                     "diskSizeGB": 900,
                      "lun": 0,
-                     "createOption": "Empty"
+                     "createOption": "FromImage",
+                     "diskSizeGB": 900,
+                     "managedDisk": {
+                        "storageAccountType": "Standard_LRS"
+                     }
                   }
                ]
             },
@@ -331,6 +334,11 @@
                   "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount')), '2019-06-01').primaryEndpoints.blob]"
                }
             }
+         },
+         "plan": {
+            "name": "[parameters('linuxImageOfferSKU')]",
+            "publisher": "[variables('const_imagePublisher')]",
+            "product": "[variables('const_imageOffer')]"
          }
       },
       {
@@ -348,10 +356,9 @@
             "autoUpgradeMinorVersion": true,
             "settings": {
                "fileUris": [
-                  "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]",
-                  "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../scripts/', variables('name_oradownScript'), parameters('_artifactsLocationSasToken')))]"
+                  "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]"
                ],
-               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('acceptOTNLicenseAgreement'),' ',parameters('otnAccountUsername'),' ',parameters('otnAccountPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ')]"
+               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ')]"
             }
          }
       },

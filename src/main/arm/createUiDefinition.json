@@ -5,17 +5,25 @@
     "parameters": {
         "basics": [
             {
-                "name": "acceptOTNLicenseAgreement",
-                "label": "Accept OTN License Agreement",
-                "type": "Microsoft.Common.TextBox",
-                "toolTip": "A value of N indicates you do not accept the OTN License Agreement.  In that case the deployment will fail.",
-                "defaultValue": "Y",
-                "visible": true,
+                "name": "linuxImageOfferSKU",
+                "type": "Microsoft.Common.DropDown",
+                "label": "Oracle WebLogic Image",
+                "defaultValue": "WebLogic 12.2.1.3.0, JDK 8u131, Oracle Linux 7.4",
+                "toolTip": "Choose Oracle WebLogic image, which is provided by Oracle, with Java and WebLogic preinstalled.",
                 "constraints": {
-                    "required": true,
-                    "regex": "^[Yy]$",
-                    "validationMessage": "The value must be Y/y to proceed with deployment."
-                }
+                    "allowedValues": [
+                        {
+                            "label": "WebLogic 12.2.1.3.0, JDK 8u131, Oracle Linux 7.4",
+                            "value": "owls-122130-8u131-ol74"
+                        },
+                        {
+                            "label": "WebLogic 12.2.1.3.0, JDK 8u131, Oracle Linux 7.3",
+                            "value": "owls-122130-8u131-ol73"
+                        }
+                    ],
+                    "required": true
+                },
+                "visible": true
             },
             {
                 "name": "basicsRequired",
@@ -47,34 +55,6 @@
                             "required": true,
                             "regex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
                             "validationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character"
-                        },
-                        "options": {
-                            "hideConfirmation": false
-                        },
-                        "visible": true
-                    },
-                    {
-                        "name": "otnAccountUsername",
-                        "type": "Microsoft.Common.TextBox",
-                        "label": "OTN Account Username",
-                        "toolTip": "The username of a pre-existing OTN account.",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
-                            "validationMessage": "The value must be a valid email address"
-                        }
-                    },
-                    {
-                        "name": "otnAccountPassword",
-                        "type": "Microsoft.Common.PasswordBox",
-                        "label": {
-                            "password": "Password for OTN Account",
-                            "confirmPassword": "Confirm password"
-                        },
-                        "toolTip": "Password for OTN Account",
-                        "constraints": {
-                            "required": true,
-                            "validationMessage": "Validation constraints for OTN accounts apply here."
                         },
                         "options": {
                             "hideConfirmation": false
@@ -514,7 +494,6 @@
             "aadsPortNumber": "[steps('section_aad').aadInfo.aadsPortNumber]",
             "aadsPublicIP": "[steps('section_aad').aadInfo.aadsPublicIP]",
             "aadsServerHost": "[steps('section_aad').aadInfo.aadsServerHost]",
-            "acceptOTNLicenseAgreement": "[basics('acceptOTNLicenseAgreement')]",
             "adminPasswordOrKey": "[basics('basicsRequired').adminPasswordOrKey]",
             "adminUsername": "[basics('basicsRequired').adminUsername]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
@@ -525,8 +504,7 @@
             "enableAAD": "[bool(steps('section_aad').enableAAD)]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
-            "otnAccountPassword": "[basics('basicsRequired').otnAccountPassword]",
-            "otnAccountUsername": "[basics('basicsRequired').otnAccountUsername]",
+            "linuxImageOfferSKU":"[basics('linuxImageOfferSKU')]",
             "portsToExpose": "[basics('basicsOptional').portsToExpose]",
             "vmSizeSelect": "[basics('basicsOptional').vmSizeSelect]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
