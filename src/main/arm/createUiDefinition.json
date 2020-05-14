@@ -8,17 +8,21 @@
                 "name": "linuxImageOfferSKU",
                 "type": "Microsoft.Common.DropDown",
                 "label": "Oracle WebLogic Image",
-                "defaultValue": "WebLogic 12.2.1.3.0, JDK 8u131, Oracle Linux 7.4",
+                "defaultValue": "WebLogic Server 12.2.1.3.0 and JDK8u131 on Oracle Linux 7.4",
                 "toolTip": "Choose Oracle WebLogic image, which is provided by Oracle, with Java and WebLogic preinstalled.",
                 "constraints": {
                     "allowedValues": [
                         {
-                            "label": "WebLogic 12.2.1.3.0, JDK 8u131, Oracle Linux 7.4",
+                            "label": "WebLogic Server 12.2.1.3.0 and JDK8u131 on Oracle Linux 7.4",
                             "value": "owls-122130-8u131-ol74"
                         },
                         {
-                            "label": "WebLogic 12.2.1.3.0, JDK 8u131, Oracle Linux 7.3",
+                            "label": "WebLogic Server 12.2.1.3.0 and JDK8u131 on Oracle Linux 7.3",
                             "value": "owls-122130-8u131-ol73"
+                        },
+                        {
+                            "label": "WebLogic Server 12.2.1.4.0 and JDK8u251 on Oracle Linux 7.6",
+                            "value": "owls-122140-8u251-ol76"
                         }
                     ],
                     "required": true
@@ -504,7 +508,7 @@
             "enableAAD": "[bool(steps('section_aad').enableAAD)]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
-            "linuxImageOfferSKU":"[basics('linuxImageOfferSKU')]",
+            "linuxImageOfferSKU": "[basics('linuxImageOfferSKU')]",
             "portsToExpose": "[basics('basicsOptional').portsToExpose]",
             "vmSizeSelect": "[basics('basicsOptional').vmSizeSelect]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
