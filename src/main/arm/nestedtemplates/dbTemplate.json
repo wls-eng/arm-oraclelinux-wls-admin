@@ -81,7 +81,7 @@
     "variables": {
         "const_singleQuote": "'",
         "const_wlsAdminPort": "7001",
-        "const_wlsHome": "/u01/app/wls/install/Oracle/Middleware/Oracle_Home",
+        "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
         "name_scriptFilePrefix": "datasourceConfig-",
         "name_scriptFileSuffix-sqlserver": "sqlserver.sh",
         "name_scriptFileSuffix-oracle": "oracle.sh",

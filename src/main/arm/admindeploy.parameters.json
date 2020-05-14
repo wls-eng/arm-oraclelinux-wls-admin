@@ -11,9 +11,6 @@
      "aadsServerHost": {
         "value": "GEN-UNIQUE"
      },
-     "acceptOTNLicenseAgreement": {
-        "value": "GEN-UNIQUE"
-     },
      "adminPasswordOrKey": {
         "value": "GEN-SSH-PUB-KEY"
      },
@@ -49,12 +46,6 @@
      },
      "jdbcDataSourceName": {
         "value": "GEN-UNIQUE"
-     },
-     "otnAccountUsername": {
-        "value": "GEN-UNIQUE"
-     },
-     "otnAccountPassword": {
-        "value": "GEN-PASSWORD"
      },
      "vmSizeSelect": {
         "value": "GEN-UNIQUE"
