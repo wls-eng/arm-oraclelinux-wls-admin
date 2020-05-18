@@ -23,6 +23,14 @@
                         {
                             "label": "WebLogic Server 12.2.1.4.0 and JDK8u251 on Oracle Linux 7.6",
                             "value": "owls-122140-8u251-ol76"
+                        },
+                        {
+                            "label": "WebLogic Server 14.1.1.0.0 and JDK8u251 on Oracle Linux 7.6",
+                            "value": "owls-141100-8u251-ol76"
+                        },
+                        {
+                            "label": "WebLogic Server 14.1.1.0.0 and JDK11_07 on Oracle Linux 7.6",
+                            "value": "owls-141100-11_07-ol76"
                         }
                     ],
                     "required": true
