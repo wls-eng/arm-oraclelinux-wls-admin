@@ -40,7 +40,7 @@ jobs:
       - name: Build azure-javaee-iaas
         run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
       - name: Built and test arm-oraclelinux-wls-admin
-        run: mvn -Ptemplate-validation-tests clean install --file arm-oraclelinux-wls-admin/pom.xml  
+        run: mvn -Ptemplate-validation-tests clean install -Ddev --file arm-oraclelinux-wls-admin/pom.xml  
         
       - name: Get version information from pom.xml
         id: version
