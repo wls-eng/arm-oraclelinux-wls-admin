@@ -126,7 +126,9 @@
          "allowedValues": [
             "owls-122130-8u131-ol73",
             "owls-122130-8u131-ol74",
-            "owls-122140-8u251-ol76"
+            "owls-122140-8u251-ol76",
+            "owls-141100-8u251-ol76",
+            "owls-141100-11_07-ol76"
          ],
          "metadata": {
             "description": "The Oracle Linux image with Weblogic and Java preinstalled. The first number is for WebLogic Server version, the second number is for Java version, and the last is for Oracle Linux version."
