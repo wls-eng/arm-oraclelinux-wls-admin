@@ -381,7 +381,98 @@
                ]
             }
          }
+      },
+      {
+         "apiVersion": "2019-10-01",
+         "name": "${from.owls-122130-8u131-ol74}",
+         "type": "Microsoft.Resources/deployments",
+         "condition": "[if(contains(parameters('linuxImageOfferSKU'), 'owls-122130-8u131-ol74'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "apiVersion": "2019-10-01",
+         "name": "${from.owls-122130-8u131-ol73}",
+         "type": "Microsoft.Resources/deployments",
+         "condition": "[if(contains(parameters('linuxImageOfferSKU'), 'from.owls-122130-8u131-ol73'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "apiVersion": "2019-10-01",
+         "name": "${from.owls-122140-8u251-ol76}",
+         "type": "Microsoft.Resources/deployments",
+         "condition": "[if(contains(parameters('linuxImageOfferSKU'), 'from.owls-122140-8u251-ol76'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "apiVersion": "2019-10-01",
+         "name": "${from.owls-141100-8u251-ol76}",
+         "type": "Microsoft.Resources/deployments",
+         "condition": "[if(contains(parameters('linuxImageOfferSKU'), 'owls-141100-8u251-ol76'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
+      },
+      {
+         "apiVersion": "2019-10-01",
+         "name": "${from.owls-141100-11_07-ol76}",
+         "type": "Microsoft.Resources/deployments",
+         "condition": "[if(contains(parameters('linuxImageOfferSKU'), 'owls-141100-11_07-ol76'), bool('true'), bool('false'))]",
+         "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+         ],
+         "properties": {
+            "mode": "Incremental",
+            "template": {
+               "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+               "contentVersion": "1.0.0.0",
+               "resources": [
+               ]
+            }
+         }
       }
+
    ],
    "outputs": {
       "hostname": {

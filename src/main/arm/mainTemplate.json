@@ -41,6 +41,7 @@
          }
       },
       "adminUsername": {
+         "defaultValue": "weblogic",
          "type": "string",
          "metadata": {
             "description": "User name for the Virtual Machine."
@@ -231,6 +232,7 @@
          }
       },
       "wlsUserName": {
+         "defaultValue": "weblogic",
          "type": "string",
          "metadata": {
             "description": "Username for your Weblogic domain name"
