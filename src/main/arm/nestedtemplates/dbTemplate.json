@@ -138,6 +138,60 @@
                     ]
                 }
             }
+        },
+        {
+            "apiVersion": "2019-10-01",
+            "name": "${database.oracle}",
+            "type": "Microsoft.Resources/deployments",
+            "condition": "[if(contains(parameters('databaseType'), 'oracle'), bool('true'), bool('false'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "2019-10-01",
+            "name": "${database.postgresql}",
+            "type": "Microsoft.Resources/deployments",
+            "condition": "[if(contains(parameters('databaseType'), 'postgresql'), bool('true'), bool('false'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
+        },
+        {
+            "apiVersion": "2019-10-01",
+            "name": "${database.sqlserver}",
+            "type": "Microsoft.Resources/deployments",
+            "condition": "[if(contains(parameters('databaseType'), 'sqlserver'), bool('true'), bool('false'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": [
+                    ]
+                }
+            }
         }
     ],
     "outputs": {
