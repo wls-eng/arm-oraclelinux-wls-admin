@@ -3,70 +3,298 @@ name: Build and Test
 on: 
   push:
     branches:
-      - master
       - develop
   pull_request:
     branches:
-      - master
       - develop
   schedule:
       - cron:  '0 7 * * *'
 
+env:
+  azCliVersion: 2.6.0
+  location: eastus
+  nsg: wls-nsg
+  resourceGroupPrefix: wls-${{ github.run_id }}-${{ github.run_number }}
+  userEmail: ${{ secrets.USER_EMAIL }}
+  userName: ${{ secrets.USER_NAME }}
+  wlsPassword: ${{ secrets.WLS_PASSWORD }}
+  adminPassword: ${{ secrets.WLS_PASSWORD }}
+  wlsDomainName : adminDomain
+  wlsUserName : weblogic
+  adminVMName: adminServerVM
+  testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
+  ref_javaee: 6807e2ae3e8a8492edf211b9f4f0b7ed3a2a29e7
+  ref_armttk: e2fbdcb93a4b2004c9ea953956b85248e0ef8c1c 
+  git_token: ${{ secrets.GIT_TOKEN }} 
+  
 jobs:
-  build:
-    if: "! contains(toJSON(github.event.commits.*.msg), '[skip-ci]')"
+  preflight:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout azure-javaee-iaas
-        uses: actions/checkout@v2
+    - name: Checkout azure-javaee-iaas
+      uses: actions/checkout@v2
+      with:
+        repository: Azure/azure-javaee-iaas
+        path: azure-javaee-iaas
+        ref: ${{ env.ref_javaee }}        
+    - name: Checkout arm-ttk
+      uses: actions/checkout@v2
+      with:
+        repository: Azure/arm-ttk
+        path: arm-ttk
+        ref: ${{ env.ref_armttk }}
+    - name: Checkout arm-oraclelinux-wls-admin
+      uses: actions/checkout@v2
+      with:
+        path: arm-oraclelinux-wls-admin
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Build azure-javaee-iaas
+      run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
+    - name: Build and test arm-oraclelinux-wls-admin
+      run: mvn -Ptemplate-validation-tests clean install --file arm-oraclelinux-wls-admin/pom.xml
+             
+    - name: Get version information from pom.xml
+      id: version
+      run: echo "##[set-env name=version;]$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-admin/pom.xml)"
+    - name: Print version
+      run: echo $version
+    - name: Generate artifact name
+      run: echo "##[set-env name=artifactName;]arm-oraclelinux-wls-admin-$version-arm-assembly"
+    - name: Print artifact name
+      run: echo $artifactName
+    - name: Output artifact name
+      id: artifact_file
+      run: echo "##[set-output name=artifactName;]arm-oraclelinux-wls-admin-$version-arm-assembly"
+    - name: Generate zip package path
+      id: artifact_path
+      run: echo "##[set-output name=artifactPath;]arm-oraclelinux-wls-admin/target/$artifactName"
+    - name: Output artifact path
+      run: echo $artifactPath
+      env:
+        artifactPath: ${{steps.package.outputs.artifactPath}}
+    - name: Unzip the package as upload action will zip again
+      run: unzip arm-oraclelinux-wls-admin/target/$artifactName.zip -d arm-oraclelinux-wls-admin/target/$artifactName
+      
+    - name: Archive arm-oraclelinux-wls-admin template
+      uses: actions/upload-artifact@v1
+      if: success()
+      with:
+        name: ${{steps.artifact_file.outputs.artifactName}}
+        path: ${{steps.artifact_path.outputs.artifactPath}}
+        
+    - name: Checkout arm-oraclelinux-wls-admin for test
+      uses: actions/checkout@v2
+      with:
+        path: arm-oraclelinux-wls-admin-dev    
+    - name: Create a new branch with development pids in nestedtemplates
+      run: |
+        current=`pwd`
+        echo "##[set-env name=current;]${current}"
+        cd arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates
+        git config --global core.longpaths true
+        git config --global user.email $userEmail
+        git config --global user.name $userName
+        echo "create branch $testbranchName"
+        git checkout -b $testbranchName
+        rm -r -f $current/arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates/*
+        cp -r -f $current/arm-oraclelinux-wls-admin/target/arm/nestedtemplates/* $current/arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates/
+        git status
+        git commit -a -m "hard code pids"
+        git push https://$git_token@github.com/$userName/arm-oraclelinux-wls-admin.git -f
+
+  deploy:
+   needs: preflight
+   runs-on: ubuntu-latest
+   strategy:
+    max-parallel: 1
+    fail-fast: false
+    matrix:
+      images: [owls-122130-8u131-ol74, owls-122140-8u251-ol76]
+
+   steps:
+    - name: Checkout arm-oraclelinux-wls-admin
+      uses: actions/checkout@v2
+      with:
+        path: arm-oraclelinux-wls-admin
+    - name: Get version information from arm-oraclelinux-wls-admin/pom.xml
+      id: version
+      run: echo "##[set-env name=version;]$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-admin/pom.xml)"
+    - name: Output artifact name for Download action
+      id: artifact_file
+      run: echo "##[set-output name=artifactName;]arm-oraclelinux-wls-admin-$version-arm-assembly"
+    - name: Download artifact for deployment
+      uses: actions/download-artifact@v1
+      with:
+        name: ${{steps.artifact_file.outputs.artifactName}}
+    - uses: azure/login@v1
+      id: azure-login
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Create Resource Group
+      id: create-resource-group
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.azCliVersion }}
+        inlineScript: |
+          resourceGroup=${{ env.resourceGroupPrefix }}-${{ matrix.images }}
+          echo "create resource group" $resourceGroup
+          echo "##[set-env name=resourceGroup;]${resourceGroup}"
+          az group create --verbose --name $resourceGroup --location ${location}
+          
+    - name: Prepare deployed parameters and test script
+      id: prepare-deployed-parameters-and-test-script
+      run: |
+        sed -i "s/#location#/$location/g; \
+        s/#adminPasswordOrKey#/$wlsPassword/g; \
+        s/#wlsdomainname#/$wlsDomainName/g; \
+        s/#wlsusername#/$wlsUserName/g; \
+        s/#wlspassword#/$wlsPassword/g; \
+        s/#adminvmname#/$adminVMName/g; \
+        s/#linuxImageOfferSKU#/${{ matrix.images }}/g; \
+        s/#testbranchName#/$testbranchName/g; \
+        s/#gitUserName#/$userName/g" \
+         arm-oraclelinux-wls-admin/test/data/parameters-test.json 
+        sed -i "s/#adminPasswordOrKey#/$wlsPassword/g" \
+         arm-oraclelinux-wls-admin/test/scripts/verify-wls-path.sh    
+        sed -i "s/#adminVMName#/$adminVMName/g; \
+         s/#adminPasswordOrKey#/$wlsPassword/g; \
+         s/#wlsUserName#/$wlsUserName/g; \
+         s/#wlspassword#/$wlsPassword/g" \
+         arm-oraclelinux-wls-admin/test/scripts/verify-wls-access.sh
+          
+    - name: Deploy WebLogic Server Admin only Domain offer
+      id: deploy-wls-admin
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.azCliVersion }}
+        inlineScript: |
+          az deployment group create \
+            --verbose \
+            --resource-group $resourceGroup \
+            --name wls-admin-node \
+            --parameters @arm-oraclelinux-wls-admin/test/data/parameters-test.json \
+            --template-file arm-oraclelinux-wls-admin-$version-arm-assembly/mainTemplate.json
+
+    - name: Verify Network Security Group
+      id: verify-nsg
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.azCliVersion }}
+        inlineScript: |
+          echo "query nsg name, will exit with error if nsg does not exist."
+          az network nsg show -g $resourceGroup -n ${nsg} --query "name"
+
+    - name: Get IP of build machine
+      id: get-ip-address
+      run: |
+        myIP=$(dig @ns1.google.com TXT o-o.myaddr.l.google.com +short)
+        echo "##[set-env name=myIP;]${myIP}"          
+
+    - name: Add ip address to security rule to access the wls machine
+      id: add-ip-to-security-rule
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.azCliVersion }}
+        inlineScript: |
+          echo "query existing source address prefixes"
+          while [ -z `az network nsg show -g $resourceGroup -n ${nsg} | grep "NRMS-Rule-101"` ]
+          do
+            echo "network security group rule NRMS-Rule-101 is not ready"
+            sleep 1m
+          done
+          sourceAddressPrefixes=$(az network nsg rule show \
+            --resource-group $resourceGroup \
+            --nsg-name ${nsg} \
+            --name NRMS-Rule-101 \
+            --query "sourceAddressPrefixes")
+          echo "IP of this machine: " ${myIP}
+          sourceAddressPrefixes=$(echo ${myIP} ${sourceAddressPrefixes} | \
+            sed 's/,/ /g; s/\[//g; s/\]//g; s/"//g')
+          echo ${sourceAddressPrefixes}
+          az network nsg rule update \
+            --resource-group $resourceGroup \
+            --nsg-name ${nsg} \
+            --name NRMS-Rule-101 \
+            --source-address-prefixes $sourceAddressPrefixes \
+            --destination-port-ranges 443 22
+          
+    - name: Restart wls VM
+      id: restart-wls-wm
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.azCliVersion }}
+        inlineScript: |
+          echo "restart vm to make sure security rule work."
+          az vm restart -g $resourceGroup -n $adminVMName
+          
+    - name: Query public IP of AdminServer VM
+      id: query-wls-admin-ip
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.azCliVersion }}
+        inlineScript: |
+          echo "query public ip"
+          publicIP=$(az vm show \
+            --resource-group $resourceGroup \
+            --name $adminVMName -d \
+            --query publicIps -o tsv)
+          echo "VM Public IP ${publicIp}"
+          echo "##[set-env name=wlsPublicIP;]${publicIP}"  
+
+    - name: Verify WebLogic Server Installation
+      id: verify-wls
+      run: |
+        echo "pubilc IP of wls machine: ${wlsPublicIP}"
+        echo "Verifying Weblgic server installation"
+        timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
+        sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < arm-oraclelinux-wls-admin/test/scripts/verify-wls-path.sh
+        
+    - name: Verify system services at admin server
+      id: veriy-admin-service
+      run: |
+        echo "Verifying WebLogic services at admin server"
+        sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < arm-oraclelinux-wls-admin/test/scripts/verify-services.sh
+
+    - name: Verify WebLogic Server Access
+      id: verify-wls-access
+      run: |
+        echo "Verifying Weblogic Server Access"
+        sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < arm-oraclelinux-wls-admin/test/scripts/verify-wls-access.sh
+
+  cleanupResourceGroup:
+    needs: deploy
+    if: always()
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        images: [owls-122130-8u131-ol74, owls-122140-8u251-ol76]
+    steps:
+      - uses: azure/login@v1
         with:
-          repository: Azure/azure-javaee-iaas
-          path: azure-javaee-iaas
-          ref: 6807e2ae3e8a8492edf211b9f4f0b7ed3a2a29e7
-      - name: Checkout arm-ttk
-        uses: actions/checkout@v2
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Delete Resource Group
+        id: delete-resource-group
+        uses: azure/CLI@v1
         with:
-          repository: Azure/arm-ttk
-          path: arm-ttk     
-          ref: e2fbdcb93a4b2004c9ea953956b85248e0ef8c1c
+          azcliversion: ${{ env.azCliVersion }}
+          inlineScript: |
+            resourceGroup=${{ env.resourceGroupPrefix }}-${{ matrix.images }}
+            echo "delete... " $resourceGroup
+            az group delete --yes --no-wait --verbose --name $resourceGroup               
+  cleanup:
+    needs: deploy
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout arm-oraclelinux-wls-admin
         uses: actions/checkout@v2
         with:
-          path: arm-oraclelinux-wls-admin  
-      - name: Set up JDK 1.8
-        uses: actions/setup-java@v1
-        with:
-          java-version: 1.8
-      - name: Build azure-javaee-iaas
-        run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
-      - name: Built and test arm-oraclelinux-wls-admin
-        run: mvn -Ptemplate-validation-tests clean install --file arm-oraclelinux-wls-admin/pom.xml  
-        
-      - name: Get version information from pom.xml
-        id: version
-        run: echo "##[set-env name=version;]$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-admin/pom.xml)"
-      - name: Print version
-        run: echo $version 
-      - name: Generate artifact name         
-        run: echo "##[set-env name=artifactName;]arm-oraclelinux-wls-admin-$version-arm-assembly"  
-      - name: Print artifact name
-        run: echo $artifactName
-      - name: Output artifact name
-        id: artifact_file
-        run: echo "##[set-output name=artifactName;]arm-oraclelinux-wls-admin-$version-arm-assembly"
-      - name: Generate zip package path
-        id: artifact_path
-        run: echo "##[set-output name=artifactPath;]arm-oraclelinux-wls-admin/target/$artifactName"
-      - name: Output artifact path
-        run: echo $artifactPath
-        env: 
-          artifactPath: ${{steps.package.outputs.artifactPath}}
-      - name: Unzip the package as upload action will zip again 
-        run: unzip arm-oraclelinux-wls-admin/target/$artifactName.zip -d arm-oraclelinux-wls-admin/target/$artifactName
-
-      - name: Archive arm-oraclelinux-wls-admin target
-        uses: actions/upload-artifact@v1 
-        if: success()
-        with:
-          name: ${{steps.artifact_file.outputs.artifactName}}
-          path: ${{steps.artifact_path.outputs.artifactPath}}
+          path: arm-oraclelinux-wls-admin
+      - name: Delete testing branch
+        run: |
+          cd arm-oraclelinux-wls-admin
+          git push https://$git_token@github.com/$userName/arm-oraclelinux-wls-admin.git -f --delete $testbranchName
