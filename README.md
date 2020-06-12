@@ -1,4 +1,4 @@
-# arm-oraclelinux-wls-admin 
+# arm-oraclelinux-wls-admin
  Simple deployment of a Weblogic Admin Domain on Oracle Linux VM with Weblogic Server pre-installed
 
 <table border="0">
