@@ -173,7 +173,7 @@ jobs:
          arm-oraclelinux-wls-admin/test/scripts/verify-wls-access.sh
 
     - name: Accept Image Terms
-      id: create-resource-group
+      id: accept-terms
       uses: azure/CLI@v1
       with:
         azcliversion: ${{ env.azCliVersion }}
