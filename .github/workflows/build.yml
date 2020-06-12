@@ -134,7 +134,7 @@ jobs:
       id: init
       run: |
         echo "set env..."
-        bash arm-oraclelinux-wls-admin/test/scripts/set-env.sh
+        bash arm-oraclelinux-wls-admin/test/scripts/set-env.sh ${{ matrix.images }}
 
     - uses: azure/login@v1
       id: azure-login
