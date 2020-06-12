@@ -300,7 +300,7 @@ jobs:
           inlineScript: |
             resourceGroup=${{ env.resourceGroupPrefix }}-${{ matrix.images }}
             echo "delete... " $resourceGroup
-            az group delete --yes --no-wait --verbose --name $resourceGroup               
+            az group delete --yes --no-wait --verbose --name $resourceGroup
   cleanup:
     needs: deploy
     if: always()

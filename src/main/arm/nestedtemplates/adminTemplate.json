@@ -97,7 +97,7 @@
       },
       "usePreviewImage": {
          "type": "bool",
-         "defaultValue": true,
+         "defaultValue": false,
          "metadata": {
             "description": "Bool value, if it's set to true, will deploy with preview weblogic image."
          }
