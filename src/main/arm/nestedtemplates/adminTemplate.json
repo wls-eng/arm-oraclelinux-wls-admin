@@ -61,27 +61,6 @@
          "type": "string",
          "defaultValue": "[newGuid()]"
       },
-      "linuxImageOfferSKU": {
-         "type": "string",
-         "defaultValue": "owls-122130-8u131-ol74",
-         "allowedValues": [
-            "owls-122130-8u131-ol73",
-            "owls-122130-8u131-ol74",
-            "owls-122140-8u251-ol76",
-            "owls-141100-8u251-ol76",
-            "owls-141100-11_07-ol76"
-         ],
-         "metadata": {
-            "description": "The Oracle Linux image with Weblogic and Java preinstalled. The first number is for WebLogic Server version, the second number is for Java version, and the last is for Oralce Linux version."
-         }
-      },
-      "linuxImageVersion": {
-         "type": "string",
-         "defaultValue": "1.1.1",
-         "metadata": {
-            "description": "The Oracle WebLogic image version. "
-         }
-      },
       "location": {
          "type": "string",
          "metadata": {
@@ -93,6 +72,20 @@
          "defaultValue": "80,443,7001-9000",
          "metadata": {
             "description": "Ports and port ranges to expose"
+         }
+      },
+      "skuUrnVersion": {
+         "type": "string",
+         "defaultValue": "owls-122130-8u131-ol74;Oracle:weblogic-122130-jdk8u131-ol74:owls-122130-8u131-ol7;1.1.1",
+         "allowedValues": [
+            "owls-122130-8u131-ol73;Oracle:weblogic-122130-jdk8u131-ol73:owls-122130-8u131-ol7;1.1.6",
+            "owls-122130-8u131-ol74;Oracle:weblogic-122130-jdk8u131-ol74:owls-122130-8u131-ol7;1.1.1",
+            "owls-122140-8u251-ol76;Oracle:weblogic-122140-jdk8u251-ol76:owls-122140-8u251-ol7;1.1.1",
+            "owls-141100-8u251-ol76;Oracle:weblogic-141100-jdk8u251-ol76:owls-141100-8u251-ol7;1.1.1",
+            "owls-141100-11_07-ol76;Oracle:weblogic-141100-jdk11_07-ol76:owls-141100-11_07-ol7;1.1.1"
+         ],
+         "metadata": {
+            "description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
          }
       },
       "usePreviewImage": {
@@ -137,7 +130,7 @@
    "variables": {
       "const_addressPrefix": "10.0.0.0/16",
       "const_hyphen": "-",
-      "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),'jdk',split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(parameters('linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
+      "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),'jdk',split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
       "const_imagePublisher": "oracle",
       "const_linuxConfiguration": {
          "disablePasswordAuthentication": true,
@@ -156,6 +149,8 @@
       "const_subnetPrefix": "10.0.0.0/24",
       "const_vmSize": "[parameters('vmSizeSelect')]",
       "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
+      "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
+      "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
       "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
       "name_nic": "adminServerVM_NIC",
       "name_publicIPAddress": "adminServerVM_PublicIP",
@@ -304,8 +299,8 @@
                "imageReference": {
                   "publisher": "[variables('const_imagePublisher')]",
                   "offer": "[variables('const_imageOffer')]",
-                  "sku": "[parameters('linuxImageOfferSKU')]",
-                  "version": "[parameters('linuxImageVersion')]"
+                  "sku": "[variables('name_linuxImageOfferSKU')]",
+                  "version": "[variables('name_linuxImageVersion')]"
                },
                "osDisk": {
                   "createOption": "FromImage",
@@ -339,7 +334,7 @@
             }
          },
          "plan": {
-            "name": "[parameters('linuxImageOfferSKU')]",
+            "name": "[variables('name_linuxImageOfferSKU')]",
             "publisher": "[variables('const_imagePublisher')]",
             "product": "[variables('const_imageOffer')]"
          }
@@ -386,7 +381,7 @@
          "apiVersion": "2019-10-01",
          "name": "${from.owls-122130-8u131-ol74}",
          "type": "Microsoft.Resources/deployments",
-         "condition": "[if(contains(parameters('linuxImageOfferSKU'), 'owls-122130-8u131-ol74'), bool('true'), bool('false'))]",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122130-8u131-ol74'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
@@ -404,7 +399,7 @@
          "apiVersion": "2019-10-01",
          "name": "${from.owls-122130-8u131-ol73}",
          "type": "Microsoft.Resources/deployments",
-         "condition": "[if(contains(parameters('linuxImageOfferSKU'), 'from.owls-122130-8u131-ol73'), bool('true'), bool('false'))]",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122130-8u131-ol73'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
@@ -422,7 +417,7 @@
          "apiVersion": "2019-10-01",
          "name": "${from.owls-122140-8u251-ol76}",
          "type": "Microsoft.Resources/deployments",
-         "condition": "[if(contains(parameters('linuxImageOfferSKU'), 'from.owls-122140-8u251-ol76'), bool('true'), bool('false'))]",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122140-8u251-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
@@ -440,7 +435,7 @@
          "apiVersion": "2019-10-01",
          "name": "${from.owls-141100-8u251-ol76}",
          "type": "Microsoft.Resources/deployments",
-         "condition": "[if(contains(parameters('linuxImageOfferSKU'), 'owls-141100-8u251-ol76'), bool('true'), bool('false'))]",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-8u251-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
@@ -458,7 +453,7 @@
          "apiVersion": "2019-10-01",
          "name": "${from.owls-141100-11_07-ol76}",
          "type": "Microsoft.Resources/deployments",
-         "condition": "[if(contains(parameters('linuxImageOfferSKU'), 'owls-141100-11_07-ol76'), bool('true'), bool('false'))]",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-11_07-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
