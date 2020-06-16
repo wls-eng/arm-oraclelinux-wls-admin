@@ -29,8 +29,8 @@
     "location": {
       "value": "#location#"
     },
-    "linuxImageOfferSKU": {
-      "value": "#linuxImageOfferSKU#"
+    "skuUrnVersion": {
+      "value": "#skuUrnVersion#"
     },
     "_artifactsLocation": {
       "value": "https://raw.githubusercontent.com/#gitUserName#/arm-oraclelinux-wls-admin/#testbranchName#/src/main/arm/"
