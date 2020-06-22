@@ -121,27 +121,6 @@
             "description": "JNDI Name for JDBC Datasource"
          }
       },
-      "linuxImageOfferSKU": {
-         "type": "string",
-         "defaultValue": "owls-122130-8u131-ol74",
-         "allowedValues": [
-            "owls-122130-8u131-ol73",
-            "owls-122130-8u131-ol74",
-            "owls-122140-8u251-ol76",
-            "owls-141100-8u251-ol76",
-            "owls-141100-11_07-ol76"
-         ],
-         "metadata": {
-            "description": "The Oracle Linux image with Weblogic and Java preinstalled. The first number is for WebLogic Server version, the second number is for Java version, and the last is for Oracle Linux version."
-         }
-      },
-      "linuxImageVersion":{
-         "type": "string",
-         "defaultValue": "1.1.1",
-         "metadata": {
-            "description": "The Oracle WebLogic image version. "
-         }
-      },
       "location": {
          "type": "string",
          "defaultValue": "[resourceGroup().location]",
@@ -154,6 +133,20 @@
          "defaultValue": "80,443,7001-9000",
          "metadata": {
             "description": "Ports and port ranges to expose"
+         }
+      },
+      "skuUrnVersion": {
+         "type": "string",
+         "defaultValue": "owls-122130-8u131-ol74;Oracle:weblogic-122130-jdk8u131-ol74:owls-122130-8u131-ol7;1.1.1",
+         "allowedValues": [
+            "owls-122130-8u131-ol73;Oracle:weblogic-122130-jdk8u131-ol73:owls-122130-8u131-ol7;1.1.6",
+            "owls-122130-8u131-ol74;Oracle:weblogic-122130-jdk8u131-ol74:owls-122130-8u131-ol7;1.1.1",
+            "owls-122140-8u251-ol76;Oracle:weblogic-122140-jdk8u251-ol76:owls-122140-8u251-ol7;1.1.1",
+            "owls-141100-8u251-ol76;Oracle:weblogic-141100-jdk8u251-ol76:owls-141100-8u251-ol7;1.1.1",
+            "owls-141100-11_07-ol76;Oracle:weblogic-141100-jdk11_07-ol76:owls-141100-11_07-ol7;1.1.1"
+         ],
+         "metadata": {
+            "description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
          }
       },
       "usePreviewImage": {
@@ -291,17 +284,14 @@
                "dnsLabelPrefix": {
                   "value": "[parameters('dnsLabelPrefix')]"
                },
-               "linuxImageOfferSKU": {
-                  "value": "[parameters('linuxImageOfferSKU')]"
-               },
-               "linuxImageVersion":{
-                  "value": "[parameters('linuxImageVersion')]"
-               },
                "location": {
                   "value": "[parameters('location')]"
                },
                "portsToExpose": {
                   "value": "[parameters('portsToExpose')]"
+               },
+               "skuUrnVersion": {
+                  "value": "[parameters('skuUrnVersion')]"
                },
                "usePreviewImage":{
                   "value": "[parameters('usePreviewImage')]"
