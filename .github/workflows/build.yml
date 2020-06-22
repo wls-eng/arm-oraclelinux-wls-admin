@@ -126,6 +126,13 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: ${{steps.artifact_file.outputs.artifactName}}
+
+    - name: Initialize
+      id: init
+      run: |
+        echo "set env..."
+        bash arm-oraclelinux-wls-admin/test/scripts/set-env.sh ${{ matrix.images }}
+
     - uses: azure/login@v1
       id: azure-login
       with:
@@ -167,6 +174,15 @@ jobs:
          s/#wlsUserName#/$wlsUserName/g; \
          s/#wlspassword#/$wlsPassword/g" \
          arm-oraclelinux-wls-admin/test/scripts/verify-wls-access.sh
+
+    - name: Accept Image Terms
+      id: accept-terms
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.azCliVersion }}
+        inlineScript: |
+          echo "accept terms for " ${{ matrix.images }}
+          az vm image accept-terms --urn ${imagePublisher}:${imageName}:${{ matrix.images }}:${imageVersion} 
           
     - name: Deploy WebLogic Server Admin only Domain offer
       id: deploy-wls-admin

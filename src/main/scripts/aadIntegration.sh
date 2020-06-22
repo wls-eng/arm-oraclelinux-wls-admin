@@ -187,6 +187,8 @@ function mapLDAPHostWithPublicIP()
     # change to superuser
     echo "${vituralMachinePassword}"
     sudo -S su -
+    # remove existing ip address for the same host
+    sudo sed -i '/${adServerHost}/d' /etc/hosts
     sudo echo "${wlsLDAPPublicIP}  ${adServerHost}" >> /etc/hosts
 }
 
@@ -214,6 +216,14 @@ function importAADCertificate()
     # import the key to java security 
     . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
     java_cacerts_path=${JAVA_HOME}/jre/lib/security/cacerts
+
+   # remove existing certificate.
+    queryAADTrust=$(${JAVA_HOME}/bin/keytool -list -keystore ${java_cacerts_path} -storepass changeit | grep "aadtrust")
+    if [ -n "$queryAADTrust" ];
+    then
+        sudo ${JAVA_HOME}/bin/keytool -delete -alias aadtrust -keystore ${java_cacerts_path} -storepass changeit  
+    fi
+    
     sudo ${JAVA_HOME}/bin/keytool -noprompt -import -alias aadtrust -file ${addsCertificate} -keystore ${java_cacerts_path} -storepass changeit
 
 }

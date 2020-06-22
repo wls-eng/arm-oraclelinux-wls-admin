@@ -16,6 +16,7 @@
             }
         },
         "_artifactsLocationSasToken": {
+            "defaultValue":"",
             "type": "securestring",
             "metadata": {
                 "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
@@ -66,14 +67,14 @@
         },
         "wlsLDAPGroupBaseDN": {
             "type": "string",
-            "defaultValue": "null",
+            "defaultValue": "",
             "metadata": {
                 "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
             }
         },
         "wlsLDAPPrincipal": {
             "type": "string",
-            "defaultValue": "null",
+            "defaultValue": "",
             "metadata": {
                 "description": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server."
             }
@@ -94,14 +95,14 @@
         },
         "wlsLDAPSSLCertificate": {
             "type": "string",
-            "defaultValue": "null",
+            "defaultValue": "",
             "metadata": {
                 "description": "Client certificate that will be imported to trust store of SSL."
             }
         },
         "wlsLDAPUserBaseDN": {
             "type": "string",
-            "defaultValue": "null",
+            "defaultValue": "",
             "metadata": {
                 "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
             }
