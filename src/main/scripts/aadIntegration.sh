@@ -7,7 +7,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./aadIntegration.sh <wlsUserName> <wlsPassword> <wlsDomainName> <wlsLDAPProviderName> <addsServerHost> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <oracleHome> <adminVMName> <wlsAdminPort> <wlsLDAPSSLCertificate> <addsPublicIP> <adminPassword> <wlsAdminServerName>"  
+  echo_stderr "./aadIntegration.sh <wlsUserName> <wlsPassword> <wlsDomainName> <wlsLDAPProviderName> <addsServerHost> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <oracleHome> <adminVMName> <wlsAdminPort> <wlsLDAPSSLCertificate> <addsPublicIP> <adminPassword> <wlsAdminServerName> <wlsDomainPath>"  
 }
 
 function validateInput()
@@ -310,11 +310,30 @@ function cleanup()
     echo "Cleanup completed."
 }
 
+function enableTLSv12onJDK8()
+{
+    if ! grep -q "${STRING_ENABLE_TLSV12}" ${wlsDomainPath}/bin/setDomainEnv.sh; then
+        cat <<EOF >>${wlsDomainPath}/bin/setDomainEnv.sh
+# Append -Djdk.tls.client.protocols to JAVA_OPTIONS in jdk8
+# Enable TLSv1.2
+\${JAVA_HOME}/bin/java -version  2>&1  | grep -e "1[.]8[.][0-9]*_"  > /dev/null 
+javaStatus=$?
+
+if [[ "\${javaStatus}" = "0" && "\${JAVA_OPTIONS}"  != *"${JAVA_OPTIONS_TLS_V12}"* ]]; then
+    JAVA_OPTIONS="\${JAVA_OPTIONS} ${JAVA_OPTIONS_TLS_V12}"
+    export JAVA_OPTIONS
+fi
+EOF
+fi
+}
+
 export LDAP_USER_NAME='sAMAccountName'
 export LDAP_USER_FROM_NAME_FILTER='(&(sAMAccountName=%u)(objectclass=user))'
+export JAVA_OPTIONS_TLS_V12="-Djdk.tls.client.protocols=TLSv1.2"
+export STRING_ENABLE_TLSV12="Append -Djdk.tls.client.protocols to JAVA_OPTIONS in jdk8"
 export SCRIPT_PWD=`pwd`
 
-if [ $# -ne 17 ]
+if [ $# -ne 18 ]
 then
     usage
 	exit 1
@@ -337,6 +356,7 @@ export wlsADSSLCer="${14}"
 export wlsLDAPPublicIP="${15}"
 export vituralMachinePassword="${16}"
 export wlsAdminServerName=${17}
+export wlsDomainPath=${18}
 export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 
 
@@ -344,6 +364,7 @@ echo "check status of admin server"
 wait_for_admin
 
 echo "start to configure Azure Active Directory"
+enableTLSv12onJDK8
 createAADProvider_model
 createSSL_model
 mapLDAPHostWithPublicIP
