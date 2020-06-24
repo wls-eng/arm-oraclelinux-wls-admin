@@ -215,7 +215,17 @@ function importAADCertificate()
 {
     # import the key to java security 
     . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
-    java_cacerts_path=${JAVA_HOME}/jre/lib/security/cacerts
+
+    # For AAD failure: exception happens when importing certificate to JDK 11.0.7
+    # ISSUE: https://github.com/wls-eng/arm-oraclelinux-wls/issues/109
+    # JRE was removed since JDK 11.
+    java_version=$(java -version 2>&1 | sed -n ';s/.* version "\(.*\)\.\(.*\)\..*"/\1\2/p;')
+    if [ ${java_version:0:3} -ge 110 ]; 
+    then 
+        java_cacerts_path=${JAVA_HOME}/lib/security/cacerts
+    else
+        java_cacerts_path=${JAVA_HOME}/jre/lib/security/cacerts
+    fi
 
    # remove existing certificate.
     queryAADTrust=$(${JAVA_HOME}/bin/keytool -list -keystore ${java_cacerts_path} -storepass changeit | grep "aadtrust")
