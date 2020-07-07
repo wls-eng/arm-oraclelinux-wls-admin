@@ -54,6 +54,38 @@ jobs:
       run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
     - name: Build and test arm-oraclelinux-wls-admin
       run: mvn -Ptemplate-validation-tests clean install --file arm-oraclelinux-wls-admin/pom.xml
+
+    - name: Checkout arm-oraclelinux-wls-admin for test
+      uses: actions/checkout@v2
+      with:
+        path: arm-oraclelinux-wls-admin-dev
+    - name: Create a new branch with development pids in nestedtemplates
+      run: |
+        current=`pwd`
+        echo "##[set-env name=current;]${current}"
+        cd arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates
+        git config --global core.longpaths true
+        git config --global user.email $userEmail
+        git config --global user.name $userName
+        echo "create branch $testbranchName"
+        git checkout -b $testbranchName
+        rm -r -f $current/arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates/*
+        cp -r -f $current/arm-oraclelinux-wls-admin/target/arm/nestedtemplates/* $current/arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates/
+        git status
+        git commit -a -m "hard code pids"
+        git push https://$git_token@github.com/$userName/arm-oraclelinux-wls-admin.git -f
+
+    - uses: azure/login@v1
+      id: azure-login
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Validate deployment templates for different combinations of service integration
+      id: validate-deployment-templates
+      run: |
+        bash arm-oraclelinux-wls-admin/test/scripts/verify-deployments.sh \
+          ${{ github.run_id }}${{ github.run_number }} ${location} \
+          arm-oraclelinux-wls-admin/target/arm/mainTemplate.json \
+          ${userName} ${testbranchName} arm-oraclelinux-wls-admin/test/scripts
              
     - name: Get version information from pom.xml
       id: version
@@ -83,26 +115,6 @@ jobs:
       with:
         name: ${{steps.artifact_file.outputs.artifactName}}
         path: ${{steps.artifact_path.outputs.artifactPath}}
-        
-    - name: Checkout arm-oraclelinux-wls-admin for test
-      uses: actions/checkout@v2
-      with:
-        path: arm-oraclelinux-wls-admin-dev    
-    - name: Create a new branch with development pids in nestedtemplates
-      run: |
-        current=`pwd`
-        echo "##[set-env name=current;]${current}"
-        cd arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates
-        git config --global core.longpaths true
-        git config --global user.email $userEmail
-        git config --global user.name $userName
-        echo "create branch $testbranchName"
-        git checkout -b $testbranchName
-        rm -r -f $current/arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates/*
-        cp -r -f $current/arm-oraclelinux-wls-admin/target/arm/nestedtemplates/* $current/arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates/
-        git status
-        git commit -a -m "hard code pids"
-        git push https://$git_token@github.com/$userName/arm-oraclelinux-wls-admin.git -f
 
   deploy-dependencies:
     needs: preflight
