@@ -98,14 +98,8 @@
       "vmSizeSelect": {
          "type": "string",
          "defaultValue": "Standard_A3",
-         "allowedValues": [
-            "Standard_A1",
-            "Standard_A2",
-            "Standard_A3",
-            "Standard_A4"
-         ],
          "metadata": {
-            "description": "Select appropriate VM Size as per requirement (Standard_A1, Standard_A2, Standard_A3, Standard_A4)"
+            "description": "Select appropriate VM Size as per requirement"
          }
       },
       "wlsDomainName": {

@@ -38,9 +38,33 @@
                 "visible": true
             },
             {
+                "name": "vmSizeSelect",
+                "type": "Microsoft.Compute.SizeSelector",
+                "label": "Virtual machine size",
+                "toolTip": "The size of virtual machine to provision.",
+                "recommendedSizes": [
+                    "Standard_A1",
+                    "Standard_A2",
+                    "Standard_A3",
+                    "Standard_A4",
+                    "Standard_B1ms"
+                ],
+                "constraints": {
+                    "excludedSizes": [
+                        "Standard_B1ls",
+                        "Standard_A0",
+                        "Basic_A0",
+                        "Standard_B1s"
+                    ]
+                },
+                "osPlatform": "Linux",
+                "count": "1",
+                "visible": true
+            },
+            {
                 "name": "basicsRequired",
                 "type": "Microsoft.Common.Section",
-                "label": "Credentails for Virtual Machines and WebLogic",
+                "label": "Credentials for Virtual Machines and WebLogic",
                 "elements": [
                     {
                         "name": "adminUsername",
@@ -156,22 +180,6 @@
                             "regex": "^[a-z0-9A-Z]{3,20}$",
                             "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
                         },
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
-                    },
-                    {
-                        "name": "vmSizeSelect",
-                        "type": "Microsoft.Compute.SizeSelector",
-                        "defaultValue": "Standard_A3",
-                        "label": "Virtual machine size",
-                        "toolTip": "The size of virtual machine to provision.",
-                        "recommendedSizes": [
-                            "Standard_A1",
-                            "Standard_A2",
-                            "Standard_A3",
-                            "Standard_A4"
-                        ],
-                        "osPlatform": "Linux",
-                        "count": "1",
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
                     {
@@ -518,7 +526,7 @@
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "portsToExpose": "[basics('basicsOptional').portsToExpose]",
             "skuUrnVersion": "[basics('skuUrnVersion')]",
-            "vmSizeSelect": "[basics('basicsOptional').vmSizeSelect]",
+            "vmSizeSelect": "[basics('vmSizeSelect')]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
             "wlsLDAPGroupBaseDN": "[steps('section_aad').aadInfo.wlsLDAPGroupBaseDN]",
             "wlsLDAPPrincipal": "[steps('section_aad').aadInfo.wlsLDAPPrincipal]",
