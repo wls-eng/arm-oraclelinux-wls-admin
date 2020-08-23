@@ -9,7 +9,14 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setupAdminDomain.sh <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost> <oracleHome>"  
+  echo_stderr "./setupAdminDomain.sh <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost> <oracleHome> [<isCustomSSLEnabled>] [<customIdentityKeyStoreData>] [<customIdentityKeyStorePassPhrase>] [<customIdentityKeyStoreType>] [<customTrustKeyStoreData>] [<customTrustKeyStorePassPhrase>] [<customTrustKeyStoreType>] [<serverPrivateKeyAlias>] [<serverPrivateKeyPassPhrase>]"  
+}
+
+function setupKeyStoreDir()
+{
+    KEYSTORE_PATH="/u01/app/keystores"
+    sudo mkdir -p $KEYSTORE_PATH
+    sudo rm -rf $KEYSTORE_PATH/*
 }
 
 function installUtilities()
@@ -70,7 +77,54 @@ function cleanup()
 function create_admin_model()
 {
     echo "Creating admin domain model"
-    cat <<EOF >$DOMAIN_PATH/admin-domain.yaml
+    cat /dev/null > $DOMAIN_PATH/admin-domain.yaml
+
+    if [ "${isCustomSSLEnabled,,}" == "true" ];
+    then
+        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+domainInfo:
+   AdminUserName: "$wlsUserName"
+   AdminPassword: "$wlsPassword"
+   ServerStartMode: prod
+topology:
+   Name: "$wlsDomainName"
+   AdminServerName: admin
+EOF
+
+        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+   Server:
+        'admin':
+            ListenPort: $wlsAdminPort
+EOF
+
+    if [ "$isHTTPAdminListenPortEnabled" == "true" ];
+    then
+        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+            ListenPortEnabled: true
+EOF
+    else
+        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+            ListenPortEnabled: false
+EOF
+    fi
+
+cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+            RestartDelaySeconds: 10
+            KeyStores: 'CustomIdentityAndCustomTrust'
+            CustomIdentityKeyStoreFileName: "$customIdentityKeyStoreFileName"
+            CustomIdentityKeyStoreType: "$customIdentityKeyStoreType"
+            CustomIdentityKeyStorePassPhraseEncrypted: "$customIdentityKeyStorePassPhrase"
+            CustomTrustKeyStoreFileName: "$customTrustKeyStoreFileName"
+            CustomTrustKeyStoreType: "$customTrustKeyStoreType"
+            CustomTrustKeyStorePassPhraseEncrypted: "$customTrustKeyStorePassPhrase"
+            SSL:
+               ServerPrivateKeyAlias: "$serverPrivateKeyAlias"
+               ServerPrivateKeyPassPhraseEncrypted: "$serverPrivateKeyPassPhrase"
+               ListenPort: $wlsSSLAdminPort
+               Enabled: true
+EOF
+    else
+        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
    AdminPassword: "$wlsPassword"
@@ -81,11 +135,26 @@ topology:
    Server:
         'admin':
             ListenPort: $wlsAdminPort
+EOF
+
+    if [ "$isHTTPAdminListenPortEnabled" == "true" ];
+    then
+        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+            ListenPortEnabled: true
+EOF
+    else
+        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+            ListenPortEnabled: false
+EOF
+    fi
+
+        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
             RestartDelaySeconds: 10
             SSL:
                ListenPort: $wlsSSLAdminPort
                Enabled: true
 EOF
+  fi
 }
 
 # This function to create model for sample application deployment 
@@ -175,7 +244,12 @@ function wait_for_admin()
 {
  #wait for admin to start
 count=1
-export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+if [ "${isHTTPAdminListenPortEnabled,,}" == "true" ];
+then
+    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+else
+    export CHECK_URL="https://$wlsAdminURL/weblogic/ready"
+fi
 status=`curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'}`
 while [[ "$status" != "200" ]]
 do
@@ -238,6 +312,23 @@ function validateInput()
         echo_stderr "oracleHome is required. "
         exit 1
     fi
+
+    if [ "${isCustomSSLEnabled,,}" != "true" ];
+    then
+        echo_stderr "Custom SSL value is not provided. Defaulting to false"
+        isCustomSSLEnabled="false"
+    else
+        if   [ -z "$customIdentityKeyStoreData" ]    || [ -z "$customIdentityKeyStorePassPhrase" ] ||
+             [ -z "$customIdentityKeyStoreType" ]    || [ -z "$customTrustKeyStoreData" ] ||
+             [ -z "$customTrustKeyStorePassPhrase" ] || [ -z "$customTrustKeyStoreType" ] ||
+             [ -z "$serverPrivateKeyAlias" ]         || [ -z "$serverPrivateKeyPassPhrase" ];
+        then
+            echo "One of the required values for enabling Custom SSL \
+            (CustomKeyIdentityKeyStoreData,CustomKeyIdentityKeyStorePassPhrase,CustomKeyIdentityKeyStoreType,CustomKeyTrustKeyStoreData,CustomKeyTrustKeyStorePassPhrase,CustomKeyTrustKeyStoreType) \
+            has not been provided."
+            exit 1
+        fi
+    fi
 }
 
 function enableAndStartAdminServerService()
@@ -264,12 +355,43 @@ function updateNetworkRules()
     sudo systemctl restart firewalld
 }
 
+function storeCustomSSLCerts()
+{
+    if [ "${isCustomSSLEnabled,,}" == "true" ];
+    then
+        setupKeyStoreDir
+
+        echo "Custom SSL is enabled. Storing CertInfo as files..."
+        export customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.jks"
+        export customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.jks"
+
+        customIdentityKeyStoreData=$(echo "$customIdentityKeyStoreData" | base64 --decode)
+        customIdentityKeyStorePassPhrase=$(echo "$customIdentityKeyStorePassPhrase" | base64 --decode)
+        customIdentityKeyStoreType=$(echo "$customIdentityKeyStoreType" | base64 --decode)
+
+        customTrustKeyStoreData=$(echo "$customTrustKeyStoreData" | base64 --decode)
+        customTrustKeyStorePassPhrase=$(echo "$customTrustKeyStorePassPhrase" | base64 --decode)
+        customTrustKeyStoreType=$(echo "$customTrustKeyStoreType" | base64 --decode)
+
+        serverPrivateKeyAlias=$(echo "$serverPrivateKeyAlias" | base64 --decode)
+        serverPrivateKeyPassPhrase=$(echo "$serverPrivateKeyPassPhrase" | base64 --decode)
+
+        #decode cert data once again as it would got base64 encoded while  storing in azure keyvault
+        echo "$customIdentityKeyStoreData" | base64 --decode > $customIdentityKeyStoreFileName
+        echo "$customTrustKeyStoreData" | base64 --decode > $customTrustKeyStoreFileName
+
+    else
+        echo "Custom SSL is not enabled"
+    fi
+}
+
+
 #main script starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-if [ $# -ne 5 ]
+if [ $# -ne 6 ]
 then
     usage
 	exit 1
@@ -280,6 +402,24 @@ export wlsUserName="$2"
 export wlsPassword="$3"
 export wlsAdminHost="$4"
 export oracleHome="$5"
+export isHTTPAdminListenPortEnabled="${6}"
+isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}";
+
+export isCustomSSLEnabled="${7}"
+
+#case insensitive check
+if [ "${isCustomSSLEnabled,,}" == "true" ];
+then
+    echo "custom ssl enabled. Reading keystore information"
+    export customIdentityKeyStoreData="${8}"
+    export customIdentityKeyStorePassPhrase="${9}"
+    export customIdentityKeyStoreType="${10}"
+    export customTrustKeyStoreData="${11}"
+    export customTrustKeyStorePassPhrase="${12}"
+    export customTrustKeyStoreType="${13}"
+    export serverPrivateKeyAlias="${14}"
+    export serverPrivateKeyPassPhrase="${15}"
+fi
 
 validateInput
 
@@ -289,11 +429,19 @@ export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/re
 export samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
 export wlsAdminPort=7001
 export wlsSSLAdminPort=7002
-export wlsAdminURL="$wlsAdminHost:$wlsAdminPort"
+if [ "${isHTTPAdminListenPortEnabled,,}" == "true" ];
+then
+    export wlsAdminURL="$wlsAdminHost:$wlsAdminPort"
+else
+    export wlsAdminURL="$wlsAdminHost:$wlsSSLAdminPort"
+fi
+
 export username="oracle"
 export groupname="oracle"
 
 export SCRIPT_PWD=`pwd`
+
+storeCustomSSLCerts
 
 create_adminDomain
 
