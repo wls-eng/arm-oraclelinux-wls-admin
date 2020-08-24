@@ -199,10 +199,12 @@
         "const_linuxConfiguration": {
             "disablePasswordAuthentication": true,
             "ssh": {
-                "publicKeys": [{
+                "publicKeys": [
+                {
                     "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
                     "keyData": "[parameters('adminPasswordOrKey')]"
-                }]
+                }
+              ]
             }
         },
         "const_publicIPAddressType": "Dynamic",
@@ -223,7 +225,8 @@
         "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
         "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]"
     },
-    "resources": [{
+    "resources": [
+       {
             "apiVersion": "2019-10-01",
             "name": "${admin.admin.start}",
             "type": "Microsoft.Resources/deployments",
@@ -232,7 +235,8 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": []
+                    "resources": [
+                    ]
                 }
             }
         },
@@ -242,7 +246,8 @@
             "name": "[variables('name_networkSecurityGroup')]",
             "location": "[parameters('location')]",
             "properties": {
-                "securityRules": [{
+                "securityRules": [
+                {
                     "name": "WebLogicPorts",
                     "properties": {
                         "protocol": "TCP",
@@ -254,7 +259,8 @@
                         "direction": "Inbound",
                         "destinationPortRanges": "[split(concat(parameters('portsToExpose'),variables('const_requiredPortrange')), ',')]"
                     }
-                }]
+                }
+              ]
             }
         },
         {
@@ -266,7 +272,8 @@
                 "name": "[variables('const_storageAccountType')]"
             },
             "kind": "Storage",
-            "properties": {}
+            "properties": {
+            }
         },
         {
             "type": "Microsoft.Network/publicIPAddresses",
@@ -294,7 +301,8 @@
                         "[variables('const_addressPrefix')]"
                     ]
                 },
-                "subnets": [{
+                "subnets": [
+                {
                     "name": "[variables('name_subnet')]",
                     "properties": {
                         "addressPrefix": "[variables('const_subnetPrefix')]",
@@ -302,7 +310,8 @@
                             "id": "[variables('ref_networkSecurityGroup')]"
                         }
                     }
-                }]
+                }
+             ]
             }
         },
         {
@@ -315,7 +324,8 @@
                 "[resourceId('Microsoft.Network/virtualNetworks/', variables('name_virtualNetwork'))]"
             ],
             "properties": {
-                "ipConfigurations": [{
+                "ipConfigurations": [
+                   {
                     "name": "ipconfig1",
                     "properties": {
                         "privateIPAllocationMethod": "Dynamic",
@@ -326,7 +336,8 @@
                             "id": "[variables('ref_subnet')]"
                         }
                     }
-                }]
+                }
+              ]
             }
         },
         {
@@ -361,19 +372,23 @@
                             "storageAccountType": "Standard_LRS"
                         }
                     },
-                    "dataDisks": [{
+                    "dataDisks": [
+                       {
                         "lun": 0,
                         "createOption": "FromImage",
                         "diskSizeGB": 900,
                         "managedDisk": {
                             "storageAccountType": "Standard_LRS"
                         }
-                    }]
+                    }
+                   ]
                 },
                 "networkProfile": {
-                    "networkInterfaces": [{
+                    "networkInterfaces": [
+                       {
                         "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('name_nic'))]"
-                    }]
+                    }
+                   ]
                 },
                 "diagnosticsProfile": {
                     "bootDiagnostics": {
@@ -408,7 +423,8 @@
                     "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',string(parameters('enableHTTPAdminListenPort')),' ',string(parameters('enableCustomSSL')),' ',if(parameters('enableCustomSSL'),base64(parameters('wlsSSLCustomIdentityKeyStoreData')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('wlsSSLCustomIdentityKeyStorePassPhrase')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('wlsSSLCustomIdentityKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('wlsSSLCustomTrustStoreData')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('wlsSSLCustomTrustStorePassPhrase')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('wlsSSLCustomTrustStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('wlsSSLServerPrivateKeyAlias')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('wlsSSLServerPrivateKeyPassPhrase')),''),' ')]"
                 }
             }
-        }, {
+        }, 
+        {
             "apiVersion": "2019-10-01",
             "name": "${admin.admin.end}",
             "type": "Microsoft.Resources/deployments",
@@ -420,10 +436,12 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": []
+                    "resources": [
+                    ]
                 }
             }
-        }, {
+        }, 
+        {
             "apiVersion": "2019-10-01",
             "name": "${from.owls-122130-8u131-ol74}",
             "type": "Microsoft.Resources/deployments",
@@ -436,10 +454,12 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": []
+                    "resources": [
+                    ]
                 }
             }
-        }, {
+        }, 
+        {
             "apiVersion": "2019-10-01",
             "name": "${from.owls-122130-8u131-ol73}",
             "type": "Microsoft.Resources/deployments",
@@ -452,10 +472,12 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": []
+                    "resources": [
+                    ]
                 }
             }
-        }, {
+        }, 
+        {
             "apiVersion": "2019-10-01",
             "name": "${from.owls-122140-8u251-ol76}",
             "type": "Microsoft.Resources/deployments",
@@ -468,10 +490,12 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": []
+                    "resources": [
+                    ]
                 }
             }
-        }, {
+        },
+        {
             "apiVersion": "2019-10-01",
             "name": "${from.owls-141100-8u251-ol76}",
             "type": "Microsoft.Resources/deployments",
@@ -484,10 +508,12 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": []
+                    "resources": [
+                    ]
                 }
             }
-        }, {
+        }, 
+        {
             "apiVersion": "2019-10-01",
             "name": "${from.owls-141100-11_07-ol76}",
             "type": "Microsoft.Resources/deployments",
@@ -500,11 +526,11 @@
                 "template": {
                     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
                     "contentVersion": "1.0.0.0",
-                    "resources": []
+                    "resources": [
+                    ]
                 }
             }
         }
-
     ],
     "outputs": {
         "hostname": {
