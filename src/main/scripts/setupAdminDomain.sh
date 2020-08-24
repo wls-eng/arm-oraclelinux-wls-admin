@@ -391,7 +391,7 @@ function storeCustomSSLCerts()
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-if [ $# -ne 6 ]
+if [ $# -lt 6 ]
 then
     usage
 	exit 1
