@@ -247,12 +247,14 @@
       },
       "wlsSSLCertificateDataResourceGroup":{
         "type": "string",
+        "defaultValue": "null",
         "metadata": {
             "description": "Resource Group containing Weblogic SSL Certificates"
         }
       },
       "wlsSSLCertificateDataKeyVaultName":{
         "type": "string",
+        "defaultValue": "null", 
         "metadata": {
             "description": "Keyvault name containing Weblogic SSL Certificates"
         }
