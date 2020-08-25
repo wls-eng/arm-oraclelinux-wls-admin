@@ -345,7 +345,7 @@
          "apiVersion": "2019-10-01",
          "condition": "[not(parameters('enableCustomSSL'))]",
          "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'admin.start')]"
+                "[resourceId('Microsoft.Resources/deployments', '${admin.start}')]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -411,7 +411,7 @@
          "apiVersion": "2019-10-01",
          "condition": "[parameters('enableCustomSSL')]",
          "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', 'admin.start')]"
+                "[resourceId('Microsoft.Resources/deployments', '${admin.start}')]"
          ],
          "properties": {
             "mode": "Incremental",
