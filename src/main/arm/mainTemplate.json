@@ -322,9 +322,7 @@
       "name_adminLinkedTemplateName": "adminTemplate.json",
       "name_adminCustomSSLLinkedTemplateName": "adminTemplateForCustomSSL.json",
       "name_dbLinkedTemplate": "dbTemplate.json",
-      "adminLinkedTemplateRef": "[concat('admin',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]",
-      "name_adminLinkedTemplate": "adminLinkedTemplate",
-      "name_adminCustomSSLLinkedTemplate": "adminCustomSSLLinkedTemplate"
+      "adminLinkedTemplateRef": "[concat('admin',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]"
    },
    "resources": [
       {
