@@ -156,7 +156,9 @@
                 "settings": {
                     "fileUris": [
                         "[uri(parameters('_artifactsLocationAADTemplate'), concat('../scripts/', variables('name_scriptAADConfiguration'), parameters('_artifactsLocationSasToken')))]"
-                    ],
+                    ]
+                },
+                "protectedSettings": {
                     "commandToExecute": "[concat('sh',' ',variables('name_scriptAADConfiguration'),' ', variables('const_aadParameters'))]"
                 }
             }
