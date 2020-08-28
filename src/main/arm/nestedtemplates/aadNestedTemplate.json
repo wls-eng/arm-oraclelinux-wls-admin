@@ -16,6 +16,7 @@
             }
         },
         "_artifactsLocationSasToken": {
+            "defaultValue":"",
             "type": "securestring",
             "metadata": {
                 "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
@@ -66,14 +67,14 @@
         },
         "wlsLDAPGroupBaseDN": {
             "type": "string",
-            "defaultValue": "null",
+            "defaultValue": "",
             "metadata": {
                 "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
             }
         },
         "wlsLDAPPrincipal": {
             "type": "string",
-            "defaultValue": "null",
+            "defaultValue": "",
             "metadata": {
                 "description": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server."
             }
@@ -94,14 +95,14 @@
         },
         "wlsLDAPSSLCertificate": {
             "type": "string",
-            "defaultValue": "null",
+            "defaultValue": "",
             "metadata": {
                 "description": "Client certificate that will be imported to trust store of SSL."
             }
         },
         "wlsLDAPUserBaseDN": {
             "type": "string",
-            "defaultValue": "null",
+            "defaultValue": "",
             "metadata": {
                 "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
             }
@@ -120,9 +121,10 @@
         }
     },
     "variables": {
-        "const_aadParameters": "[concat(parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsLDAPProviderName'), ' ',  parameters('aadsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsLDAPSSLCertificate'), ' ', parameters('aadsPublicIP'), ' ', parameters('adminPassword'), ' ', variables('const_adminServerName'))]",
+        "const_aadParameters": "[concat(parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsLDAPProviderName'), ' ',  parameters('aadsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsLDAPSSLCertificate'), ' ', parameters('aadsPublicIP'), ' ', parameters('adminPassword'), ' ', variables('const_adminServerName'), ' ', variables('const_wlsDomainPath'))]",
         "const_adminServerName": "admin",
         "const_wlsAdminPort": "7001",
+        "const_wlsDomainPath": "[concat('/u01/domains/', parameters('wlsDomainName'))]",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
         "name_scriptAADConfiguration": "aadIntegration.sh"
     },
@@ -154,7 +156,9 @@
                 "settings": {
                     "fileUris": [
                         "[uri(parameters('_artifactsLocationAADTemplate'), concat('../scripts/', variables('name_scriptAADConfiguration'), parameters('_artifactsLocationSasToken')))]"
-                    ],
+                    ]
+                },
+                "protectedSettings": {
                     "commandToExecute": "[concat('sh',' ',variables('name_scriptAADConfiguration'),' ', variables('const_aadParameters'))]"
                 }
             }

@@ -9,9 +9,11 @@ on:
 
 env:
   azCliVersion: 2.6.0
+  dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
   location: eastus
   nsg: wls-nsg
   resourceGroupPrefix: wls-${{ github.run_id }}-${{ github.run_number }}
+  resourceGroupForDependency: wlsd-${{ github.run_id }}-${{ github.run_number }}
   userEmail: ${{ secrets.USER_EMAIL }}
   userName: ${{ secrets.USER_NAME }}
   wlsPassword: ${{ secrets.WLS_PASSWORD }}
@@ -21,7 +23,7 @@ env:
   adminVMName: adminServerVM
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
   ref_javaee: 6807e2ae3e8a8492edf211b9f4f0b7ed3a2a29e7
-  ref_armttk: e2fbdcb93a4b2004c9ea953956b85248e0ef8c1c 
+  ref_armttk: e2fbdcb93a4b2004c9ea953956b85248e0ef8c1c
   git_token: ${{ secrets.GIT_TOKEN }} 
   
 jobs:
@@ -52,6 +54,38 @@ jobs:
       run: mvn -DskipTests clean install --file azure-javaee-iaas/pom.xml
     - name: Build and test arm-oraclelinux-wls-admin
       run: mvn -Ptemplate-validation-tests clean install --file arm-oraclelinux-wls-admin/pom.xml
+
+    - name: Checkout arm-oraclelinux-wls-admin for test
+      uses: actions/checkout@v2
+      with:
+        path: arm-oraclelinux-wls-admin-dev
+    - name: Create a new branch with development pids in nestedtemplates
+      run: |
+        current=`pwd`
+        echo "##[set-env name=current;]${current}"
+        cd arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates
+        git config --global core.longpaths true
+        git config --global user.email $userEmail
+        git config --global user.name $userName
+        echo "create branch $testbranchName"
+        git checkout -b $testbranchName
+        rm -r -f $current/arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates/*
+        cp -r -f $current/arm-oraclelinux-wls-admin/target/arm/nestedtemplates/* $current/arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates/
+        git status
+        git commit -a -m "hard code pids"
+        git push https://$git_token@github.com/$userName/arm-oraclelinux-wls-admin.git -f
+
+    - uses: azure/login@v1
+      id: azure-login
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Validate deployment templates for different combinations of service integration
+      id: validate-deployment-templates
+      run: |
+        bash arm-oraclelinux-wls-admin/test/scripts/verify-deployments.sh \
+          ${{ github.run_id }}${{ github.run_number }} ${location} \
+          arm-oraclelinux-wls-admin/target/arm/mainTemplate.json \
+          ${userName} ${testbranchName} arm-oraclelinux-wls-admin/test/scripts
              
     - name: Get version information from pom.xml
       id: version
@@ -81,29 +115,43 @@ jobs:
       with:
         name: ${{steps.artifact_file.outputs.artifactName}}
         path: ${{steps.artifact_path.outputs.artifactPath}}
-        
-    - name: Checkout arm-oraclelinux-wls-admin for test
-      uses: actions/checkout@v2
-      with:
-        path: arm-oraclelinux-wls-admin-dev    
-    - name: Create a new branch with development pids in nestedtemplates
-      run: |
-        current=`pwd`
-        echo "##[set-env name=current;]${current}"
-        cd arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates
-        git config --global core.longpaths true
-        git config --global user.email $userEmail
-        git config --global user.name $userName
-        echo "create branch $testbranchName"
-        git checkout -b $testbranchName
-        rm -r -f $current/arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates/*
-        cp -r -f $current/arm-oraclelinux-wls-admin/target/arm/nestedtemplates/* $current/arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates/
-        git status
-        git commit -a -m "hard code pids"
-        git push https://$git_token@github.com/$userName/arm-oraclelinux-wls-admin.git -f
 
-  deploy:
-   needs: preflight
+  deploy-dependencies:
+    needs: preflight
+    runs-on: ubuntu-latest
+    steps:
+      - uses: azure/login@v1
+        id: azure-login
+        with:
+         creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Create Resource Group
+        id: create-resource-group
+        uses: azure/CLI@v1
+        with:
+          azcliversion: ${{ env.azCliVersion }}
+          inlineScript: |
+            echo "create resource group" ${{ env.resourceGroupForDependency }}
+            az group create --verbose --name ${{ env.resourceGroupForDependency }} --location ${location}
+
+      - name: Set Up Azure Postgresql to Test dbTemplate
+        id: setup-postgresql
+        uses: azure/CLI@v1
+        with:
+          azcliversion: ${{ env.azCliVersion }}
+          inlineScript: |
+            echo "Deploy DB with name " ${{ env.dbName }}
+            az postgres server create \
+            --resource-group ${{ env.resourceGroupForDependency }} \
+            --name ${{ env.dbName }}  \
+            --location ${location} \
+            --admin-user weblogic \
+            --ssl-enforcement Disabled \
+            --public-network-access Enabled \
+            --admin-password ${{ env.wlsPassword }} \
+            --sku-name B_Gen5_1
+
+  deploy-weblogic-admin:
+   needs: deploy-dependencies
    runs-on: ubuntu-latest
    strategy:
     max-parallel: 1
@@ -126,6 +174,7 @@ jobs:
       uses: actions/download-artifact@v1
       with:
         name: ${{steps.artifact_file.outputs.artifactName}}
+
     - uses: azure/login@v1
       id: azure-login
       with:
@@ -167,6 +216,18 @@ jobs:
          s/#wlsUserName#/$wlsUserName/g; \
          s/#wlspassword#/$wlsPassword/g" \
          arm-oraclelinux-wls-admin/test/scripts/verify-wls-access.sh
+
+    - name: Accept Image Terms
+      id: accept-terms
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.azCliVersion }}
+        inlineScript: |
+          echo "accept terms for " "${{ matrix.images }}"
+          rawUrn="${{ matrix.images }}"
+          publisherAndName=$(echo ${rawUrn} | grep -o ";.*:" | sed "s/;//g")
+          imageVersion=${rawUrn##*;}
+          az vm image terms accept --urn ${publisherAndName}${sku}:${imageVersion}
           
     - name: Deploy WebLogic Server Admin only Domain offer
       id: deploy-wls-admin
@@ -266,6 +327,32 @@ jobs:
       run: |
         echo "Verifying Weblogic Server Access"
         sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < arm-oraclelinux-wls-admin/test/scripts/verify-wls-access.sh
+    
+    - name: Deploy DB Template to Connect to Azure Postgresql Database
+      id: enable-postgresql-db
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.azCliVersion }}
+        inlineScript: |
+          # Generate parameters for db template deployment
+          bash arm-oraclelinux-wls-admin/test/scripts/gen-parameters-deploy-db.sh \
+          arm-oraclelinux-wls-admin/test/scripts/ \
+          ${{ env.adminVMName }} \
+          ${{ env.wlsPassword}} \
+          ${{ env.dbName }} \
+          ${{ env.location }} \
+          ${{ env.wlsUserName }} \
+          ${{ env.wlsPassword }} \
+          ${{ env.userName }} \
+          ${{ env.testbranchName }}
+          echo "Deploy DB Template..."
+          az group deployment create \
+          --verbose \
+          --resource-group ${resourceGroup} \
+          --name db \
+          --parameters @arm-oraclelinux-wls-admin/test/scripts/parameters-deploy-db.json \
+          --template-file arm-oraclelinux-wls-admin-$version-arm-assembly/nestedtemplates/dbTemplate.json
+
     - name: Delete Resource Group
       id: delete-resource-group
       if: always()
@@ -277,7 +364,7 @@ jobs:
           az group delete --yes --no-wait --verbose --name $resourceGroup
   
   cleanup:
-    needs: deploy
+    needs: deploy-weblogic-admin
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -289,3 +376,16 @@ jobs:
         run: |
           cd arm-oraclelinux-wls-admin
           git push https://$git_token@github.com/$userName/arm-oraclelinux-wls-admin.git -f --delete $testbranchName
+      
+      - uses: azure/login@v1
+        id: azure-login
+        with:
+         creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Delete DB Resource Group
+        id: delete-db-resource-group
+        uses: azure/CLI@v1
+        with:
+          azcliversion: ${{ env.azCliVersion }}
+          inlineScript: |
+            echo "delete... " $resourceGroup
+            az group delete --yes --no-wait --verbose --name ${{ env.resourceGroupForDependency }}

@@ -38,9 +38,33 @@
                 "visible": true
             },
             {
+                "name": "vmSizeSelect",
+                "type": "Microsoft.Compute.SizeSelector",
+                "label": "Virtual machine size",
+                "toolTip": "The size of virtual machine to provision.",
+                "recommendedSizes": [
+                    "Standard_A1",
+                    "Standard_A2",
+                    "Standard_A3",
+                    "Standard_A4",
+                    "Standard_B1ms"
+                ],
+                "constraints": {
+                    "excludedSizes": [
+                        "Standard_B1ls",
+                        "Standard_A0",
+                        "Basic_A0",
+                        "Standard_B1s"
+                    ]
+                },
+                "osPlatform": "Linux",
+                "count": "1",
+                "visible": true
+            },
+            {
                 "name": "basicsRequired",
                 "type": "Microsoft.Common.Section",
-                "label": "Credentails for Virtual Machines and WebLogic",
+                "label": "Credentials for Virtual Machines and WebLogic",
                 "elements": [
                     {
                         "name": "adminUsername",
@@ -97,7 +121,7 @@
                         "constraints": {
                             "required": true,
                             "regex": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)[A-Za-z\\d]{12,}$",
-                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
+                            "validationMessage": "The password must contain at least 12 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number, and special characters are not allowed."
                         },
                         "options": {
                             "hideConfirmation": false
@@ -156,22 +180,6 @@
                             "regex": "^[a-z0-9A-Z]{3,20}$",
                             "validationMessage": "The Domain Name must be between 3 and 20 characters long and contain letters, numbers only."
                         },
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
-                    },
-                    {
-                        "name": "vmSizeSelect",
-                        "type": "Microsoft.Compute.SizeSelector",
-                        "defaultValue": "Standard_A3",
-                        "label": "Virtual machine size",
-                        "toolTip": "The size of virtual machine to provision.",
-                        "recommendedSizes": [
-                            "Standard_A1",
-                            "Standard_A2",
-                            "Standard_A3",
-                            "Standard_A4"
-                        ],
-                        "osPlatform": "Linux",
-                        "count": "1",
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
                     {
@@ -349,7 +357,7 @@
                             "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the connection to Azure Active Directory.",
                             "link": {
                                 "label": "Learn more",
-                                "uri": "https://docs.microsoft.com/en-us/azure/active-directory-domain-services/tutorial-create-instance"
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-aad-ldap"
                             }
                         }
                     },
@@ -518,7 +526,7 @@
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "portsToExpose": "[basics('basicsOptional').portsToExpose]",
             "skuUrnVersion": "[basics('skuUrnVersion')]",
-            "vmSizeSelect": "[basics('basicsOptional').vmSizeSelect]",
+            "vmSizeSelect": "[basics('vmSizeSelect')]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",
             "wlsLDAPGroupBaseDN": "[steps('section_aad').aadInfo.wlsLDAPGroupBaseDN]",
             "wlsLDAPPrincipal": "[steps('section_aad').aadInfo.wlsLDAPPrincipal]",
