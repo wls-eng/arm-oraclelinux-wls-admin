@@ -416,7 +416,7 @@
                 "type": "CustomScript",
                 "typeHandlerVersion": "2.0",
                 "autoUpgradeMinorVersion": true,
-                "settings": {
+                "protectedSettings": {
                     "fileUris": [
                         "[uri(parameters('_artifactsLocationAdminTemplate'), concat('../scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]"
                     ],
