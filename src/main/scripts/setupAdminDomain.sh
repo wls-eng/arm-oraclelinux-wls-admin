@@ -153,6 +153,8 @@ echo "Creating weblogic admin server service"
 cat <<EOF >/etc/systemd/system/wls_admin.service
 [Unit]
 Description=WebLogic Adminserver service
+After=network-online.target
+Wants=network-online.target
  
 [Service]
 Type=simple
@@ -163,6 +165,8 @@ User=oracle
 Group=oracle
 KillMode=process
 LimitNOFILE=65535
+Restart=always
+RestartSec=3
  
 [Install]
 WantedBy=multi-user.target
