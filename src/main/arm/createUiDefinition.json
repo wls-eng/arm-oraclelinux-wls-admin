@@ -507,6 +507,148 @@
                         "visible": "[bool(steps('section_aad').enableAAD)]"
                     }
                 ]
+            },
+            {
+                "name": "section_elk",
+                "label": "Elasticsearch and Kibana",
+                "subLabel": {
+                    "preValidation": "Configure the connection to Elasticsearch and Kibana.",
+                    "postValidation": "Done"
+                },
+                "bladeTitle": "Elasticsearch and Kibana",
+                "elements": [
+                    {
+                        "name": "aboutelk",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "icon": "None",
+                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the Elasticsearch and Kibana, the WebLogic Server logs will be exported to Elasticsearch server.",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-elk"
+                            }
+                        }
+                    },
+                    {
+                        "name": "enableELK",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "label": "Export logs to Elasticsearch server?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' and provide required info to configure the connection to Elasticsearch.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": "true"
+                                },
+                                {
+                                    "label": "No",
+                                    "value": "false"
+                                }
+                            ],
+                            "required": true
+                        }
+                    },
+                    {
+                        "name": "elkInfo",
+                        "type": "Microsoft.Common.Section",
+                        "label": "Connection settings",
+                        "elements": [
+                            {
+                                "name": "elasticsearchURI",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Elasticsearch URI",
+                                "toolTip": "Elasticsearch URI. Used as REST API rui to send logs to Elasticsearch.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
+                                    "validationMessage": "The value must be a valid uri."
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "elasticsearchPort",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Elasticsearch Port",
+                                "toolTip": "Elasticsearch port. Used as REST API port to send logs to Elasticsearch.",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[0-9]+$",
+                                    "validationMessage": "The value must be a valid port."
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "elasticsearchUserName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Elasticsearch User Name",
+                                "toolTip": "User name of Elasticsearch account. Authentication to send logs to Elasticsearch",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
+                                    "validationMessage": "The value must be valid Elasticsearch user name."
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "elasticsearchPassword",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password for Elasticsearch account. Authentication to send logs to Elasticsearch",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": "The credential (usually a password) used to connect to the LDAP server.",
+                                "constraints": {
+                                    "required": true
+                                },
+                                "required": true
+                            },
+                            {
+                                "name": "logsToIntegrate",
+                                "type": "Microsoft.Common.DropDown",
+                                "label": "WebLogic Server logs to export",
+                                "toolTip": "The logs selected will be exported to Elasticsearch.",
+                                "defaultValue": ["Server Log"],
+                                "multiselect": true,
+                                "selectAll": true,
+                                "multiLine": true,
+                                "defaultDescription": "The logs selected will be exported to Elasticsearch",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Data Source Log",
+                                            "description": "Export Datasource logs to Elasticsearch.",
+                                            "value": "DataSourceLog"
+                                        },
+                                        {
+                                            "label": "Domain Log",
+                                            "description": "Export Domain logs to Elasticsearch.",
+                                            "value": "DomainLog"
+                                        },
+                                        {
+                                            "label": "HTTP Access Log",
+                                            "description": "Export HTTP logs to Elasticsearch.",
+                                            "value": "HTTPAccessLog"
+                                        },
+                                        {
+                                            "label": "Server Log",
+                                            "description": "Export Server logs to Elasticsearch.",
+                                            "value": "ServerLog"
+                                        },
+                                        {
+                                            "label": "Standard error and output",
+                                            "description": "Export standard error and output to Elasticsearch.",
+                                            "value": "StandardErrorAndOutput"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            }
+                        ],
+                        "visible": "[bool(steps('section_elk').enableELK)]"
+                    }
+                ]
             }
         ],
         "outputs": {
@@ -521,9 +663,15 @@
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
             "dnsLabelPrefix": "[basics('basicsOptional').dnsLabelPrefix]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
+            "elasticsearchPassword": "[steps('section_elk').elkInfo.elasticsearchPassword]",
+            "elasticsearchPort": "[steps('section_elk').elkInfo.elasticsearchPort]",
+            "elasticsearchURI": "[steps('section_elk').elkInfo.elasticsearchURI]",
+            "elasticsearchUserName": "[steps('section_elk').elkInfo.elasticsearchUserName]",
             "enableAAD": "[bool(steps('section_aad').enableAAD)]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
+            "enableELK": "[bool(steps('section_elk').enableELK)]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
+            "logsToIntegrate": "[steps('section_elk').elkInfo.logsToIntegrate]",
             "portsToExpose": "[basics('basicsOptional').portsToExpose]",
             "skuUrnVersion": "[basics('skuUrnVersion')]",
             "vmSizeSelect": "[basics('vmSizeSelect')]",

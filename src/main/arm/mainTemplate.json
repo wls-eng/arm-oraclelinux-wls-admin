@@ -100,6 +100,34 @@
             "description": "JDBC Connection String"
          }
       },
+      "elasticsearchPassword": {
+         "type": "securestring",
+         "defaultValue": "[newGuid()]",
+         "metadata": {
+            "description": "The credentials to distibute message with REST API to Elasticsearch instance."
+         }
+      },
+      "elasticsearchPort": {
+         "type": "string",
+         "defaultValue": "9243",
+         "metadata": {
+            "description": "Port of the Elasticsearch instance."
+         }
+      },
+      "elasticsearchURI": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Host name of the Elasticsearch instance."
+         }
+      },
+      "elasticsearchUserName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "The credentials to distibute message with REST API to Elasticsearch instance."
+         }
+      },
       "enableAAD": {
          "type": "bool",
          "defaultValue": false,
@@ -114,6 +142,13 @@
             "description": "If true, use the supplied parameters to connect the cluster to a pre-provisioned database."
          }
       },
+      "enableELK": {
+         "defaultValue": false,
+         "type": "bool",
+         "metadata": {
+            "description": "If true, use the supplied parameters to distribute WebLogic Server logs to the Elasticsearch instance."
+         }
+      },
       "jdbcDataSourceName": {
          "type": "string",
          "defaultValue": "",
@@ -126,6 +161,14 @@
          "defaultValue": "[resourceGroup().location]",
          "metadata": {
             "description": "Location for all resources."
+         }
+      },
+      "logsToIntegrate": {
+         "type": "array",
+         "defaultValue": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput" ],
+         "allowedValues": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput" ],
+         "metadata": {
+            "description": "Specify the expeted logs to integrate, you must input at least one log."
          }
       },
       "portsToExpose": {
@@ -229,7 +272,8 @@
    "variables": {
       "name_aadLinkedTemplateName": "aadNestedTemplate.json",
       "name_adminLinkedTemplateName": "adminTemplate.json",
-      "name_dbLinkedTemplate": "dbTemplate.json"
+      "name_dbLinkedTemplate": "dbTemplate.json",
+      "name_eldLinedTemplateName": "elkNestedTemplate.json"
    },
    "resources": [
       {
@@ -287,7 +331,7 @@
                "skuUrnVersion": {
                   "value": "[parameters('skuUrnVersion')]"
                },
-               "usePreviewImage":{
+               "usePreviewImage": {
                   "value": "[parameters('usePreviewImage')]"
                },
                "vmSizeSelect": {
@@ -427,13 +471,68 @@
          }
       },
       {
+         "name": "elkLinkedTemplate",
+         "type": "Microsoft.Resources/deployments",
+         "dependsOn": [
+            "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]"
+         ],
+         "apiVersion": "2019-10-01",
+         "condition": "[parameters('enableELK')]",
+         "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_eldLinedTemplateName')))]",
+               "contentVersion": "1.0.0.0"
+            },
+            "parameters": {
+               "_artifactsLocation": {
+                  "value": "[parameters('_artifactsLocation')]"
+               },
+               "_artifactsLocationSasToken": {
+                  "value": "[parameters('_artifactsLocationSasToken')]"
+               },
+               "adminVMName": {
+                  "value": "[parameters('adminVMName')]"
+               },
+               "elasticsearchPassword": {
+                  "value": "[parameters('elasticsearchPassword')]"
+               },
+               "elasticsearchPort": {
+                  "value": "[parameters('elasticsearchPort')]"
+               },
+               "elasticsearchURI": {
+                  "value": "[parameters('elasticsearchURI')]"
+               },
+               "elasticsearchUserName": {
+                  "value": "[parameters('elasticsearchUserName')]"
+               },
+               "location": {
+                  "value": "[parameters('location')]"
+               },
+               "logsToIntegrate": {
+                  "value": "[parameters('logsToIntegrate')]"
+               },
+               "wlsDomainName": {
+                  "value": "[parameters('wlsDomainName')]"
+               },
+               "wlsPassword": {
+                  "value": "[parameters('wlsPassword')]"
+               },
+               "wlsUserName": {
+                  "value": "[parameters('wlsUserName')]"
+               }
+            }
+         }
+      },
+      {
          "apiVersion": "2019-10-01",
          "name": "${admin.end}",
          "type": "Microsoft.Resources/deployments",
          "dependsOn": [
             "[resourceId('Microsoft.Resources/deployments', 'adminLinkedTemplate')]",
             "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
-            "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]"
+            "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]",
+            "[resourceId('Microsoft.Resources/deployments', 'elkLinkedTemplate')]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -466,6 +565,10 @@
       "adminConsoleSecureURL": {
          "type": "string",
          "value": "[reference('adminLinkedTemplate','2019-10-01').outputs.adminConsoleSecureURL.value]"
+      },
+      "logIndex": {
+         "type": "string",
+         "value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '2019-10-01').outputs.logIndex.value, '')]"
       }
    }
 }
