@@ -273,7 +273,7 @@
       "name_aadLinkedTemplateName": "aadNestedTemplate.json",
       "name_adminLinkedTemplateName": "adminTemplate.json",
       "name_dbLinkedTemplate": "dbTemplate.json",
-      "name_eldLinedTemplateName": "elkNestedTemplate.json"
+      "name_elkLinkedTemplateName": "elkNestedTemplate.json"
    },
    "resources": [
       {
@@ -331,7 +331,7 @@
                "skuUrnVersion": {
                   "value": "[parameters('skuUrnVersion')]"
                },
-               "usePreviewImage": {
+               "usePreviewImage":{
                   "value": "[parameters('usePreviewImage')]"
                },
                "vmSizeSelect": {
@@ -481,7 +481,7 @@
          "properties": {
             "mode": "Incremental",
             "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_eldLinedTemplateName')))]",
+               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_elkLinkedTemplateName')))]",
                "contentVersion": "1.0.0.0"
             },
             "parameters": {
