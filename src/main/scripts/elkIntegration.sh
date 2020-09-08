@@ -545,9 +545,13 @@ function setup_javahome()
 
 function restart_admin_service()
 {
-     echo "Restart weblogic admin server service"
-     sudo systemctl stop wls_admin
-     sudo systemctl start wls_admin
+    echo "Restart weblogic admin server"
+    echo "Stop admin server"
+    shutdown_admin
+    sudo systemctl start wls_admin
+    echo "Waiting for admin server to be available"
+    wait_for_admin
+    echo "Weblogic admin server is up and running"
 }
 
 #This function to check admin server status 
@@ -576,6 +580,31 @@ function wait_for_admin()
         break
     fi
     done  
+}
+
+# shutdown admin server
+function shutdown_admin() {
+    #check admin server status
+    count=1
+    export CHECK_URL="http://$wlsAdminURL/weblogic/ready"
+    status=$(curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'})
+    echo "Check admin server status"
+    while [[ "$status" == "200" ]]; do
+        echo "."
+        count=$((count + 1))
+        sudo systemctl stop wls_admin
+        if [ $count -le 30 ]; then
+            sleep 1m
+        else
+            echo "Error : Maximum attempts exceeded while stopping admin server"
+            exit 1
+        fi
+        status=$(curl --insecure -ILs $CHECK_URL | tac | grep -m1 HTTP/1.1 | awk {'print $2'})
+        if [ -z ${status} ]; then
+            echo "WebLogic Server is stop..."
+            break
+        fi
+    done
 }
 
 function cleanup()
