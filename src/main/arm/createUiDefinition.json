@@ -523,7 +523,7 @@
                         "visible": true,
                         "options": {
                             "icon": "None",
-                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the Elasticsearch and Kibana, the WebLogic Server logs will be exported to Elasticsearch server.",
+                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the Elasticsearch and Kibana, the WebLogic Server logs will be exported to Elasticsearch server. To ensure Logstash works correctly, the selected Virtual Machines have at least 2.5GB memory.",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://aka.ms/arm-oraclelinux-wls-elk"
@@ -555,6 +555,15 @@
                         "type": "Microsoft.Common.Section",
                         "label": "Connection settings",
                         "elements": [
+                            {
+                                "name": "elkMemoryRequired",
+                                "type": "Microsoft.Common.InfoBox",
+                                "options": {
+                                    "icon": "Warning",
+                                    "text": "Please make sure the selected Virtual Machine has more than 2.5GB memory to set up Elasticsearch and Kibana."
+                                },
+                                "visible": "[and(contains('Standard_A1,Basic_A1,Standard_B1ms,Standard_A1_v2,Standard_F1,Standard_F1s', basics('vmSizeSelect')),bool(steps('section_elk').enableELK))]"
+                            },
                             {
                                 "name": "elasticsearchURI",
                                 "type": "Microsoft.Common.TextBox",
