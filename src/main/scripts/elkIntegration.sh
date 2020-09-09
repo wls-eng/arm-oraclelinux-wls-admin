@@ -515,7 +515,7 @@ EOF
 
     # create start up for logstash
     /usr/share/logstash/bin/system-install /etc/logstash/startup.options
-    if [ $? -ne 0]; 
+    if [ $? -ne 0 ]; 
     then
         echo_stderr "Failed to set up logstash service."
         exit 1
