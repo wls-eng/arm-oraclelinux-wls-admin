@@ -183,19 +183,6 @@
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
                     {
-                        "name": "portsToExpose",
-                        "label": "Ports and port ranges to expose (N or N-N, comma separated)",
-                        "type": "Microsoft.Common.TextBox",
-                        "toolTip": "Ports and port ranges to expose (N or N-N, comma separated)",
-                        "defaultValue": "80,443,7001-9000",
-                        "constraints": {
-                            "required": true,
-                            "regex": "^((([0-9]+-[0-9]+)|([0-9]+))[,]?)+[^,]$",
-                            "validationMessage": "Only numbers, hyphen separated ranges of numbers, separated by commas"
-                        },
-                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
-                    },
-                    {
                         "name": "About",
                         "type": "Microsoft.Common.InfoBox",
                         "options": {
@@ -524,7 +511,6 @@
             "enableAAD": "[bool(steps('section_aad').enableAAD)]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
-            "portsToExpose": "[basics('basicsOptional').portsToExpose]",
             "skuUrnVersion": "[basics('skuUrnVersion')]",
             "vmSizeSelect": "[basics('vmSizeSelect')]",
             "wlsDomainName": "[basics('basicsOptional').wlsDomainName]",

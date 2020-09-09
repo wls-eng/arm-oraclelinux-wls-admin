@@ -128,13 +128,6 @@
             "description": "Location for all resources."
          }
       },
-      "portsToExpose": {
-         "type": "string",
-         "defaultValue": "80,443,7001-9000",
-         "metadata": {
-            "description": "Ports and port ranges to expose"
-         }
-      },
       "skuUrnVersion": {
          "type": "string",
          "defaultValue": "owls-122130-8u131-ol74;Oracle:weblogic-122130-jdk8u131-ol74:owls-122130-8u131-ol7;latest",
@@ -280,9 +273,6 @@
                },
                "location": {
                   "value": "[parameters('location')]"
-               },
-               "portsToExpose": {
-                  "value": "[parameters('portsToExpose')]"
                },
                "skuUrnVersion": {
                   "value": "[parameters('skuUrnVersion')]"

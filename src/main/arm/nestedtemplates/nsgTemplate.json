@@ -1,0 +1,50 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"location": {
+			"type": "string",
+			"metadata": {
+				"description": "Location for all resources."
+			}
+		},
+		"name_networkSecurityGroup": {
+			"type": "string",
+			"metadata": {
+				"description": "Network Security Group name"
+			}
+		},
+		"const_subnetPrefix": {
+			"type": "string",
+			"defaultValue": "10.0.0.0/24"			
+		}
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Network/networkSecurityGroups",
+			"apiVersion": "2019-06-01",
+			"name": "[parameters('name_networkSecurityGroup')]",
+			"location": "[parameters('location')]",
+			"properties": {
+				"securityRules": [
+					{
+						"name": "WebLogicAdminPorts",
+						"properties": {
+							"protocol": "TCP",
+							"sourcePortRange": "*",
+							"destinationAddressPrefix": "*",
+							"access": "Allow",
+							"priority": 330,
+							"direction": "Inbound",
+							"destinationPortRanges": [
+								"7001",
+								"7002"
+							],
+							"sourceAddressPrefix": "[parameters('const_subnetPrefix')]",
+						}
+					}
+				]
+			}
+		}
+	]
+}

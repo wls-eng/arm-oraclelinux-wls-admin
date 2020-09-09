@@ -67,13 +67,6 @@
             "description": "Location for all resources."
          }
       },
-      "portsToExpose": {
-         "type": "string",
-         "defaultValue": "80,443,7001-9000",
-         "metadata": {
-            "description": "Ports and port ranges to expose"
-         }
-      },
       "skuUrnVersion": {
          "type": "string",
          "defaultValue": "owls-122130-8u131-ol74;Oracle:weblogic-122130-jdk8u131-ol74:owls-122130-8u131-ol7;latest",
@@ -138,7 +131,6 @@
          }
       },
       "const_publicIPAddressType": "Dynamic",
-      "const_requiredPortrange": ",65200-65535,5556",
       "const_storageAccountType": "Standard_LRS",
       "const_subnetPrefix": "10.0.0.0/24",
       "const_vmSize": "[parameters('vmSizeSelect')]",
@@ -152,8 +144,9 @@
       "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
       "name_subnet": "Subnet",
       "name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
-      "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
-      "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]"
+      "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
+      "name_nsgLinkedTemplateName": "nsgTemplate.json",
+      "name_nsgTemplate": "nsgLinkedTemplateName"
    },
    "resources": [
       {
@@ -171,28 +164,28 @@
          }
       },
       {
-         "type": "Microsoft.Network/networkSecurityGroups",
-         "apiVersion": "2019-06-01",
-         "name": "[variables('name_networkSecurityGroup')]",
-         "location": "[parameters('location')]",
-         "properties": {
-            "securityRules": [
-               {
-                  "name": "WebLogicPorts",
-                  "properties": {
-                     "protocol": "TCP",
-                     "sourcePortRange": "*",
-                     "sourceAddressPrefix": "*",
-                     "destinationAddressPrefix": "*",
-                     "access": "Allow",
-                     "priority": 320,
-                     "direction": "Inbound",
-                     "destinationPortRanges": "[split(concat(parameters('portsToExpose'),variables('const_requiredPortrange')), ',')]"
-                  }
-               }
-            ]
-         }
-      },
+         "type": "Microsoft.Resources/deployments",
+		 "apiVersion": "2019-10-01",
+		 "name": "[variables('name_nsgTemplate')]",
+		 "properties": {
+		 	"mode": "Incremental",
+			"templateLink": {
+				"uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/',variables('name_nsgLinkedTemplateName')))]",
+				"contentVersion": "1.0.0.0"
+			},
+			"parameters": {
+				"location": {
+					"value": "[parameters('location')]"
+				},
+				"name_networkSecurityGroup": {
+					"value": "[variables('name_networkSecurityGroup')]"
+				},
+				"const_subnetPrefix": {
+					"value": "[variables('const_subnetPrefix')]"
+				}
+			}
+		}
+	  },      
       {
          "type": "Microsoft.Storage/storageAccounts",
          "apiVersion": "2019-06-01",
@@ -223,7 +216,7 @@
          "name": "[variables('name_virtualNetwork')]",
          "location": "[parameters('location')]",
          "dependsOn": [
-            "[variables('ref_networkSecurityGroup')]"
+            "[variables('name_nsgTemplate')]"
          ],
          "properties": {
             "addressSpace": {
@@ -237,7 +230,7 @@
                   "properties": {
                      "addressPrefix": "[variables('const_subnetPrefix')]",
                      "networkSecurityGroup": {
-                        "id": "[variables('ref_networkSecurityGroup')]"
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]"
                      }
                   }
                }
