@@ -339,7 +339,7 @@
          "apiVersion": "2019-07-01",
          "location": "[parameters('location')]",
          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]"
+            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]"
          ],
          "properties": {
             "publisher": "Microsoft.Azure.Extensions",
