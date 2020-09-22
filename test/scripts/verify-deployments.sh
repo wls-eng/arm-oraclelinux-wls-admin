@@ -26,6 +26,10 @@ parametersList+=(${scriptsDir}/parameters-db.json)
 bash ${scriptsDir}/gen-parameters-aad.sh ${scriptsDir}/parameters-aad.json $githubUserName $testbranchName
 parametersList+=(${scriptsDir}/parameters-aad.json)
 
+# parameters for admin+elk
+bash ${scriptsDir}/gen-parameters-elk.sh ${scriptsDir}/parameters-elk.json $githubUserName $testbranchName
+parametersList+=(${scriptsDir}/parameters-elk.json)
+
 # parameters for cluster+db+aad
 bash ${scriptsDir}/gen-parameters-db-aad.sh ${scriptsDir}/parameters-db-aad.json $githubUserName $testbranchName
 parametersList+=(${scriptsDir}/parameters-db-aad.json)
