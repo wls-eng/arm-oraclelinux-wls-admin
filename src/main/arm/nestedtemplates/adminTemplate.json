@@ -189,6 +189,32 @@
                      "direction": "Inbound",
                      "destinationPortRanges": "[split(concat(parameters('portsToExpose'),variables('const_requiredPortrange')), ',')]"
                   }
+               },
+               {
+                  "name": "WebLogicNMPort",
+                  "properties": {
+                     "protocol": "TCP",
+                     "sourcePortRange": "*",
+                     "sourceAddressPrefix": "Internet",
+                     "destinationAddressPrefix": "*",
+                     "access": "Deny",
+                     "priority": 201,
+                     "direction": "Inbound",
+                     "destinationPortRanges": [ "5556" ]
+                  }
+               },
+               {
+                  "name": "WebLogicAdminChannelPort",
+                  "properties": {
+                     "protocol": "TCP",
+                     "sourcePortRange": "*",
+                     "sourceAddressPrefix": "Internet",
+                     "destinationAddressPrefix": "*",
+                     "access": "Deny",
+                     "priority": 202,
+                     "direction": "Inbound",
+                     "destinationPortRanges": [ "7005" ]
+                  }
                }
             ]
          }
