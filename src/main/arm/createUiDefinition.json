@@ -559,8 +559,8 @@
                                 "name": "elkMemoryRequired",
                                 "type": "Microsoft.Common.InfoBox",
                                 "options": {
-                                    "icon": "Warning",
-                                    "text": "Please make sure the selected Virtual Machine has more than 2.5GB memory to set up Elasticsearch and Kibana."
+                                    "icon": "Error",
+                                    "text": "Your selected Virtual Machines have less than 2.5GB memory to set up Elasticsearch and Kibana, please go to Basics -> Virtual machine size to change it, recommended size is Standard_A2_v2."
                                 },
                                 "visible": "[and(contains('Standard_A1,Basic_A1,Standard_B1ms,Standard_A1_v2,Standard_F1,Standard_F1s', basics('vmSizeSelect')),bool(steps('section_elk').enableELK))]"
                             },
@@ -571,10 +571,17 @@
                                 "toolTip": "Elasticsearch URI. Used as REST API rui to send logs to Elasticsearch.",
                                 "constraints": {
                                     "required": true,
-                                    "regex": "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)",
-                                    "validationMessage": "The value must be a valid uri."
-                                },
-                                "required": true
+                                    "validations": [
+                                        {
+                                            "regex": "^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$",
+                                            "message": "The value must be a valid uri."
+                                        },
+                                        {
+                                            "isValid": "[not(contains('Standard_A1,Basic_A1,Standard_B1ms,Standard_A1_v2,Standard_F1,Standard_F1s', basics('vmSizeSelect')))]",
+                                            "message": "Your selected Virtual Machines have less than 2.5GB memory to set up Elasticsearch and Kibana, please go to Basics -> Virtual machine size to change it, recommended size is Standard_A2_v2."
+                                        }
+                                    ]
+                                }
                             },
                             {
                                 "name": "elasticsearchPort",
@@ -585,8 +592,7 @@
                                     "required": true,
                                     "regex": "^[0-9]+$",
                                     "validationMessage": "The value must be a valid port."
-                                },
-                                "required": true
+                                }
                             },
                             {
                                 "name": "elasticsearchUserName",
@@ -597,8 +603,7 @@
                                     "required": true,
                                     "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
                                     "validationMessage": "The value must be valid Elasticsearch user name."
-                                },
-                                "required": true
+                                }
                             },
                             {
                                 "name": "elasticsearchPassword",
@@ -610,15 +615,16 @@
                                 "toolTip": "The credential (usually a password) used to connect to the LDAP server.",
                                 "constraints": {
                                     "required": true
-                                },
-                                "required": true
+                                }
                             },
                             {
                                 "name": "logsToIntegrate",
                                 "type": "Microsoft.Common.DropDown",
                                 "label": "WebLogic Server logs to export",
                                 "toolTip": "The logs selected will be exported to Elasticsearch.",
-                                "defaultValue": ["Server Log"],
+                                "defaultValue": [
+                                    "Server Log"
+                                ],
                                 "multiselect": true,
                                 "selectAll": true,
                                 "multiLine": true,
