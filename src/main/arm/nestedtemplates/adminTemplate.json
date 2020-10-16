@@ -267,7 +267,10 @@
                      }
                   }
                }
-            ]
+            ],
+            "dnsSettings": {
+               "internalDnsNameLabel": "[parameters('adminVMName')]"
+            }
          }
       },
       {
