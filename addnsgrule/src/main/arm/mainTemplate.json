@@ -1,0 +1,88 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"location": {
+			"type": "string",
+			"metadata": {
+				"description": "Location for all resources."
+			}
+		},
+		"name_networkSecurityGroup": {
+			"type": "string",
+			"metadata": {
+				"description": "Network Security Group name"
+			}
+		},
+		"const_subnetPrefix": {
+			"type": "string",
+			"defaultValue": "10.0.0.0/24"			
+		}
+	},
+	"variables": {
+		"const_requiredAppGatewayPortrange": "65200-65535"
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
+			"name": "[concat(parameters('name_networkSecurityGroup'),'/','AppgatewayPorts')]",
+			"apiVersion": "2018-08-01",
+			"properties": {
+			  "protocol": "TCP",
+			  "sourcePortRange": "*",
+			  "sourceAddressPrefix": "GatewayManager",
+			  "destinationAddressPrefix": "*",
+			  "access": "Allow",
+			  "priority": 200,
+			  "direction": "Inbound",
+			  "destinationPortRanges": "[split(variables('const_requiredAppGatewayPortrange'), ',')]"
+			}
+		},
+		{
+			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
+			"name": "[concat(parameters('name_networkSecurityGroup'),'/','WebLogicAdminPortsAllowed')]",
+			"apiVersion": "2018-08-01",
+			"properties": {
+			  "protocol": "TCP",
+			  "sourcePortRange": "*",
+			  "destinationAddressPrefix": "*",
+			  "access": "Allow",
+			  "priority": 210,
+			  "direction": "Inbound",
+			  "destinationPortRanges": [
+				"7001",
+				"7002"
+			  ],
+			 "sourceAddressPrefix": "[parameters('const_subnetPrefix')]",
+			}
+		},
+		{
+			"type": "Microsoft.Network/networkSecurityGroups/securityRules",
+			"name": "[concat(parameters('name_networkSecurityGroup'),'/','WebLogicAdminPortsDenied')]",
+			"apiVersion": "2018-08-01",
+			"properties": {
+			  "protocol": "*",
+			  "sourcePortRange": "*",
+			  "destinationAddressPrefix": "*",
+			  "access": "Deny",
+			  "priority": 211,
+			  "direction": "Inbound",
+			  "destinationPortRanges": [
+				"7001",
+				"7002"
+			  ],
+			 "sourceAddressPrefix": "Internet"
+			}
+		}
+	],
+	"outputs": {
+		"nsg": {
+			"type": "string",
+			"value": "[resourceId('Microsoft.Network/networkSecurityGroups').name]"
+		},
+		"subnet" : {
+			"type": "string",
+			"value": "[resourceId('Microsoft.Network/virtualNetworks').name]"
+		}
+	}
+}
