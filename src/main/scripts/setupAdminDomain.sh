@@ -114,7 +114,6 @@ function create_adminDomain()
     echo "Creating domain path /u01/domains"
     echo "Downloading weblogic-deploy-tool"
 
-    DOMAIN_PATH="/u01/domains"
     sudo mkdir -p $DOMAIN_PATH
     sudo rm -rf $DOMAIN_PATH/*
 
@@ -159,8 +158,8 @@ Wants=network-online.target
 [Service]
 Type=simple
 WorkingDirectory="/u01/domains/$wlsDomainName"
-ExecStart="/u01/domains/$wlsDomainName/startWebLogic.sh"
-ExecStop="/u01/domains/$wlsDomainName/bin/stopWebLogic.sh"
+ExecStart="${startWebLogicScript}"
+ExecStop="${stopWebLogicScript}"
 User=oracle
 Group=oracle
 KillMode=process
@@ -268,6 +267,25 @@ function updateNetworkRules()
     sudo systemctl restart firewalld
 }
 
+# Create custom stopWebLogic script and add it to wls_admin service
+# This script is created as stopWebLogic.sh will not work if non ssl admin listening port 7001 is disabled
+# Refer https://github.com/wls-eng/arm-oraclelinux-wls/issues/164 
+function createStopWebLogicScript()
+{
+
+cat <<EOF >${stopWebLogicScript}
+#!/bin/sh
+# This is custom script for stopping weblogic server using ADMIN_URL supplied
+export ADMIN_URL="t3://${wlsAdminURL}"
+${DOMAIN_PATH}/${wlsDomainName}/bin/stopWebLogic.sh
+EOF
+
+sudo chown -R $username:$groupname ${stopWebLogicScript}
+sudo chmod -R 750 ${stopWebLogicScript}
+
+}
+
+
 #main script starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -284,6 +302,9 @@ export wlsUserName="$2"
 export wlsPassword="$3"
 export wlsAdminHost="$4"
 export oracleHome="$5"
+export DOMAIN_PATH="/u01/domains"
+export startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
+export stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
 
 validateInput
 
@@ -300,6 +321,8 @@ export groupname="oracle"
 export SCRIPT_PWD=`pwd`
 
 create_adminDomain
+
+createStopWebLogicScript
 
 deploy_sampleApp
 
