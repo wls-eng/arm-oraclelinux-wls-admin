@@ -13,25 +13,16 @@ wlspassword=$9
 gitUserName=${10}
 testbranchName=${11}
 
-elasticsearchPort=${elasticsearchURI#*:}
-elasticsearchURI=${elasticsearchURI%%:*}
-echo "elasticsearchPort: ${elasticsearchPort}"
-echo "elasticsearchURI: ${elasticsearchURI}"
-
-
 cat <<EOF > ${parametersPath}
 {
      "adminVMName":{
         "value": "${adminVMName}"
       },
+      "elasticsearchEndpoint": {
+        "value": "${elasticsearchURI}"
+      },
       "elasticsearchPassword": {
         "value": "elasticsearchPassword"
-      },
-      "elasticsearchPort": {
-        "value": "${elasticsearchPort}"
-      },
-      "elasticsearchURI": {
-        "value": "${elasticsearchURI}"
       },
       "elasticsearchUserName": {
         "value": "${elasticsearchUserName}"

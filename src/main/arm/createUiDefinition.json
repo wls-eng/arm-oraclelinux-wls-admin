@@ -555,15 +555,16 @@
                                 "visible": "[and(contains('Standard_A1,Basic_A1,Standard_B1ms,Standard_A1_v2,Standard_F1,Standard_F1s', basics('vmSizeSelect')),bool(steps('section_elk').enableELK))]"
                             },
                             {
-                                "name": "elasticsearchURI",
+                                "name": "elasticsearchEndpoint",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "Elasticsearch URI",
-                                "toolTip": "Elasticsearch URI. Used as REST API rui to send logs to Elasticsearch.",
+                                "label": "Elasticsearch endpoint URL",
+                                "toolTip": "Elasticsearch endpoint.",
+                                "defaultValue": "https://example.location.azure.elastic-cloud.com:9243",
                                 "constraints": {
                                     "required": true,
                                     "validations": [
                                         {
-                                            "regex": "^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)$",
+                                            "regex": "^https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*):[0-9]{1,6}$",
                                             "message": "The value must be a valid uri."
                                         },
                                         {
@@ -574,21 +575,11 @@
                                 }
                             },
                             {
-                                "name": "elasticsearchPort",
-                                "type": "Microsoft.Common.TextBox",
-                                "label": "Elasticsearch Port",
-                                "toolTip": "Elasticsearch port. Used as REST API port to send logs to Elasticsearch.",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[0-9]+$",
-                                    "validationMessage": "The value must be a valid port."
-                                }
-                            },
-                            {
                                 "name": "elasticsearchUserName",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Elasticsearch User Name",
-                                "toolTip": "User name of Elasticsearch account. Authentication to send logs to Elasticsearch",
+                                "defaultValue": "elastic",
+                                "toolTip": "User name of Elasticsearch account.",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])",
@@ -599,10 +590,10 @@
                                 "name": "elasticsearchPassword",
                                 "type": "Microsoft.Common.PasswordBox",
                                 "label": {
-                                    "password": "Password for Elasticsearch account. Authentication to send logs to Elasticsearch",
+                                    "password": "Password for Elasticsearch account",
                                     "confirmPassword": "Confirm password"
                                 },
-                                "toolTip": "The credential (usually a password) used to connect to the LDAP server.",
+                                "toolTip": "Password for Elasticsearch account.",
                                 "constraints": {
                                     "required": true
                                 }
@@ -668,9 +659,8 @@
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
             "dnsLabelPrefix": "[basics('basicsOptional').dnsLabelPrefix]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
+            "elasticsearchEndpoint": "[steps('section_elk').elkInfo.elasticsearchEndpoint]",
             "elasticsearchPassword": "[steps('section_elk').elkInfo.elasticsearchPassword]",
-            "elasticsearchPort": "[steps('section_elk').elkInfo.elasticsearchPort]",
-            "elasticsearchURI": "[steps('section_elk').elkInfo.elasticsearchURI]",
             "elasticsearchUserName": "[steps('section_elk').elkInfo.elasticsearchUserName]",
             "enableAAD": "[bool(steps('section_aad').enableAAD)]",
             "enableDB": "[bool(steps('section_database').enableDB)]",

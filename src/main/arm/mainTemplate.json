@@ -100,25 +100,18 @@
             "description": "JDBC Connection String"
          }
       },
+       "elasticsearchEndpoint": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Endpoint of the Elasticsearch instance."
+            }
+        },
       "elasticsearchPassword": {
          "type": "securestring",
          "defaultValue": "[newGuid()]",
          "metadata": {
             "description": "The credentials to distibute message with REST API to Elasticsearch instance."
-         }
-      },
-      "elasticsearchPort": {
-         "type": "string",
-         "defaultValue": "9243",
-         "metadata": {
-            "description": "Port of the Elasticsearch instance."
-         }
-      },
-      "elasticsearchURI": {
-         "type": "string",
-         "defaultValue": "",
-         "metadata": {
-            "description": "Host name of the Elasticsearch instance."
          }
       },
       "elasticsearchUserName": {
@@ -494,14 +487,11 @@
                "adminVMName": {
                   "value": "[parameters('adminVMName')]"
                },
+               "elasticsearchEndpoint": {
+                  "value": "[parameters('elasticsearchEndpoint')]"
+               },
                "elasticsearchPassword": {
                   "value": "[parameters('elasticsearchPassword')]"
-               },
-               "elasticsearchPort": {
-                  "value": "[parameters('elasticsearchPort')]"
-               },
-               "elasticsearchURI": {
-                  "value": "[parameters('elasticsearchURI')]"
                },
                "elasticsearchUserName": {
                   "value": "[parameters('elasticsearchUserName')]"
