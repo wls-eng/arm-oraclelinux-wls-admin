@@ -126,27 +126,84 @@
          "metadata": {
             "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
          }
-      },
-      "enableCustomDNS":{
-         "defaultValue":false,
-         "type": "bool",
-         "metadata": {
-            "description": "Boolean value indicating, if custom DNS Name is available or not"
-         }
-      },
-      "customDNSName":{
-         "defaultValue":"noCustomDNS",
-         "type": "string",
-         "metadata": {
-            "description": "Custom DNS Name used to access WebLogic Admin Server"
-         }
-      },
-      "adminConsoleSubDomain":{
-         "defaultValue":"console",
-         "type": "string",
-         "metadata": {
-            "description": "WebLogic Admin Server Console Subdomain Name which will be appended to the custom DNS Name to get the complete URL of the Weblogic Admin Console"
-         }
+        },
+        "enableCustomDNS":{
+           "defaultValue":false,
+           "type": "bool",
+           "metadata": {
+              "description": "Boolean value indicating, if custom DNS Name is available or not"
+           }
+        },
+        "customDNSName":{
+           "defaultValue":"noCustomDNS",
+           "type": "string",
+           "metadata": {
+              "description": "Custom DNS Name used to access WebLogic Admin Server"
+           }
+        },
+        "adminConsoleSubDomain":{
+           "defaultValue":"console",
+           "type": "string",
+           "metadata": {
+              "description": "WebLogic Admin Server Console Subdomain Name which will be appended to the custom DNS Name to get the complete URL of the Weblogic Admin Console"
+           }
+        },
+        "enableCustomSSL": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "Boolean value indicating, if custom SSL is enabled or not"
+            }
+        },
+        "keyVaultCustomIdentityKeyStoretDataSecretName": {
+            "type": "string",
+            "metadata": {
+                "description": "Weblogic Custom Identity Keystore Data"
+            }
+        },
+        "keyVaultCustomIdentityKeyStorePassPhraseSecretName": {
+            "type": "string",
+            "metadata": {
+                "description": "Weblogic Custom Identity Keystore Passphrase"
+            }
+        },
+        "keyVaultCustomIdentityKeyStoreType": {
+            "type": "string",
+            "metadata": {
+                "description": "Weblogic Custom Identity Keystore Type"
+            },
+            "defaultValue": "JKS"
+        },
+        "keyVaultCustomTrustKeyStoretDataSecretName": {
+            "type": "string",
+            "metadata": {
+                "description": "Weblogic Custom Trust Store Data"
+            }
+        },
+        "keyVaultCustomTrustKeyStorePassPhraseSecretName": {
+            "type": "string",
+            "metadata": {
+                "description": "Weblogic Custom Trust Store Passphrase"
+            }
+        },
+        "keyVaultCustomTrustKeyStoreType": {
+            "type": "string",
+            "metadata": {
+                "description": "Weblogic Custom Trust Store Type"
+            },
+            "defaultValue": "JKS"
+        },
+        "keyVaultPrivateKeyAliasSecretName": {
+            "type": "string",
+            "metadata": {
+                "description": "Weblogic Server Private Key Alias"
+            }
+        },
+        "keyVaultPrivateKeyPassPhraseSecretName": {
+            "type": "string",
+            "metadata": {
+                "description": "Weblogic Server Private Key Pass Phrase"
+            }
       }
    },
    "variables": {
@@ -179,8 +236,8 @@
       "name_publicIPAddress": "adminServerVM_PublicIP",
       "name_scriptFile": "setupAdminDomain.sh",
       "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
-      "name_share":"wlsshare",
       "name_subnet": "Subnet",
+      "name_share":"wlsshare",
       "name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
       "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
       "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
@@ -190,9 +247,9 @@
    },
    "resources": [
       {
-         "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersion}",
          "name": "${admin.admin.start}",
+         "type": "Microsoft.Resources/deployments",
          "properties": {
             "mode": "Incremental",
             "template": {
@@ -253,15 +310,15 @@
          }
       },
       {
-         "type": "Microsoft.Storage/storageAccounts",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "[variables('name_storageAccount')]",
-         "location": "[parameters('location')]",
-         "sku": {
-            "name": "[variables('const_storageAccountType')]"
-         },
-         "kind": "Storage",
-         "properties": {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "${azure.apiVersion}",
+            "name": "[variables('name_storageAccount')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "[variables('const_storageAccountType')]"
+            },
+            "kind": "Storage",
+            "properties": {
                 "supportsHttpsTrafficOnly": false
             },
             "dependsOn": [
@@ -290,7 +347,7 @@
             ],
             "properties": {
                 "shareQuota": 10
-         }
+            }
       },
       {
          "type": "Microsoft.Network/publicIPAddresses",
@@ -453,12 +510,12 @@
           }
       },
       {
-         "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
          "type": "Microsoft.Compute/virtualMachines/extensions",
+         "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
          "apiVersion": "${azure.apiVersion}",
          "location": "[parameters('location')]",
          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]",
             "[variables('ref_fileShare')]"
          ],
          "properties": {
@@ -472,14 +529,14 @@
                ]
             },
             "protectedSettings": {
-               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '2019-04-01').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ')]"
+               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '2019-04-01').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',string(parameters('enableCustomSSL')),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoretDataSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStorePassPhraseSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoretDataSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyAliasSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyPassPhraseSecretName')),''),' ')]"
             }
          }
       },
       {
-         "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersion}",
          "name": "${admin.admin.end}",
+         "type": "Microsoft.Resources/deployments",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
@@ -494,9 +551,9 @@
          }
       },
       {
-         "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersion}",
          "name": "${from.owls-122130-8u131-ol74}",
+         "type": "Microsoft.Resources/deployments",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122130-8u131-ol74'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -512,9 +569,9 @@
          }
       },
       {
-         "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersion}",
          "name": "${from.owls-122130-8u131-ol73}",
+         "type": "Microsoft.Resources/deployments",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122130-8u131-ol73'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -530,9 +587,9 @@
          }
       },
       {
-         "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersion}",
          "name": "${from.owls-122140-8u251-ol76}",
+         "type": "Microsoft.Resources/deployments",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122140-8u251-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -548,9 +605,9 @@
          }
       },
       {
-         "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersion}",
          "name": "${from.owls-141100-8u251-ol76}",
+         "type": "Microsoft.Resources/deployments",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-8u251-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -566,9 +623,9 @@
          }
       },
       {
-         "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersion}",
          "name": "${from.owls-141100-11_07-ol76}",
+         "type": "Microsoft.Resources/deployments",
          "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-11_07-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
@@ -613,3 +670,4 @@
       }
    }
 }
+

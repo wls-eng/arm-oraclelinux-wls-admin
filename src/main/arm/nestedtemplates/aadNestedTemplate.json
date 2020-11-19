@@ -123,7 +123,7 @@
     "variables": {
         "const_aadParameters": "[concat(parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsLDAPProviderName'), ' ',  parameters('aadsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsLDAPSSLCertificate'), ' ', parameters('aadsPublicIP'), ' ', parameters('adminPassword'), ' ', variables('const_adminServerName'), ' ', variables('const_wlsDomainPath'))]",
         "const_adminServerName": "admin",
-        "const_wlsAdminPort": "7001",
+        "const_wlsAdminPort": "7005",
         "const_wlsDomainPath": "[concat('/u01/domains/', parameters('wlsDomainName'))]",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
         "name_scriptAADConfiguration": "aadIntegration.sh"

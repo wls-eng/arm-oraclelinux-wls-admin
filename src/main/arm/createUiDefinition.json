@@ -196,6 +196,26 @@
                         "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
                     },
                     {
+						"name": "enableAdminHTTPListenPort",
+						"type": "Microsoft.Common.OptionsGroup",
+						"label": "Enable HTTP Listen Port on WebLogic Administration Server?",
+						"defaultValue": "Yes",
+						"toolTip": "Select 'No' to disable HTTP Listen Port on WebLogic Administration Server.",
+						"constraints": {
+							"allowedValues": [{
+									"label": "Yes",
+									"value": "true"
+								},
+								{
+									"label": "No",
+									"value": "false"
+								}
+							],
+							"required": true
+						},
+                        "visible": "[bool(basics('basicsOptional').basicsOptionalAcceptDefaults)]"
+					},
+                    {
                         "name": "About",
                         "type": "Microsoft.Common.InfoBox",
                         "options": {
@@ -209,6 +229,206 @@
             }
         ],
         "steps": [
+        {
+				"name": "section_sslConfiguration",
+				"type": "Microsoft.Common.Section",
+				"label": "SSL Configuration",
+				"elements": [{
+						"name": "sslConfigurationText",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": true,
+						"options": {
+							"text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) Port, with your own SSL Certificate provided by a Certifying Authority.",
+							"link": {
+								"label": "Learn more",
+								"uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-overview"
+							}
+						}
+					},
+					{
+						"name": "enableCustomSSL",
+						"type": "Microsoft.Common.OptionsGroup",
+						"label": "Configure WebLogic Administration Console on HTTPS (Secure) Port, with your own SSL Certificate provided by a Certifying Authority?",
+						"defaultValue": "No",
+						"toolTip": "Select 'Yes' to configure WebLogic Administration Console on HTTPS (Secure) Port with your own SSL Certificate provided by a Certifying Authority.",
+						"constraints": {
+							"allowedValues": [{
+									"label": "Yes",
+									"value": true
+								},
+								{
+									"label": "No",
+									"value": false
+								}
+							],
+							"required": false
+						}
+					},
+                    {
+						"name": "customSSLSettings",
+						"type": "Microsoft.Common.Section",
+                        "visible": "[steps('section_sslConfiguration').enableCustomSSL]",
+						"label": "SSL Configuration Settings",
+						"elements": [{
+                                "name": "keyVaultText",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": "true",
+                                "options": {
+                                    "text": "Enabling a HTTPS (Secure) Port for the Administration Console requires you to obtain a valid SSL Certificate from a Certifying Authority (CA). The template will look for the certificate and other configuration items in the Azure KeyVault specified here.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "keyVaultResourceGroup",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "Resource group name in current subscription containing the KeyVault",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
+                                    "validationMessage": "[if(greater(length(steps('section_sslConfiguration').customSSLSettings.keyVaultResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                                }
+                            },
+                            {
+                                "name": "keyVaultName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "Name of the Azure KeyVault containing secrets for the SSL Certificate",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
+                                    "validationMessage": "[if(or(greater(length(steps('section_sslConfiguration').customSSLSettings.keyVaultName), 24), less(length(steps('section_sslConfiguration').customSSLSettings.keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomIdentityKeyStoretDataSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified KeyVault whose value is the Identity KeyStore Data",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomIdentityKeyStorePassPhraseSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified KeyVault whose value is the passphrase for the Identity KeyStore",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomIdentityKeyStoreType",
+                                "type": "Microsoft.Common.DropDown",
+                                "visible": "true",
+                                "label": "The Identity KeyStore type (JKS,PKCS12)",
+                                "defaultValue": "JKS",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "allowedValues": [{
+                                            "label": "JKS",
+                                            "value": "JKS"
+                                        },
+                                        {
+                                            "label": "PKCS12",
+                                            "value": "PKCS12"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomTrustKeyStoretDataSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified KeyVault whose value is the Trust KeyStore Data",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomTrustKeyStorePassPhraseSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified KeyVault whose value is the passphrase for the Trust KeyStore",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "keyVaultCustomTrustKeyStoreType",
+                                "type": "Microsoft.Common.DropDown",
+                                "visible": "true",
+                                "label": "The Trust KeyStore type (JKS,PKCS12)",
+                                "defaultValue": "JKS",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "allowedValues": [{
+                                            "label": "JKS",
+                                            "value": "JKS"
+                                        },
+                                        {
+                                            "label": "PKCS12",
+                                            "value": "PKCS12"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
+                            {
+                                "name": "keyVaultPrivateKeyAliasSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified KeyVault whose value is the Private Key Alias",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "keyVaultPrivateKeyPassPhraseSecretName",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The name of the secret in the specified KeyVault whose value is the passphrase for the Private Key",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            }
+                     ]
+                  }
+				]
+			},
             {
                 "name": "section_database",
                 "type": "Microsoft.Common.Section",
@@ -645,7 +865,98 @@
                         "visible": "[bool(steps('section_elk').enableELK)]"
                     }
                 ]
-            }
+            },
+			{
+				"name": "section_dnsConfiguration",
+				"type": "Microsoft.Common.Section",
+				"label": "DNS Configuration",
+				"elements": [{
+						"name": "dnsConfigurationText",
+						"type": "Microsoft.Common.TextBlock",
+						"visible": true,
+						"options": {
+							"text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) Port, using custom DNS Name (example: console.contoso.com)",
+							"link": {
+								"label": "Learn more",
+								"uri": "https://aka.ms/dns-web-sites-custom-domain"
+							}
+						}
+					},
+					{
+						"name": "enableCustomDNS",
+						"type": "Microsoft.Common.OptionsGroup",
+						"visible": true,
+						"label": "Configure Custom DNS Alias for the WebLogic Administration Server?",
+						"defaultValue": "No",
+						"toolTip": "Select 'Yes' to configure Custom DNS Alias for the WebLogic Administration Server.",
+						"constraints": {
+							"allowedValues": [{
+									"label": "Yes",
+									"value": true
+								},
+								{
+									"label": "No",
+									"value": false
+								}
+							],
+							"required": false
+						}
+					},
+                    {
+						"name": "customDNSSettings",
+						"type": "Microsoft.Common.Section",
+                        "visible": "[steps('section_dnsConfiguration').enableCustomDNS]",
+                        "label": "DNS Configuration Settings",
+						"elements": [{
+                            "name": "enableCustomDNSText",
+                            "type": "Microsoft.Common.TextBlock",
+                            "visible": "[steps('section_dnsConfiguration').enableCustomDNS]",
+                            "options": {
+                                "text": "Enabling a Custom DNS for the WebLogic Administration Console will require you to perform DNS Domain Delegation at your DNS Registry.",
+                                "link": {
+                                    "label": "Learn more",
+                                    "uri": "https://aka.ms/dns-domain-delegation"
+                                }
+                            }
+                        },
+                        {
+                            "name": "customDNSName",
+                            "type": "Microsoft.Common.TextBox",
+                            "visible": true,
+                            "label": "Root Domain Name (For example, contoso.com)",
+                            "defaultValue": "",
+                            "toolTip": "Use only letters and numbers and periods to separate Domains",
+                            "constraints": {
+                                "required": true,
+                                "regex": "^(?=.{4,255}$)([a-zA-Z0-9_]([a-zA-Z0-9_-]{0,41}[a-zA-Z0-9_])?\\.){1,126}[a-zA-Z0-9][a-zA-Z0-9-]{0,41}[a-zA-Z0-9]$",
+                                "validationMessage": "[if(greater(length(steps('section_dnsConfiguration').customDNSSettings.customDNSName), 41),'The root domain name should be between 1 and 41 characters long', 'Domain Names only allow alphanumeric characters, periods, hyphens')]"
+                            }
+                        },
+                        {
+                            "name": "adminConsoleSubDomain",
+                            "type": "Microsoft.Common.TextBox",
+                            "visible": true,
+                            "label": "Sub Domain Name for the WebLogic Administration Console",
+                            "defaultValue": "console",
+                            "toolTip": "Use only letters and numbers and periods to separate Sub Domains",
+                            "constraints": {
+                                "required": true,
+                                "regex": "^[a-z0-9A-Z]{1,20}$",
+                                "validationMessage": "[if(greater(length(steps('section_dnsConfiguration').customDNSSettings.adminConsoleSubDomain), 20),'The sub domain name should be between 1 and 20 characters long','Sub Domain Names only allow alphanumeric characters')]"
+                            }
+                        },
+                        {
+                            "name": "adminConsoleSubDomainHelpText",
+                            "type": "Microsoft.Common.TextBlock",
+                            "visible": true,
+                            "options": {
+                                "text": "Combined with the Root Domain Name value, the WebLogic Administration Server sub domain will provide the complete HTTPS URL for accessing the WebLogic Administration Console. (For example, https://console.contoso.com)"
+                            }
+                        }
+                      ]
+                  }
+              ]
+			}
         ],
         "outputs": {
             "Location": "[location()]",
@@ -678,7 +989,22 @@
             "wlsLDAPSSLCertificate": "[steps('section_aad').aadInfo.wlsLDAPSSLCertificate]",
             "wlsLDAPUserBaseDN": "[steps('section_aad').aadInfo.wlsLDAPUserBaseDN]",
             "wlsPassword": "[basics('basicsRequired').wlsPassword]",
-            "wlsUserName": "[basics('basicsRequired').wlsUserName]"
+            "wlsUserName": "[basics('basicsRequired').wlsUserName]",
+            "enableHTTPAdminListenPort":"[basics('basicsOptional').enableAdminHTTPListenPort]",
+            "enableCustomDNS":"[steps('section_dnsConfiguration').enableCustomDNS]",
+            "customDNSName":"[steps('section_dnsConfiguration').customDNSSettings.customDNSName]",
+            "adminConsoleSubDomain":"[steps('section_dnsConfiguration').customDNSSettings.adminConsoleSubDomain]",
+            "enableCustomSSL":"[steps('section_sslConfiguration').enableCustomSSL]",
+            "adminSSLKeyVaultResourceGroup":"[steps('section_sslConfiguration').customSSLSettings.keyVaultResourceGroup]",
+            "adminSSLKeyVaultName":"[steps('section_sslConfiguration').customSSLSettings.keyVaultName]",
+            "keyVaultCustomIdentityKeyStoretDataSecretName":"[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomIdentityKeyStoretDataSecretName]",
+            "keyVaultCustomIdentityKeyStorePassPhraseSecretName":"[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomIdentityKeyStorePassPhraseSecretName]",
+            "keyVaultCustomIdentityKeyStoreType":"[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomIdentityKeyStoreType]",
+            "keyVaultCustomTrustKeyStoretDataSecretName":"[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomTrustKeyStoretDataSecretName]",
+            "keyVaultCustomTrustKeyStorePassPhraseSecretName":"[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomTrustKeyStorePassPhraseSecretName]",
+            "keyVaultCustomTrustKeyStoreType":"[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomTrustKeyStoreType]",
+            "keyVaultPrivateKeyAliasSecretName":"[steps('section_sslConfiguration').customSSLSettings.keyVaultPrivateKeyAliasSecretName]",
+            "keyVaultPrivateKeyPassPhraseSecretName":"[steps('section_sslConfiguration').customSSLSettings.keyVaultPrivateKeyPassPhraseSecretName]"
         }
     }
 }
