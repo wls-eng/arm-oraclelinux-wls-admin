@@ -254,7 +254,7 @@
       },
       {
          "type": "Microsoft.Storage/storageAccounts",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2019-06-01",
          "name": "[variables('name_storageAccount')]",
          "location": "[parameters('location')]",
          "sku": {
@@ -270,7 +270,7 @@
       },
       {
             "type": "Microsoft.Storage/storageAccounts/fileServices",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2019-06-01",
             "name": "[concat(variables('name_storageAccount'), '/default')]",
             "dependsOn": [
                 "[variables('ref_storage')]"
@@ -282,7 +282,7 @@
       },
       {
             "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-            "apiVersion": "${azure.apiVersion}",
+            "apiVersion": "2019-06-01",
             "name": "[concat(variables('name_storageAccount'), '/default/', variables('name_share'))]",
             "dependsOn": [
                 "[variables('ref_fileService')]",
