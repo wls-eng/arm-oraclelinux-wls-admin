@@ -515,7 +515,7 @@
          "apiVersion": "${azure.apiVersion}",
          "location": "[parameters('location')]",
          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]",
+            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]",
             "[variables('ref_fileShare')]"
          ],
          "properties": {
