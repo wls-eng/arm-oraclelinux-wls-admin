@@ -429,7 +429,7 @@
           "condition": "[parameters('enableCustomDNS')]",
           "name": "[parameters('customDNSName')]",
           "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]"
+              "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]"
           ],
           "location": "global",
           "properties": {
@@ -442,7 +442,7 @@
           "condition": "[parameters('enableCustomDNS')]",
           "name": "[concat(parameters('customDNSName'), '/', parameters('adminConsoleSubDomain'))]",
           "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]",
+              "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]",
               "[resourceId('Microsoft.Network/dnszones', parameters('customDNSName'))]"
           ],
           "properties": {
