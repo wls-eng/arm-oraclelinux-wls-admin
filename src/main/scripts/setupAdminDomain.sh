@@ -9,7 +9,14 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setupAdminDomain.sh <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost> <oracleHome>"  
+  echo_stderr "./setupAdminDomain.sh <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost> <oracleHome> [<isCustomSSLEnabled>] [<customIdentityKeyStoreData>] [<customIdentityKeyStorePassPhrase>] [<customIdentityKeyStoreType>] [<customTrustKeyStoreData>] [<customTrustKeyStorePassPhrase>] [<customTrustKeyStoreType>] [<serverPrivateKeyAlias>] [<serverPrivateKeyPassPhrase>]"
+}
+
+function setupKeyStoreDir()
+{
+    KEYSTORE_PATH="/u01/app/keystores"
+    sudo mkdir -p $KEYSTORE_PATH
+    sudo rm -rf $KEYSTORE_PATH/*
 }
 
 function installUtilities()
@@ -70,7 +77,47 @@ function cleanup()
 function create_admin_model()
 {
     echo "Creating admin domain model"
-    cat <<EOF >$DOMAIN_PATH/admin-domain.yaml
+    cat /dev/null > $DOMAIN_PATH/admin-domain.yaml
+
+    if [ "${isCustomSSLEnabled,,}" == "true" ];
+    then
+        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+domainInfo:
+   AdminUserName: "$wlsUserName"
+   AdminPassword: "$wlsPassword"
+   ServerStartMode: prod
+topology:
+   Name: "$wlsDomainName"
+   AdminServerName: admin
+EOF
+
+        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+   Server:
+        'admin':
+            ListenPort: $wlsAdminPort
+            NetworkAccessPoint:
+                'adminT3Channel':
+                    ListenAddress: '$wlsAdminHost'
+                    ListenPort: $wlsAdminT3ChannelPort
+                    Protocol: t3
+                    Enabled: true
+            ListenPortEnabled: $isHTTPAdminListenPortEnabled
+            RestartDelaySeconds: 10
+            KeyStores: 'CustomIdentityAndCustomTrust'
+            CustomIdentityKeyStoreFileName: "$customIdentityKeyStoreFileName"
+            CustomIdentityKeyStoreType: "$customIdentityKeyStoreType"
+            CustomIdentityKeyStorePassPhraseEncrypted: "$customIdentityKeyStorePassPhrase"
+            CustomTrustKeyStoreFileName: "$customTrustKeyStoreFileName"
+            CustomTrustKeyStoreType: "$customTrustKeyStoreType"
+            CustomTrustKeyStorePassPhraseEncrypted: "$customTrustKeyStorePassPhrase"
+            SSL:
+               ServerPrivateKeyAlias: "$serverPrivateKeyAlias"
+               ServerPrivateKeyPassPhraseEncrypted: "$serverPrivateKeyPassPhrase"
+               ListenPort: $wlsSSLAdminPort
+               Enabled: true
+EOF
+    else
+        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
    AdminPassword: "$wlsPassword"
@@ -80,12 +127,20 @@ topology:
    AdminServerName: admin
    Server:
         'admin':
+            NetworkAccessPoint:
+                'adminT3Channel':
+                    ListenAddress: '$wlsAdminHost'
+                    ListenPort: $wlsAdminT3ChannelPort
+                    Protocol: t3
+                    Enabled: true
             ListenPort: $wlsAdminPort
+            ListenPortEnabled: $isHTTPAdminListenPortEnabled
             RestartDelaySeconds: 10
             SSL:
                ListenPort: $wlsSSLAdminPort
                Enabled: true
 EOF
+  fi
 }
 
 # This function to create model for sample application deployment 
@@ -114,9 +169,13 @@ function create_adminDomain()
     echo "Creating domain path /u01/domains"
     echo "Downloading weblogic-deploy-tool"
 
+    DOMAIN_PATH="/u01/domains"
     sudo mkdir -p $DOMAIN_PATH
     sudo rm -rf $DOMAIN_PATH/*
 
+    if [ ! -d "$DOMAIN_PATH/weblogic-deploy" ];
+    then
+        echo "Deployment tool not found. Downloading..."
     cd $DOMAIN_PATH
     wget -q $WEBLOGIC_DEPLOY_TOOL  
     if [[ $? != 0 ]]; then
@@ -124,6 +183,10 @@ function create_adminDomain()
        exit 1
     fi
     sudo unzip -o weblogic-deploy.zip -d $DOMAIN_PATH
+    else
+        echo "Deploy tool already available at $DOMAIN_PATH/weblogic-deploy"
+    fi
+
     create_admin_model
     sudo chown -R $username:$groupname $DOMAIN_PATH
     runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; $DOMAIN_PATH/weblogic-deploy/bin/createDomain.sh -oracle_home $oracleHome -domain_parent $DOMAIN_PATH  -domain_type WLS -model_file $DOMAIN_PATH/admin-domain.yaml"
@@ -241,6 +304,23 @@ function validateInput()
         echo_stderr "oracleHome is required. "
         exit 1
     fi
+
+    if [ "${isCustomSSLEnabled,,}" != "true" ];
+    then
+        echo_stderr "Custom SSL value is not provided. Defaulting to false"
+        isCustomSSLEnabled="false"
+    else
+        if   [ -z "$customIdentityKeyStoreData" ]    || [ -z "$customIdentityKeyStorePassPhrase" ] ||
+             [ -z "$customIdentityKeyStoreType" ]    || [ -z "$customTrustKeyStoreData" ] ||
+             [ -z "$customTrustKeyStorePassPhrase" ] || [ -z "$customTrustKeyStoreType" ] ||
+             [ -z "$serverPrivateKeyAlias" ]         || [ -z "$serverPrivateKeyPassPhrase" ];
+        then
+            echo "One of the required values for enabling Custom SSL \
+            (CustomKeyIdentityKeyStoreData,CustomKeyIdentityKeyStorePassPhrase,CustomKeyIdentityKeyStoreType,CustomKeyTrustKeyStoreData,CustomKeyTrustKeyStorePassPhrase,CustomKeyTrustKeyStoreType) \
+            has not been provided."
+            exit 1
+        fi
+    fi
 }
 
 function enableAndStartAdminServerService()
@@ -262,7 +342,7 @@ function updateNetworkRules()
     echo "update network rules for admin server"
     sudo firewall-cmd --zone=public --add-port=$wlsAdminPort/tcp
     sudo firewall-cmd --zone=public --add-port=$wlsSSLAdminPort/tcp
-
+    sudo firewall-cmd --zone=public --add-port=$wlsAdminT3ChannelPort/tcp
     sudo firewall-cmd --runtime-to-permanent
     sudo systemctl restart firewalld
 }
@@ -285,13 +365,72 @@ sudo chmod -R 750 ${stopWebLogicScript}
 
 }
 
+function storeCustomSSLCerts()
+{
+    if [ "${isCustomSSLEnabled,,}" == "true" ];
+    then
+        setupKeyStoreDir
+
+        echo "Custom SSL is enabled. Storing CertInfo as files..."
+        export customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.jks"
+        export customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.jks"
+
+        customIdentityKeyStoreData=$(echo "$customIdentityKeyStoreData" | base64 --decode)
+        customIdentityKeyStorePassPhrase=$(echo "$customIdentityKeyStorePassPhrase" | base64 --decode)
+        customIdentityKeyStoreType=$(echo "$customIdentityKeyStoreType" | base64 --decode)
+
+        customTrustKeyStoreData=$(echo "$customTrustKeyStoreData" | base64 --decode)
+        customTrustKeyStorePassPhrase=$(echo "$customTrustKeyStorePassPhrase" | base64 --decode)
+        customTrustKeyStoreType=$(echo "$customTrustKeyStoreType" | base64 --decode)
+
+        serverPrivateKeyAlias=$(echo "$serverPrivateKeyAlias" | base64 --decode)
+        serverPrivateKeyPassPhrase=$(echo "$serverPrivateKeyPassPhrase" | base64 --decode)
+
+        #decode cert data once again as it would got base64 encoded while  storing in azure keyvault
+        echo "$customIdentityKeyStoreData" | base64 --decode > $customIdentityKeyStoreFileName
+        echo "$customTrustKeyStoreData" | base64 --decode > $customTrustKeyStoreFileName
+
+    else
+        echo "Custom SSL is not enabled"
+    fi
+}
+
+# Mount the Azure file share on all VMs created
+function mountFileShare()
+{
+  echo "Creating mount point"
+  echo "Mount point: $mountpointPath"
+  sudo mkdir -p $mountpointPath
+  if [ ! -d "/etc/smbcredentials" ]; then
+    sudo mkdir /etc/smbcredentials
+  fi
+  if [ ! -f "/etc/smbcredentials/${storageAccountName}.cred" ]; then
+    echo "Crearing smbcredentials"
+    echo "username=$storageAccountName >> /etc/smbcredentials/${storageAccountName}.cred"
+    echo "password=$storageAccountKey >> /etc/smbcredentials/${storageAccountName}.cred"
+    sudo bash -c "echo "username=$storageAccountName" >> /etc/smbcredentials/${storageAccountName}.cred"
+    sudo bash -c "echo "password=$storageAccountKey" >> /etc/smbcredentials/${storageAccountName}.cred"
+  fi
+  echo "chmod 600 /etc/smbcredentials/${storageAccountName}.cred"
+  sudo chmod 600 /etc/smbcredentials/${storageAccountName}.cred
+  echo "//${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred ,dir_mode=0777,file_mode=0777,serverino"
+  sudo bash -c "echo \"//${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath cifs nofail,vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred ,dir_mode=0777,file_mode=0777,serverino\" >> /etc/fstab"
+  echo "mount -t cifs //${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino"
+  sudo mount -t cifs //${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath -o vers=2.1,credentials=/etc/smbcredentials/${storageAccountName}.cred,dir_mode=0777,file_mode=0777,serverino
+  if [[ $? != 0 ]];
+  then
+         echo "Failed to mount //${storageAccountName}.file.core.windows.net/wlsshare $mountpointPath"
+	 exit 1
+  fi
+}
+
 
 #main script starts here
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-if [ $# -ne 5 ]
+if [ $# -lt 6 ]
 then
     usage
 	exit 1
@@ -302,6 +441,28 @@ export wlsUserName="$2"
 export wlsPassword="$3"
 export wlsAdminHost="$4"
 export oracleHome="$5"
+export storageAccountName="${6}"
+export storageAccountKey="${7}"
+export mountpointPath="${8}"
+export isHTTPAdminListenPortEnabled="${9}"
+isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}";
+
+export isCustomSSLEnabled="${10}"
+
+#case insensitive check
+if [ "${isCustomSSLEnabled,,}" == "true" ];
+then
+    echo "custom ssl enabled. Reading keystore information"
+    export customIdentityKeyStoreData="${11}"
+    export customIdentityKeyStorePassPhrase="${12}"
+    export customIdentityKeyStoreType="${13}"
+    export customTrustKeyStoreData="${14}"
+    export customTrustKeyStorePassPhrase="${15}"
+    export customTrustKeyStoreType="${16}"
+    export serverPrivateKeyAlias="${17}"
+    export serverPrivateKeyPassPhrase="${18}"
+fi
+
 export DOMAIN_PATH="/u01/domains"
 export startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
 export stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
@@ -310,15 +471,28 @@ validateInput
 
 installUtilities
 
+mountFileShare
+
+
 export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
 export samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
 export wlsAdminPort=7001
 export wlsSSLAdminPort=7002
-export wlsAdminURL="$wlsAdminHost:$wlsAdminPort"
+export wlsAdminT3ChannelPort=7005
+
+if [ "${isHTTPAdminListenPortEnabled,,}" == "true" ];
+then
+    export wlsAdminURL="$wlsAdminHost:$wlsAdminPort"
+else
+    export wlsAdminURL="$wlsAdminHost:$wlsAdminT3ChannelPort"
+fi
+
 export username="oracle"
 export groupname="oracle"
 
 export SCRIPT_PWD=`pwd`
+
+storeCustomSSLCerts
 
 create_adminDomain
 
