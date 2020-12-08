@@ -152,10 +152,18 @@ jobs:
             --name ${{ env.dbName }}  \
             --location ${location} \
             --admin-user weblogic \
-            --ssl-enforcement Disabled \
+            --ssl-enforcement Enabled \
             --public-network-access Enabled \
             --admin-password ${{ env.wlsPassword }} \
             --sku-name B_Gen5_1
+
+            echo "Allow Access To Azure Services"
+            az postgres server firewall-rule create \
+            -g ${{ env.resourceGroupForDependency }} \
+            -s ${{ env.dbName }} \
+            -n "AllowAllWindowsAzureIps" \
+            --start-ip-address "0.0.0.0" \
+            --end-ip-address "0.0.0.0"
 
   deploy-weblogic-admin:
    needs: deploy-dependencies
