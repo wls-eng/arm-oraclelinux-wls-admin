@@ -3,7 +3,7 @@ name: Build and Test
 on: 
   push:
     branches:
-      - develop
+      - 20201202-hotfix
   schedule:
       - cron:  '0 7 * * *'
 
@@ -21,7 +21,7 @@ env:
   adminVMName: adminServerVM
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
   ref_javaee: 6807e2ae3e8a8492edf211b9f4f0b7ed3a2a29e7
-  ref_armttk: e2fbdcb93a4b2004c9ea953956b85248e0ef8c1c 
+  ref_armttk: 8e08a92dbb0a22b8560ec854a60e9a8a7b71c68f 
   git_token: ${{ secrets.GIT_TOKEN }} 
   
 jobs:
@@ -54,12 +54,13 @@ jobs:
       run: mvn -Ptemplate-validation-tests clean install --file arm-oraclelinux-wls-admin/pom.xml
              
     - name: Get version information from pom.xml
-      id: version
-      run: echo "##[set-env name=version;]$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-admin/pom.xml)"
+      run: |
+        version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-admin/pom.xml)
+        echo "version=${version}" >> $GITHUB_ENV
     - name: Print version
       run: echo $version
     - name: Generate artifact name
-      run: echo "##[set-env name=artifactName;]arm-oraclelinux-wls-admin-$version-arm-assembly"
+      run: echo "artifactName=arm-oraclelinux-wls-admin-$version-arm-assembly" >> $GITHUB_ENV
     - name: Print artifact name
       run: echo $artifactName
     - name: Output artifact name
@@ -89,7 +90,7 @@ jobs:
     - name: Create a new branch with development pids in nestedtemplates
       run: |
         current=`pwd`
-        echo "##[set-env name=current;]${current}"
+        echo "current=${current}" >> $GITHUB_ENV
         cd arm-oraclelinux-wls-admin-dev/src/main/arm/nestedtemplates
         git config --global core.longpaths true
         git config --global user.email $userEmail
@@ -109,7 +110,7 @@ jobs:
     max-parallel: 1
     fail-fast: false
     matrix:
-        images: ["owls-122130-8u131-ol73;Oracle:weblogic-122130-jdk8u131-ol73:owls-122130-8u131-ol7;1.1.6", "owls-122130-8u131-ol74;Oracle:weblogic-122130-jdk8u131-ol74:owls-122130-8u131-ol7;1.1.1", "owls-122140-8u251-ol76;Oracle:weblogic-122140-jdk8u251-ol76:owls-122140-8u251-ol7;1.1.1", "owls-141100-8u251-ol76;Oracle:weblogic-141100-jdk8u251-ol76:owls-141100-8u251-ol7;1.1.1", "owls-141100-11_07-ol76;Oracle:weblogic-141100-jdk11_07-ol76:owls-141100-11_07-ol7;1.1.1"]
+        images: ["owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest", "owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest", "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest", "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest", "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest"]
 
    steps:
     - name: Checkout arm-oraclelinux-wls-admin
@@ -118,7 +119,9 @@ jobs:
         path: arm-oraclelinux-wls-admin
     - name: Get version information from arm-oraclelinux-wls-admin/pom.xml
       id: version
-      run: echo "##[set-env name=version;]$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-admin/pom.xml)"
+      run: |
+        version=$(awk '/<version>[^<]+<\/version>/{gsub(/<version>|<\/version>/,"",$1);print $1;exit;}' arm-oraclelinux-wls-admin/pom.xml)
+        echo "version=${version}" >> $GITHUB_ENV
     - name: Output artifact name for Download action
       id: artifact_file
       run: echo "##[set-output name=artifactName;]arm-oraclelinux-wls-admin-$version-arm-assembly"
@@ -135,7 +138,7 @@ jobs:
       run: |
         imageUrn="${{ matrix.images }}"
         sku=${imageUrn%%;*}
-        echo "##[set-env name=sku;]${sku}"
+        echo "sku=${sku}" >> $GITHUB_ENV
     - name: Create Resource Group
       id: create-resource-group
       uses: azure/CLI@v1
@@ -144,8 +147,8 @@ jobs:
         inlineScript: |
           resourceGroup=${{ env.resourceGroupPrefix }}-${sku}
           echo "create resource group" $resourceGroup
-          echo "##[set-env name=resourceGroup;]${resourceGroup}"
           az group create --verbose --name $resourceGroup --location ${location}
+          echo "resourceGroup=${resourceGroup}" >> $GITHUB_ENV
           
     - name: Prepare deployed parameters and test script
       id: prepare-deployed-parameters-and-test-script
@@ -167,6 +170,18 @@ jobs:
          s/#wlsUserName#/$wlsUserName/g; \
          s/#wlspassword#/$wlsPassword/g" \
          arm-oraclelinux-wls-admin/test/scripts/verify-wls-access.sh
+
+    - name: Accept Image Terms
+      id: accept-terms
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.azCliVersion }}
+        inlineScript: |
+          echo "accept terms for " "${{ matrix.images }}"
+          rawUrn="${{ matrix.images }}"
+          publisherAndName=$(echo ${rawUrn} | grep -o ";.*:" | sed "s/;//g")
+          imageVersion=${rawUrn##*;}
+          az vm image terms accept --urn ${publisherAndName}${sku}:${imageVersion}
           
     - name: Deploy WebLogic Server Admin only Domain offer
       id: deploy-wls-admin
@@ -194,7 +209,7 @@ jobs:
       id: get-ip-address
       run: |
         myIP=$(dig @ns1.google.com TXT o-o.myaddr.l.google.com +short)
-        echo "##[set-env name=myIP;]${myIP}"          
+        echo "myIP=${myIP}" >> $GITHUB_ENV
 
     - name: Add ip address to security rule to access the wls machine
       id: add-ip-to-security-rule
@@ -245,7 +260,10 @@ jobs:
             --name $adminVMName -d \
             --query publicIps -o tsv)
           echo "VM Public IP ${publicIp}"
-          echo "##[set-env name=wlsPublicIP;]${publicIP}"  
+          echo "##[set-output name=publicIP;]${publicIP}"
+    - name: Create environment variable for AdminServer IP
+      id: env-admin-ip
+      run: echo "wlsPublicIP=${{steps.query-wls-admin-ip.outputs.publicIP}}" >> $GITHUB_ENV
 
     - name: Verify WebLogic Server Installation
       id: verify-wls
