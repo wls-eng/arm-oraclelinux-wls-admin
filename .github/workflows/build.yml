@@ -10,6 +10,7 @@ on:
 
 env:
   azCliVersion: 2.6.0
+  adminConsolePort: 7005
   dbName: wlsdb${{ github.run_id }}${{ github.run_number }}
   elkURI: ${{ secrets.ELK_URI }}
   elkUser: ${{ secrets.ELK_USER_NAME }}
@@ -231,12 +232,7 @@ jobs:
         s/#gitUserName#/$userName/g" \
          ${{ env.offerName }}/test/data/parameters-test.json 
         sed -i "s/#adminPasswordOrKey#/$wlsPassword/g" \
-         ${{ env.offerName }}/test/scripts/verify-wls-path.sh    
-        sed -i "s/#adminVMName#/$adminVMName/g; \
-         s/#adminPasswordOrKey#/$wlsPassword/g; \
-         s/#wlsUserName#/$wlsUserName/g; \
-         s/#wlspassword#/$wlsPassword/g" \
-         ${{ env.offerName }}/test/scripts/verify-wls-access.sh
+         ${{ env.offerName }}/test/scripts/verify-wls-path.sh
 
     - name: Accept Image Terms
       id: accept-terms
@@ -304,7 +300,7 @@ jobs:
             --nsg-name ${nsg} \
             --name NRMS-Rule-101 \
             --source-address-prefixes $sourceAddressPrefixes \
-            --destination-port-ranges 443 22
+            --destination-port-ranges 443 22 ${adminConsolePort}
           
     - name: Restart wls VM
       id: restart-wls-wm
@@ -338,7 +334,18 @@ jobs:
         echo "Verifying Weblgic server installation"
         timeout 6m sh -c 'until nc -zv $0 $1; do echo "nc rc: $?"; sleep 5; done' ${wlsPublicIP} 22
         sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.offerName }}/test/scripts/verify-wls-path.sh
-        
+    
+    - name: Restart remote SSH agent
+      id: restart-remote-ssh
+      uses: azure/CLI@v1
+      with:
+        azcliversion: ${{ env.azCliVersion }}
+        inlineScript: |
+          echo "Restart remote SSH agent"
+          az vm user reset-ssh \
+            --resource-group $resourceGroup \
+            --name ${{ env.adminVMName }}
+
     - name: Verify system services at admin server
       id: veriy-admin-service
       run: |
@@ -349,7 +356,8 @@ jobs:
       id: verify-wls-access
       run: |
         echo "Verifying Weblogic Server Access"
-        sshpass -p ${wlsPassword} -v ssh -p 22 -o StrictHostKeyChecking=no -o ConnectTimeout=100 -v -tt weblogic@${wlsPublicIP} 'bash -s' < ${{ env.offerName }}/test/scripts/verify-wls-access.sh
+        echo ${wlsPublicIP}
+        bash ${{ env.offerName }}/test/scripts/verify-wls-access.sh "${wlsPublicIP}" "7005"
     
     - name: Deploy DB Template to Connect to Azure Postgresql Database
       id: enable-postgresql-db
