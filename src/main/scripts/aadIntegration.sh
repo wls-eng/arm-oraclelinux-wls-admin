@@ -101,7 +101,7 @@ function validateInput()
 
 function createAADProvider_model()
 {
-    cat <<EOF >${SCRIPT_PWD}/configure-active-directory.py
+    cat <<EOF >${SCRIPT_PATH}/configure-active-directory.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 try:
    edit()
@@ -161,7 +161,7 @@ EOF
 
 function createSSL_model()
 {
-    cat <<EOF >${SCRIPT_PWD}/configure-ssl.py
+    cat <<EOF >${SCRIPT_PATH}/configure-ssl.py
 # Connect to the AdminServer.
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 try:
@@ -241,8 +241,8 @@ function importAADCertificate()
 function configureSSL()
 {
     echo "configure ladp ssl"
-    . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
-    java $WLST_ARGS weblogic.WLST ${SCRIPT_PWD}/configure-ssl.py 
+    sudo chown -R ${USER_ORACLE}:${GROUP_ORACLE} ${SCRIPT_PATH}
+    runuser -l ${USER_ORACLE} -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST ${SCRIPT_PATH}/configure-ssl.py" 
 
     errorCode=$?
     if [ $errorCode -eq 1 ]
@@ -255,8 +255,8 @@ function configureSSL()
 function configureAzureActiveDirectory()
 {
     echo "create Azure Active Directory provider"
-    . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
-    java $WLST_ARGS weblogic.WLST ${SCRIPT_PWD}/configure-active-directory.py 
+    sudo chown -R ${USER_ORACLE}:${GROUP_ORACLE} ${SCRIPT_PATH}
+    runuser -l ${USER_ORACLE} -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST  ${SCRIPT_PATH}/configure-active-directory.py" 
 
     errorCode=$?
     if [ $errorCode -eq 1 ]
@@ -304,8 +304,7 @@ function wait_for_admin()
 function cleanup()
 {
     echo "Cleaning up temporary files..."
-    rm -f ${SCRIPT_PWD}/configure-ssl.py
-    rm -f ${SCRIPT_PWD}/configure-active-directory.py 
+    rm -f -r ${SCRIPT_PATH} 
     rm -rf ${SCRIPT_PWD}/security/*
     echo "Cleanup completed."
 }
@@ -327,11 +326,21 @@ EOF
 fi
 }
 
+function createTempFolder()
+{
+    export SCRIPT_PATH="/u01/tmp"
+    sudo rm -f -r ${SCRIPT_PATH}
+    sudo mkdir ${SCRIPT_PATH}
+    sudo rm -rf $SCRIPT_PATH/*
+}
+
 export LDAP_USER_NAME='sAMAccountName'
 export LDAP_USER_FROM_NAME_FILTER='(&(sAMAccountName=%u)(objectclass=user))'
 export JAVA_OPTIONS_TLS_V12="-Djdk.tls.client.protocols=TLSv1.2"
 export STRING_ENABLE_TLSV12="Append -Djdk.tls.client.protocols to JAVA_OPTIONS in jdk8"
 export SCRIPT_PWD=`pwd`
+export USER_ORACLE="oracle"
+export GROUP_ORACLE="oracle"
 
 if [ $# -ne 18 ]
 then
@@ -359,7 +368,8 @@ export wlsAdminServerName=${17}
 export wlsDomainPath=${18}
 export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 
-
+validateInput
+createTempFolder
 echo "check status of admin server"
 wait_for_admin
 
@@ -378,3 +388,4 @@ echo "Waiting for admin server to be available"
 wait_for_admin
 echo "Weblogic admin server is up and running"
 
+cleanup
