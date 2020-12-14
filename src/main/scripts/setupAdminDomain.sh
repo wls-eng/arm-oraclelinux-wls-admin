@@ -117,7 +117,7 @@ EOF
                Enabled: true
             WebServer:
                 'admin':
-                    FrontendHost: ${adminPublicHostName}
+                    FrontendHost: '${adminPublicHostName}'
                     FrontendHTTPSPort: $wlsSSLAdminPort
                     FrontendHTTPPort: $wlsAdminPort
 EOF
@@ -146,7 +146,7 @@ topology:
                Enabled: true
             WebServer:
                 'admin':
-                    FrontendHost: ${adminPublicHostName}
+                    FrontendHost: '${adminPublicHostName}'
                     FrontendHTTPSPort: $wlsSSLAdminPort
                     FrontendHTTPPort: $wlsAdminPort
 EOF
