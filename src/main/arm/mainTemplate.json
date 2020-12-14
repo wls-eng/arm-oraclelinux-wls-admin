@@ -791,32 +791,32 @@
    "outputs": {
       "hostname": {
          "type": "string",
-         "value": "[reference(variables('adminLinkedTemplateRef'),'2019-10-01').outputs.hostname.value]"
+         "value": "[reference(variables('adminLinkedTemplateRef'),'${azure.apiVersion}').outputs.hostname.value]"
       },
       "sshCommand": {
          "type": "string",
-         "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('adminLinkedTemplateRef'),'2019-10-01').outputs.hostname.value)]"
+         "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('adminLinkedTemplateRef'),'${azure.apiVersion}').outputs.hostname.value)]"
       },
       "wlsDomainLocation": {
          "type": "string",
-         "value": "[reference(variables('adminLinkedTemplateRef'),'2019-10-01').outputs.wlsDomainLocation.value]"
+         "value": "[reference(variables('adminLinkedTemplateRef'),'${azure.apiVersion}').outputs.wlsDomainLocation.value]"
       },
       "adminConsoleURL": {
          "type": "string",
-         "value": "[reference(variables('adminLinkedTemplateRef'),'2019-10-01').outputs.adminConsoleURL.value]"
+         "value": "[reference(variables('adminLinkedTemplateRef'),'${azure.apiVersion}').outputs.adminConsoleURL.value]"
       },
       "adminConsoleSecureURL": {
          "type": "string",
-         "value": "[reference(variables('adminLinkedTemplateRef'),'2019-10-01').outputs.adminConsoleSecureURL.value]"
+         "value": "[reference(variables('adminLinkedTemplateRef'),'${azure.apiVersion}').outputs.adminConsoleSecureURL.value]"
       },
       "logIndex": {
          "type": "string",
-         "value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '2019-10-01').outputs.logIndex.value, '')]"
+         "value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '${azure.apiVersion}').outputs.logIndex.value, '')]"
       },
       "dnsZoneNameServers": {
          "condition": "[parameters('enableCustomDNS')]",
          "type": "array",
-         "value": "[reference(variables('adminLinkedTemplateRef'),'2019-10-01').outputs.dnsZoneNameServers.value]"
+         "value": "[reference(variables('adminLinkedTemplateRef'),'${azure.apiVersion}').outputs.dnsZoneNameServers.value]"
       }
    }
 }
