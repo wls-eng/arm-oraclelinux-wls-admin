@@ -179,7 +179,6 @@
             }
         },
         {
->>>>>>> 20201202 hotfix CI/CD (#67)
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
             "name": "${database.sqlserver}",

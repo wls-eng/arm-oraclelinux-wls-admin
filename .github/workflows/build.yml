@@ -3,6 +3,7 @@ name: Build and Test
 on: 
   push:
     branches:
+      - develop
       - 20201202-hotfix
   schedule:
       - cron:  '0 7 * * *'
