@@ -9,7 +9,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setupAdminDomain.sh <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost> <oracleHome> [<isCustomSSLEnabled>] [<customIdentityKeyStoreData>] [<customIdentityKeyStorePassPhrase>] [<customIdentityKeyStoreType>] [<customTrustKeyStoreData>] [<customTrustKeyStorePassPhrase>] [<customTrustKeyStoreType>] [<serverPrivateKeyAlias>] [<serverPrivateKeyPassPhrase>]"
+  echo_stderr "./setupAdminDomain.sh <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost> <oracleHome> <storageAccountName> <storageAccountKey> <mountpointPath> <isHTTPAdminListenPortEnabled> <adminPublicHostName> [<isCustomSSLEnabled>] [<customIdentityKeyStoreData>] [<customIdentityKeyStorePassPhrase>] [<customIdentityKeyStoreType>] [<customTrustKeyStoreData>] [<customTrustKeyStorePassPhrase>] [<customTrustKeyStoreType>] [<serverPrivateKeyAlias>] [<serverPrivateKeyPassPhrase>]"
 }
 
 function setupKeyStoreDir()
@@ -81,7 +81,7 @@ function create_admin_model()
 
     if [ "${isCustomSSLEnabled,,}" == "true" ];
     then
-        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+        cat <<EOF >$DOMAIN_PATH/admin-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
    AdminPassword: "$wlsPassword"
@@ -91,7 +91,7 @@ topology:
    AdminServerName: admin
 EOF
 
-        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+        cat <<EOF >>$DOMAIN_PATH/admin-domain.yaml
    Server:
         'admin':
             ListenPort: $wlsAdminPort
@@ -115,9 +115,14 @@ EOF
                ServerPrivateKeyPassPhraseEncrypted: "$serverPrivateKeyPassPhrase"
                ListenPort: $wlsSSLAdminPort
                Enabled: true
+            WebServer:
+                'admin':
+                    FrontendHost: '${adminPublicHostName}'
+                    FrontendHTTPSPort: $wlsSSLAdminPort
+                    FrontendHTTPPort: $wlsAdminPort
 EOF
     else
-        cat <<EOF>>$DOMAIN_PATH/admin-domain.yaml
+        cat <<EOF >>$DOMAIN_PATH/admin-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
    AdminPassword: "$wlsPassword"
@@ -139,6 +144,11 @@ topology:
             SSL:
                ListenPort: $wlsSSLAdminPort
                Enabled: true
+            WebServer:
+                'admin':
+                    FrontendHost: '${adminPublicHostName}'
+                    FrontendHTTPSPort: $wlsSSLAdminPort
+                    FrontendHTTPPort: $wlsAdminPort
 EOF
   fi
 }
@@ -305,6 +315,24 @@ function validateInput()
         exit 1
     fi
 
+    if [ -z "$storageAccountName" ] || [ -z "${storageAccountKey}" ] || [  -z ${mountpointPath} ]
+    then
+        echo_stderr "storageAccountName, storageAccountKey and mountpointPath is required. "
+        exit 1
+    fi
+
+    if [ -z "$isHTTPAdminListenPortEnabled" ];
+    then
+        echo_stderr "isHTTPAdminListenPortEnabled is required. "
+        exit 1
+    fi
+
+    if [ -z "$adminPublicHostName" ];
+    then
+        echo_stderr "adminPublicHostName is required. "
+        exit 1
+    fi
+
     if [ "${isCustomSSLEnabled,,}" != "true" ];
     then
         echo_stderr "Custom SSL value is not provided. Defaulting to false"
@@ -430,7 +458,7 @@ function mountFileShare()
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-if [ $# -lt 6 ]
+if [ $# -lt 10 ]
 then
     usage
 	exit 1
@@ -445,6 +473,7 @@ export storageAccountName="${6}"
 export storageAccountKey="${7}"
 export mountpointPath="${8}"
 export isHTTPAdminListenPortEnabled="${9}"
+export adminPublicHostName="${10}"
 isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}";
 
 export isCustomSSLEnabled="${10}"
