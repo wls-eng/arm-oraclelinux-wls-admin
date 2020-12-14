@@ -115,7 +115,7 @@ EOF
                ServerPrivateKeyPassPhraseEncrypted: "$serverPrivateKeyPassPhrase"
                ListenPort: $wlsSSLAdminPort
                Enabled: true
-            WebServer
+            WebServer:
                 'admin':
                     FrontendHost: ${adminPublicHostName}
                     FrontendHTTPSPort: $wlsSSLAdminPort
@@ -144,7 +144,7 @@ topology:
             SSL:
                ListenPort: $wlsSSLAdminPort
                Enabled: true
-            WebServer
+            WebServer:
                 'admin':
                     FrontendHost: ${adminPublicHostName}
                     FrontendHTTPSPort: $wlsSSLAdminPort
