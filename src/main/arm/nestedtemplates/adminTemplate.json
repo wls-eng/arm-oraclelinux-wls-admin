@@ -57,6 +57,13 @@
             "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
          }
       },
+      "enableHTTPAdminListenPort":{
+         "type": "bool",
+         "defaultValue": true,
+         "metadata": {
+            "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
+         }
+      },
       "guidValue": {
          "type": "string",
          "defaultValue": "[newGuid()]"
@@ -137,6 +144,7 @@
             ]
          }
       },
+      "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
       "const_publicIPAddressType": "Dynamic",
       "const_requiredPortrange": ",65200-65535,5556",
       "const_storageAccountType": "Standard_LRS",
@@ -150,6 +158,7 @@
       "name_publicIPAddress": "adminServerVM_PublicIP",
       "name_scriptFile": "setupAdminDomain.sh",
       "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
+      "name_share":"wlsshare",
       "name_subnet": "Subnet",
       "name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
       "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
@@ -381,7 +390,7 @@
                ]
             },
             "protectedSettings": {
-               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ')]"
+               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '2019-04-01').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ', reference(variables('name_publicIPAddress')).dnsSettings.fqdn, ' ')]"
             }
          }
       },

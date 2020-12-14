@@ -22,7 +22,7 @@ cat <<EOF > ${parametersPath}
         "value": "${elasticsearchURI}"
       },
       "elasticsearchPassword": {
-        "value": "elasticsearchPassword"
+        "value": "${elasticsearchPassword}"
       },
       "elasticsearchUserName": {
         "value": "${elasticsearchUserName}"

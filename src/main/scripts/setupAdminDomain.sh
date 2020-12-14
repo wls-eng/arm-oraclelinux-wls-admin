@@ -9,7 +9,14 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./setupAdminDomain.sh <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost> <oracleHome>"  
+  echo_stderr "./setupAdminDomain.sh <wlsDomainName> <wlsUserName> <wlsPassword> <wlsAdminHost> <oracleHome> <storageAccountName> <storageAccountKey> <mountpointPath> <isHTTPAdminListenPortEnabled> <adminPublicHostName> [<isCustomSSLEnabled>] [<customIdentityKeyStoreData>] [<customIdentityKeyStorePassPhrase>] [<customIdentityKeyStoreType>] [<customTrustKeyStoreData>] [<customTrustKeyStorePassPhrase>] [<customTrustKeyStoreType>] [<serverPrivateKeyAlias>] [<serverPrivateKeyPassPhrase>]"
+}
+
+function setupKeyStoreDir()
+{
+    KEYSTORE_PATH="/u01/app/keystores"
+    sudo mkdir -p $KEYSTORE_PATH
+    sudo rm -rf $KEYSTORE_PATH/*
 }
 
 function installUtilities()
@@ -70,7 +77,52 @@ function cleanup()
 function create_admin_model()
 {
     echo "Creating admin domain model"
-    cat <<EOF >$DOMAIN_PATH/admin-domain.yaml
+    cat /dev/null > $DOMAIN_PATH/admin-domain.yaml
+
+    if [ "${isCustomSSLEnabled,,}" == "true" ];
+    then
+        cat <<EOF >$DOMAIN_PATH/admin-domain.yaml
+domainInfo:
+   AdminUserName: "$wlsUserName"
+   AdminPassword: "$wlsPassword"
+   ServerStartMode: prod
+topology:
+   Name: "$wlsDomainName"
+   AdminServerName: admin
+EOF
+
+        cat <<EOF >>$DOMAIN_PATH/admin-domain.yaml
+   Server:
+        'admin':
+            ListenPort: $wlsAdminPort
+            NetworkAccessPoint:
+                'adminT3Channel':
+                    ListenAddress: '$wlsAdminHost'
+                    ListenPort: $wlsAdminT3ChannelPort
+                    Protocol: t3
+                    Enabled: true
+            ListenPortEnabled: $isHTTPAdminListenPortEnabled
+            RestartDelaySeconds: 10
+            KeyStores: 'CustomIdentityAndCustomTrust'
+            CustomIdentityKeyStoreFileName: "$customIdentityKeyStoreFileName"
+            CustomIdentityKeyStoreType: "$customIdentityKeyStoreType"
+            CustomIdentityKeyStorePassPhraseEncrypted: "$customIdentityKeyStorePassPhrase"
+            CustomTrustKeyStoreFileName: "$customTrustKeyStoreFileName"
+            CustomTrustKeyStoreType: "$customTrustKeyStoreType"
+            CustomTrustKeyStorePassPhraseEncrypted: "$customTrustKeyStorePassPhrase"
+            SSL:
+               ServerPrivateKeyAlias: "$serverPrivateKeyAlias"
+               ServerPrivateKeyPassPhraseEncrypted: "$serverPrivateKeyPassPhrase"
+               ListenPort: $wlsSSLAdminPort
+               Enabled: true
+            WebServer:
+                'admin':
+                    FrontendHost: '${adminPublicHostName}'
+                    FrontendHTTPSPort: $wlsSSLAdminPort
+                    FrontendHTTPPort: $wlsAdminPort
+EOF
+    else
+        cat <<EOF >>$DOMAIN_PATH/admin-domain.yaml
 domainInfo:
    AdminUserName: "$wlsUserName"
    AdminPassword: "$wlsPassword"
@@ -85,6 +137,11 @@ topology:
             SSL:
                ListenPort: $wlsSSLAdminPort
                Enabled: true
+            WebServer:
+                'admin':
+                    FrontendHost: '${adminPublicHostName}'
+                    FrontendHTTPSPort: $wlsSSLAdminPort
+                    FrontendHTTPPort: $wlsAdminPort
 EOF
 }
 
@@ -241,6 +298,44 @@ function validateInput()
         echo_stderr "oracleHome is required. "
         exit 1
     fi
+<<<<<<< HEAD
+=======
+
+    if [ -z "$storageAccountName" ] || [ -z "${storageAccountKey}" ] || [  -z ${mountpointPath} ]
+    then
+        echo_stderr "storageAccountName, storageAccountKey and mountpointPath is required. "
+        exit 1
+    fi
+
+    if [ -z "$isHTTPAdminListenPortEnabled" ];
+    then
+        echo_stderr "isHTTPAdminListenPortEnabled is required. "
+        exit 1
+    fi
+
+    if [ -z "$adminPublicHostName" ];
+    then
+        echo_stderr "adminPublicHostName is required. "
+        exit 1
+    fi
+
+    if [ "${isCustomSSLEnabled,,}" != "true" ];
+    then
+        echo_stderr "Custom SSL value is not provided. Defaulting to false"
+        isCustomSSLEnabled="false"
+    else
+        if   [ -z "$customIdentityKeyStoreData" ]    || [ -z "$customIdentityKeyStorePassPhrase" ] ||
+             [ -z "$customIdentityKeyStoreType" ]    || [ -z "$customTrustKeyStoreData" ] ||
+             [ -z "$customTrustKeyStorePassPhrase" ] || [ -z "$customTrustKeyStoreType" ] ||
+             [ -z "$serverPrivateKeyAlias" ]         || [ -z "$serverPrivateKeyPassPhrase" ];
+        then
+            echo "One of the required values for enabling Custom SSL \
+            (CustomKeyIdentityKeyStoreData,CustomKeyIdentityKeyStorePassPhrase,CustomKeyIdentityKeyStoreType,CustomKeyTrustKeyStoreData,CustomKeyTrustKeyStorePassPhrase,CustomKeyTrustKeyStoreType) \
+            has not been provided."
+            exit 1
+        fi
+    fi
+>>>>>>> dcad8fc... Validate elastic server connection info (#68)
 }
 
 function enableAndStartAdminServerService()
@@ -291,7 +386,7 @@ sudo chmod -R 750 ${stopWebLogicScript}
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export BASE_DIR="$(readlink -f ${CURR_DIR})"
 
-if [ $# -ne 5 ]
+if [ $# -lt 10 ]
 then
     usage
 	exit 1
@@ -302,6 +397,29 @@ export wlsUserName="$2"
 export wlsPassword="$3"
 export wlsAdminHost="$4"
 export oracleHome="$5"
+export storageAccountName="${6}"
+export storageAccountKey="${7}"
+export mountpointPath="${8}"
+export isHTTPAdminListenPortEnabled="${9}"
+export adminPublicHostName="${10}"
+isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}";
+
+export isCustomSSLEnabled="${10}"
+
+#case insensitive check
+if [ "${isCustomSSLEnabled,,}" == "true" ];
+then
+    echo "custom ssl enabled. Reading keystore information"
+    export customIdentityKeyStoreData="${11}"
+    export customIdentityKeyStorePassPhrase="${12}"
+    export customIdentityKeyStoreType="${13}"
+    export customTrustKeyStoreData="${14}"
+    export customTrustKeyStorePassPhrase="${15}"
+    export customTrustKeyStoreType="${16}"
+    export serverPrivateKeyAlias="${17}"
+    export serverPrivateKeyPassPhrase="${18}"
+fi
+
 export DOMAIN_PATH="/u01/domains"
 export startWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/startWebLogic.sh"
 export stopWebLogicScript="${DOMAIN_PATH}/${wlsDomainName}/bin/customStopWebLogic.sh"
