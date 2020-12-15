@@ -116,10 +116,9 @@ EOF
                ListenPort: $wlsSSLAdminPort
                Enabled: true
             WebServer:
-                'admin':
-                    FrontendHost: '${adminPublicHostName}'
-                    FrontendHTTPSPort: $wlsSSLAdminPort
-                    FrontendHTTPPort: $wlsAdminPort
+                FrontendHost: '${adminPublicHostName}'
+                FrontendHTTPSPort: $wlsSSLAdminPort
+                FrontendHTTPPort: $wlsAdminPort
 EOF
     else
         cat <<EOF >>$DOMAIN_PATH/admin-domain.yaml
@@ -138,10 +137,9 @@ topology:
                ListenPort: $wlsSSLAdminPort
                Enabled: true
             WebServer:
-                'admin':
-                    FrontendHost: '${adminPublicHostName}'
-                    FrontendHTTPSPort: $wlsSSLAdminPort
-                    FrontendHTTPPort: $wlsAdminPort
+                FrontendHost: '${adminPublicHostName}'
+                FrontendHTTPSPort: $wlsSSLAdminPort
+                FrontendHTTPPort: $wlsAdminPort
 EOF
 }
 
