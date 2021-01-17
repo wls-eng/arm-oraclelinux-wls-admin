@@ -81,20 +81,28 @@
                     },
                     {
                         "name": "adminPasswordOrKey",
-                        "type": "Microsoft.Common.PasswordBox",
+                        "type": "Microsoft.Compute.CredentialsCombo",
                         "label": {
-                            "password": "Password for admin account of VMs",
-                            "confirmPassword": "Confirm password"
+                            "authenticationType": "Authentication type",
+                            "password": "Password",
+                            "confirmPassword": "Confirm password",
+                            "sshPublicKey": "SSH public key"
                         },
-                        "toolTip": "Password for admin account of VMs",
+                        "toolTip": {
+                            "authenticationType": "Use username and password or SSH public key for authentication to the VM",
+                            "password": "Password for admin account of VMs",
+                            "sshPublicKey": "SSH key for admin account of VMs"
+                        },
                         "constraints": {
                             "required": true,
-                            "regex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
-                            "validationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character"
+                            "customPasswordRegex": "^((?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{12,72}$",
+                            "customValidationMessage": "Password must be at least 12 characters long and have 3 out of the following: one number, one lower case, one upper case, or one special character"
                         },
                         "options": {
-                            "hideConfirmation": false
+                            "hideConfirmation": false,
+                            "hidePassword": false
                         },
+                        "osPlatform": "Linux",
                         "visible": true
                     },
                     {
@@ -963,8 +971,9 @@
             "aadsPortNumber": "[steps('section_aad').aadInfo.aadsPortNumber]",
             "aadsPublicIP": "[steps('section_aad').aadInfo.aadsPublicIP]",
             "aadsServerHost": "[steps('section_aad').aadInfo.aadsServerHost]",
-            "adminPasswordOrKey": "[basics('basicsRequired').adminPasswordOrKey]",
+            "adminPasswordOrKey": "[if(equals(basics('basicsRequired').adminPasswordOrKey.authenticationType, 'password'), basics('basicsRequired').adminPasswordOrKey.password, basics('basicsRequired').adminPasswordOrKey.sshPublicKey)]",
             "adminUsername": "[basics('basicsRequired').adminUsername]",
+            "authenticationType": "[basics('basicsRequired').adminPasswordOrKey.authenticationType]",
             "databaseType": "[steps('section_database').databaseConnectionInfo.databaseType]",
             "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
