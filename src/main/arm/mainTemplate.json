@@ -677,9 +677,6 @@
                "aadsServerHost": {
                   "value": "[parameters('aadsServerHost')]"
                },
-               "adminPassword": {
-                  "value": "[parameters('adminPasswordOrKey')]"
-               },
                "adminVMName": {
                   "value": "[parameters('adminVMName')]"
                },

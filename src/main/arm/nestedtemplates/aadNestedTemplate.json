@@ -40,12 +40,6 @@
                 "description": "The LDAP server host."
             }
         },
-        "adminPassword": {
-            "type": "securestring",
-            "metadata": {
-                "description": "Password for the Virtual Machine"
-            }
-        },
         "adminVMName": {
             "type": "string",
             "defaultValue": "adminVM",
@@ -121,7 +115,7 @@
         }
     },
     "variables": {
-        "const_aadParameters": "[concat(parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsLDAPProviderName'), ' ',  parameters('aadsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsLDAPSSLCertificate'), ' ', parameters('aadsPublicIP'), ' ', parameters('adminPassword'), ' ', variables('const_adminServerName'), ' ', variables('const_wlsDomainPath'))]",
+        "const_aadParameters": "[concat(parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsLDAPProviderName'), ' ',  parameters('aadsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsLDAPSSLCertificate'), ' ', parameters('aadsPublicIP'), ' ', variables('const_adminServerName'), ' ', variables('const_wlsDomainPath'))]",
         "const_adminServerName": "admin",
         "const_wlsAdminPort": "7005",
         "const_wlsDomainPath": "[concat('/u01/domains/', parameters('wlsDomainName'))]",
