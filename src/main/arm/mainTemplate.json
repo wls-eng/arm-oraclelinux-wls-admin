@@ -86,6 +86,13 @@
             "description": "Userid of Database"
          }
       },
+      "denyPublicTrafficForAdminServer": {
+         "type": "bool",
+         "defaultValue": false,
+         "metadata": {
+            "description": "Set 'true' to deny public inbound traffic for the admin server."
+         }
+      },
       "dnsLabelPrefix": {
          "defaultValue": "wls",
          "type": "string",
@@ -100,13 +107,13 @@
             "description": "JDBC Connection String"
          }
       },
-       "elasticsearchEndpoint": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Endpoint of the Elasticsearch instance."
-            }
-        },
+      "elasticsearchEndpoint": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
+            "description": "Endpoint of the Elasticsearch instance."
+         }
+      },
       "elasticsearchPassword": {
          "type": "securestring",
          "defaultValue": "[newGuid()]",
@@ -261,110 +268,110 @@
             "description": "Username for your Weblogic domain name"
          }
       },
-      "enableHTTPAdminListenPort":{
-         "defaultValue":true,
+      "enableHTTPAdminListenPort": {
+         "defaultValue": true,
          "type": "bool",
          "metadata": {
             "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
          }
       },
-      "enableCustomSSL":{
-         "defaultValue":false,
+      "enableCustomSSL": {
+         "defaultValue": false,
          "type": "bool",
          "metadata": {
             "description": "Boolean value indicating, if custom SSL is enabled or not"
          }
       },
-      "enableCustomDNS":{
-         "defaultValue":false,
+      "enableCustomDNS": {
+         "defaultValue": false,
          "type": "bool",
          "metadata": {
             "description": "Boolean value indicating, if custom DNS Name is available or not"
          }
       },
-      "customDNSName":{
-         "defaultValue":"noCustomDNS",
+      "customDNSName": {
+         "defaultValue": "noCustomDNS",
          "type": "string",
          "metadata": {
             "description": "Custom DNS Name used to access WebLogic Admin Server"
          }
       },
-      "adminConsoleSubDomain":{
-         "defaultValue":"console",
+      "adminConsoleSubDomain": {
+         "defaultValue": "console",
          "type": "string",
          "metadata": {
             "description": "WebLogic Admin Server Console Subdomain Name which will be appended to the custom DNS Name to get the complete URL of the Weblogic Admin Console"
          }
       },
-      "adminSSLKeyVaultResourceGroup":{
-        "type": "string",
-        "defaultValue": "",
-        "metadata": {
+      "adminSSLKeyVaultResourceGroup": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
             "description": "Resource Group containing Weblogic SSL Certificates"
-        }
+         }
       },
-      "adminSSLKeyVaultName":{
-        "type": "string",
-        "defaultValue": "",
-        "metadata": {
+      "adminSSLKeyVaultName": {
+         "type": "string",
+         "defaultValue": "",
+         "metadata": {
             "description": "Keyvault name containing Weblogic SSL Certificates"
-        }
+         }
       },
-      "keyVaultCustomIdentityKeyStoretDataSecretName":{
-        "type": "string",
-        "metadata": {
+      "keyVaultCustomIdentityKeyStoretDataSecretName": {
+         "type": "string",
+         "metadata": {
             "description": "Secret name in KeyVault containing Weblogic Custom Identity Keystore Data"
-        },
-        "defaultValue": "CustomIdentityKeyStoreDataSecret"
+         },
+         "defaultValue": "CustomIdentityKeyStoreDataSecret"
       },
-      "keyVaultCustomIdentityKeyStorePassPhraseSecretName":{
-        "type": "string",
-        "metadata": {
+      "keyVaultCustomIdentityKeyStorePassPhraseSecretName": {
+         "type": "string",
+         "metadata": {
             "description": "Secret name in KeyVault containing Weblogic Custom Identity Keystore Passphrase"
-        },
-        "defaultValue": "CustomIdentityKeyStorePassPhraseSecret"
+         },
+         "defaultValue": "CustomIdentityKeyStorePassPhraseSecret"
       },
-      "keyVaultCustomIdentityKeyStoreType":{
-        "type": "string",
-        "metadata": {
+      "keyVaultCustomIdentityKeyStoreType": {
+         "type": "string",
+         "metadata": {
             "description": "Weblogic Custom Identity Keystore Type"
-        },
-        "defaultValue": "JKS"
+         },
+         "defaultValue": "JKS"
       },
-      "keyVaultCustomTrustKeyStoretDataSecretName":{
-        "type": "string",
-        "metadata": {
+      "keyVaultCustomTrustKeyStoretDataSecretName": {
+         "type": "string",
+         "metadata": {
             "description": "Secret name in KeyVault containing Weblogic Custom Trust Store Data"
-        },
-        "defaultValue": "CustomTrustStoreDataSecret"
+         },
+         "defaultValue": "CustomTrustStoreDataSecret"
       },
-      "keyVaultCustomTrustKeyStorePassPhraseSecretName":{
-        "type": "string",
-        "metadata": {
+      "keyVaultCustomTrustKeyStorePassPhraseSecretName": {
+         "type": "string",
+         "metadata": {
             "description": "Secret name in KeyVault containing Weblogic Custom Trust Store Passphrase"
-        },
-        "defaultValue": "CustomTrustStorePassPhraseSecret"
+         },
+         "defaultValue": "CustomTrustStorePassPhraseSecret"
       },
-      "keyVaultCustomTrustKeyStoreType":{
-        "type": "string",
-        "metadata": {
+      "keyVaultCustomTrustKeyStoreType": {
+         "type": "string",
+         "metadata": {
             "description": "Weblogic Custom Trust Store Type"
-        },
-        "defaultValue": "JKS"
+         },
+         "defaultValue": "JKS"
       },
-      "keyVaultPrivateKeyAliasSecretName":{
-        "type": "string",
-        "metadata": {
+      "keyVaultPrivateKeyAliasSecretName": {
+         "type": "string",
+         "metadata": {
             "description": "Secret name in KeyVault containing Weblogic Server Private  Key Alias"
-        },
-        "defaultValue": "ServerPrivateKeyAlias"
+         },
+         "defaultValue": "ServerPrivateKeyAlias"
       },
-      "keyVaultPrivateKeyPassPhraseSecretName":{
-        "type": "string",
-        "metadata": {
+      "keyVaultPrivateKeyPassPhraseSecretName": {
+         "type": "string",
+         "metadata": {
             "description": "Secret name in KeyVault containing Weblogic Server Private  KeyPassPhrase"
-        },
-        "defaultValue": "ServerPrivateKeyPassPhraseSecret"
+         },
+         "defaultValue": "ServerPrivateKeyPassPhraseSecret"
       }
    },
    "variables": {
@@ -374,6 +381,7 @@
       "name_adminCustomSSLLinkedTemplateName": "adminTemplateForCustomSSL.json",
       "name_dbLinkedTemplate": "dbTemplate.json",
       "name_elkLinkedTemplateName": "elkNestedTemplate.json",
+      "name_nsgLinkedTemplateName": "nsgNestedTemplate.json",
       "adminLinkedTemplateRef": "[concat('admin',if(parameters('enableCustomSSL'),'CustomSSL',''),'LinkedTemplate')]"
    },
    "resources": [
@@ -433,7 +441,7 @@
                "skuUrnVersion": {
                   "value": "[parameters('skuUrnVersion')]"
                },
-               "usePreviewImage":{
+               "usePreviewImage": {
                   "value": "[parameters('usePreviewImage')]"
                },
                "vmSizeSelect": {
@@ -448,20 +456,43 @@
                "wlsUserName": {
                   "value": "[parameters('wlsUserName')]"
                },
-               "enableHTTPAdminListenPort":{
+               "enableHTTPAdminListenPort": {
                   "value": "[parameters('enableHTTPAdminListenPort')]"
                },
-               "enableCustomDNS":{
+               "enableCustomDNS": {
                   "value": "[parameters('enableCustomDNS')]"
                },
-               "customDNSName":{
+               "customDNSName": {
                   "value": "[parameters('customDNSName')]"
                },
-               "adminConsoleSubDomain":{
+               "adminConsoleSubDomain": {
                   "value": "[parameters('adminConsoleSubDomain')]"
                }
             }
          }
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "networkSecurityLinkedTemplate",
+         "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_nsgLinkedTemplateName')))]",
+               "contentVersion": "1.0.0.0"
+            },
+            "parameters": {
+               "denyPublicTrafficForAdminServer": {
+                  "value": "[parameters('denyPublicTrafficForAdminServer')]"
+               },
+               "networkSecurityGroupName": {
+                  "value": "[concat(parameters('dnsLabelPrefix'), '-nsg')]"
+               }
+            }
+         },
+         "dependsOn": [
+            "[resourceId('Microsoft.Resources/deployments', 'adminLinkedTemplate')]"
+         ]
       },
       {
          "name": "adminCustomSSLLinkedTemplate",
@@ -469,7 +500,7 @@
          "apiVersion": "${azure.apiVersion}",
          "condition": "[parameters('enableCustomSSL')]",
          "dependsOn": [
-                "[resourceId('Microsoft.Resources/deployments', '${admin.start}')]"
+            "[resourceId('Microsoft.Resources/deployments', '${admin.start}')]"
          ],
          "properties": {
             "mode": "Incremental",
@@ -508,7 +539,7 @@
                "skuUrnVersion": {
                   "value": "[parameters('skuUrnVersion')]"
                },
-               "usePreviewImage":{
+               "usePreviewImage": {
                   "value": "[parameters('usePreviewImage')]"
                },
                "vmSizeSelect": {
@@ -523,74 +554,74 @@
                "wlsUserName": {
                   "value": "[parameters('wlsUserName')]"
                },
-               "enableHTTPAdminListenPort":{
+               "enableHTTPAdminListenPort": {
                   "value": "[parameters('enableHTTPAdminListenPort')]"
                },
-               "enableCustomDNS":{
+               "enableCustomDNS": {
                   "value": "[parameters('enableCustomDNS')]"
                },
-               "customDNSName":{
+               "customDNSName": {
                   "value": "[parameters('customDNSName')]"
                },
-               "adminConsoleSubDomain":{
+               "adminConsoleSubDomain": {
                   "value": "[parameters('adminConsoleSubDomain')]"
                },
-               "enableCustomSSL":{
+               "enableCustomSSL": {
                   "value": "[parameters('enableCustomSSL')]"
                },
                "keyVaultCustomIdentityKeyStoretDataSecretName": {
-                   "reference": {
-                        "keyVault": {
-                            "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
-                        },
-                        "secretName": "[parameters('keyVaultCustomIdentityKeyStoretDataSecretName')]"
-                   }
+                  "reference": {
+                     "keyVault": {
+                        "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
+                     },
+                     "secretName": "[parameters('keyVaultCustomIdentityKeyStoretDataSecretName')]"
+                  }
                },
                "keyVaultCustomIdentityKeyStorePassPhraseSecretName": {
-                   "reference": {
-                        "keyVault": {
-                            "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
-                        },
-                        "secretName": "[parameters('keyVaultCustomIdentityKeyStorePassPhraseSecretName')]"
-                   }
+                  "reference": {
+                     "keyVault": {
+                        "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
+                     },
+                     "secretName": "[parameters('keyVaultCustomIdentityKeyStorePassPhraseSecretName')]"
+                  }
                },
-               "keyVaultCustomIdentityKeyStoreType":{
-                   "value": "[parameters('keyVaultCustomIdentityKeyStoreType')]"
+               "keyVaultCustomIdentityKeyStoreType": {
+                  "value": "[parameters('keyVaultCustomIdentityKeyStoreType')]"
                },
                "keyVaultCustomTrustKeyStoretDataSecretName": {
-                   "reference": {
-                        "keyVault": {
-                            "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
-                        },
-                        "secretName": "[parameters('keyVaultCustomTrustKeyStoretDataSecretName')]"
-                   }
+                  "reference": {
+                     "keyVault": {
+                        "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
+                     },
+                     "secretName": "[parameters('keyVaultCustomTrustKeyStoretDataSecretName')]"
+                  }
                },
                "keyVaultCustomTrustKeyStorePassPhraseSecretName": {
-                   "reference": {
-                        "keyVault": {
-                            "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
-                        },
-                        "secretName": "[parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName')]"
-                   }
+                  "reference": {
+                     "keyVault": {
+                        "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
+                     },
+                     "secretName": "[parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName')]"
+                  }
                },
-               "keyVaultCustomTrustKeyStoreType":{
-                   "value": "[parameters('keyVaultCustomTrustKeyStoreType')]"
+               "keyVaultCustomTrustKeyStoreType": {
+                  "value": "[parameters('keyVaultCustomTrustKeyStoreType')]"
                },
-               "keyVaultPrivateKeyAliasSecretName":{
-                   "reference": {
-                        "keyVault": {
-                            "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
-                        },
-                        "secretName": "[parameters('keyVaultPrivateKeyAliasSecretName')]"
-                   }
+               "keyVaultPrivateKeyAliasSecretName": {
+                  "reference": {
+                     "keyVault": {
+                        "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
+                     },
+                     "secretName": "[parameters('keyVaultPrivateKeyAliasSecretName')]"
+                  }
                },
                "keyVaultPrivateKeyPassPhraseSecretName": {
-                   "reference": {
-                        "keyVault": {
-                            "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
-                        },
-                        "secretName": "[parameters('keyVaultPrivateKeyPassPhraseSecretName')]"
-                   }
+                  "reference": {
+                     "keyVault": {
+                        "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
+                     },
+                     "secretName": "[parameters('keyVaultPrivateKeyPassPhraseSecretName')]"
+                  }
                }
             }
          }
