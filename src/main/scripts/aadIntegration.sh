@@ -7,7 +7,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./aadIntegration.sh <wlsUserName> <wlsPassword> <wlsDomainName> <wlsLDAPProviderName> <addsServerHost> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <oracleHome> <adminVMName> <wlsAdminPort> <wlsLDAPSSLCertificate> <addsPublicIP> <adminPassword> <wlsAdminServerName> <wlsDomainPath>"  
+  echo_stderr "./aadIntegration.sh <wlsUserName> <wlsPassword> <wlsDomainName> <wlsLDAPProviderName> <addsServerHost> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <oracleHome> <adminVMName> <wlsAdminPort> <wlsLDAPSSLCertificate> <addsPublicIP> <wlsAdminServerName> <wlsDomainPath>"  
 }
 
 function validateInput()
@@ -73,11 +73,6 @@ function validateInput()
         echo_stderr "wlsAdminPort is required. "
     fi
 
-    if [ -z "$vituralMachinePassword" ];
-    then
-        echo_stderr "vituralMachinePassword is required. "
-    fi
-
     if [ -z "$wlsADSSLCer" ];
     then
         echo_stderr "wlsADSSLCer is required. "
@@ -88,9 +83,9 @@ function validateInput()
         echo_stderr "wlsLDAPPublicIP is required. "
     fi
 
-    if [ -z "$vituralMachinePassword" ];
+    if [ -z "$wlsDomainPath" ];
     then
-        echo_stderr "vituralMachinePassword is required. "
+        echo_stderr "wlsDomainPath is required. "
     fi
 
     if [ -z "$wlsAdminServerName" ];
@@ -184,10 +179,6 @@ EOF
 function mapLDAPHostWithPublicIP()
 {
     echo "map LDAP host with pubilc IP"
-    # change to superuser
-    echo "${vituralMachinePassword}"
-    sudo -S su -
-    # remove existing ip address for the same host
     sudo sed -i '/${adServerHost}/d' /etc/hosts
     sudo echo "${wlsLDAPPublicIP}  ${adServerHost}" >> /etc/hosts
 }
@@ -342,7 +333,7 @@ export SCRIPT_PWD=`pwd`
 export USER_ORACLE="oracle"
 export GROUP_ORACLE="oracle"
 
-if [ $# -ne 18 ]
+if [ $# -ne 17 ]
 then
     usage
 	exit 1
@@ -363,9 +354,8 @@ export wlsAdminHost=${12}
 export wlsAdminPort=${13}
 export wlsADSSLCer="${14}"
 export wlsLDAPPublicIP="${15}"
-export vituralMachinePassword="${16}"
-export wlsAdminServerName=${17}
-export wlsDomainPath=${18}
+export wlsAdminServerName=${16}
+export wlsDomainPath=${17}
 export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 
 validateInput
