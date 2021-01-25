@@ -71,9 +71,73 @@
             "description": "Boolean value indicating, if custom DNS Name is available or not"
          }
       },
+      "enableCustomSSL": {
+         "type": "bool",
+         "defaultValue": false,
+         "metadata": {
+            "description": "Boolean value indicating, if custom SSL is enabled or not"
+         }
+      },
+      "enableHTTPAdminListenPort": {
+         "type": "bool",
+         "defaultValue": true,
+         "metadata": {
+            "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
+         }
+      },
       "guidValue": {
          "type": "string",
          "defaultValue": "[newGuid()]"
+      },
+      "keyVaultCustomIdentityKeyStoreDataSecretName": {
+         "type": "string",
+         "metadata": {
+            "description": "Weblogic Custom Identity Keystore Data"
+         }
+      },
+      "keyVaultCustomIdentityKeyStorePassPhraseSecretName": {
+         "type": "string",
+         "metadata": {
+            "description": "Weblogic Custom Identity Keystore Passphrase"
+         }
+      },
+      "keyVaultCustomIdentityKeyStoreType": {
+         "type": "string",
+         "metadata": {
+            "description": "Weblogic Custom Identity Keystore Type"
+         },
+         "defaultValue": "JKS"
+      },
+      "keyVaultCustomTrustKeyStoreDataSecretName": {
+         "type": "string",
+         "metadata": {
+            "description": "Weblogic Custom Trust Store Data"
+         }
+      },
+      "keyVaultCustomTrustKeyStorePassPhraseSecretName": {
+         "type": "string",
+         "metadata": {
+            "description": "Weblogic Custom Trust Store Passphrase"
+         }
+      },
+      "keyVaultCustomTrustKeyStoreType": {
+         "type": "string",
+         "metadata": {
+            "description": "Weblogic Custom Trust Store Type"
+         },
+         "defaultValue": "JKS"
+      },
+      "keyVaultPrivateKeyAliasSecretName": {
+         "type": "string",
+         "metadata": {
+            "description": "Weblogic Server Private Key Alias"
+         }
+      },
+      "keyVaultPrivateKeyPassPhraseSecretName": {
+         "type": "string",
+         "metadata": {
+            "description": "Weblogic Server Private Key Pass Phrase"
+         }
       },
       "location": {
          "type": "string",
@@ -92,11 +156,11 @@
          "type": "string",
          "defaultValue": "owls-122130-8u131-ol74;Oracle:weblogic-122130-jdk8u131-ol74:owls-122130-8u131-ol7;latest",
          "allowedValues": [
-            "owls-122130-8u131-ol73;Oracle:weblogic-122130-jdk8u131-ol73:owls-122130-8u131-ol7;latest",
-            "owls-122130-8u131-ol74;Oracle:weblogic-122130-jdk8u131-ol74:owls-122130-8u131-ol7;latest",
-            "owls-122140-8u251-ol76;Oracle:weblogic-122140-jdk8u251-ol76:owls-122140-8u251-ol7;latest",
-            "owls-141100-8u251-ol76;Oracle:weblogic-141100-jdk8u251-ol76:owls-141100-8u251-ol7;latest",
-            "owls-141100-11_07-ol76;Oracle:weblogic-141100-jdk11_07-ol76:owls-141100-11_07-ol7;latest"
+            "owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest",
+            "owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest",
+            "owls-122140-jdk8-ol76;Oracle:weblogic-122140-jdk8-ol76:owls-122140-jdk8-ol7;latest",
+            "owls-141100-jdk8-ol76;Oracle:weblogic-141100-jdk8-ol76:owls-141100-jdk8-ol7;latest",
+            "owls-141100-jdk11-ol76;Oracle:weblogic-141100-jdk11-ol76:owls-141100-jdk11-ol7;latest"
          ],
          "metadata": {
             "description": "The Oracle Linux image with Weblogic and Java preinstalled. Semicolon separated string of Sku, URN, and Version"
@@ -133,83 +197,12 @@
          "metadata": {
             "description": "Username for your Weblogic domain name"
          }
-      },
-      "enableHTTPAdminListenPort":{
-         "type": "bool",
-         "defaultValue": true,
-         "metadata": {
-            "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
-         }
-        },
-        "adminConsoleSubDomain":{
-           "defaultValue":"console",
-           "type": "string",
-           "metadata": {
-              "description": "WebLogic Admin Server Console Subdomain Name which will be appended to the custom DNS Name to get the complete URL of the Weblogic Admin Console"
-           }
-        },
-        "enableCustomSSL": {
-            "type": "bool",
-            "defaultValue": false,
-            "metadata": {
-                "description": "Boolean value indicating, if custom SSL is enabled or not"
-            }
-        },
-        "keyVaultCustomIdentityKeyStoretDataSecretName": {
-            "type": "string",
-            "metadata": {
-                "description": "Weblogic Custom Identity Keystore Data"
-            }
-        },
-        "keyVaultCustomIdentityKeyStorePassPhraseSecretName": {
-            "type": "string",
-            "metadata": {
-                "description": "Weblogic Custom Identity Keystore Passphrase"
-            }
-        },
-        "keyVaultCustomIdentityKeyStoreType": {
-            "type": "string",
-            "metadata": {
-                "description": "Weblogic Custom Identity Keystore Type"
-            },
-            "defaultValue": "JKS"
-        },
-        "keyVaultCustomTrustKeyStoretDataSecretName": {
-            "type": "string",
-            "metadata": {
-                "description": "Weblogic Custom Trust Store Data"
-            }
-        },
-        "keyVaultCustomTrustKeyStorePassPhraseSecretName": {
-            "type": "string",
-            "metadata": {
-                "description": "Weblogic Custom Trust Store Passphrase"
-            }
-        },
-        "keyVaultCustomTrustKeyStoreType": {
-            "type": "string",
-            "metadata": {
-                "description": "Weblogic Custom Trust Store Type"
-            },
-            "defaultValue": "JKS"
-        },
-        "keyVaultPrivateKeyAliasSecretName": {
-            "type": "string",
-            "metadata": {
-                "description": "Weblogic Server Private Key Alias"
-            }
-        },
-        "keyVaultPrivateKeyPassPhraseSecretName": {
-            "type": "string",
-            "metadata": {
-                "description": "Weblogic Server Private Key Pass Phrase"
-            }
       }
    },
    "variables": {
       "const_addressPrefix": "10.0.0.0/16",
       "const_hyphen": "-",
-      "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),'jdk',split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
+      "const_imageOffer": "[concat('weblogic',variables('const_hyphen'), split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[1],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[2],variables('const_hyphen'),split(variables('name_linuxImageOfferSKU'),variables('const_hyphen'))[3],if(parameters('usePreviewImage'),'-preview',''))]",
       "const_imagePublisher": "oracle",
       "const_linuxConfiguration": {
          "disablePasswordAuthentication": true,
@@ -222,13 +215,13 @@
             ]
          }
       },
+      "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
       "const_publicIPAddressType": "Dynamic",
       "const_requiredPortrange": ",65200-65535,5556",
       "const_storageAccountType": "Standard_LRS",
       "const_subnetPrefix": "10.0.0.0/24",
       "const_vmSize": "[parameters('vmSizeSelect')]",
       "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
-      "const_mountPointPath": "[concat('/mnt/', variables('name_share'))]",
       "name_linuxImageOfferSKU": "[first(split(parameters('skuUrnVersion'), ';'))]",
       "name_linuxImageVersion": "[last(split(parameters('skuUrnVersion'),';'))]",
       "name_networkSecurityGroup": "[concat(parameters('dnsLabelPrefix'), '-nsg')]",
@@ -237,7 +230,7 @@
       "name_scriptFile": "setupAdminDomain.sh",
       "name_storageAccount": "[concat(take(replace(parameters('guidValue'),'-',''),6),'olvm')]",
       "name_subnet": "Subnet",
-      "name_share":"wlsshare",
+      "name_share": "wlsshare",
       "name_virtualNetwork": "[concat(parameters('wlsDomainName'),'_VNET')]",
       "ref_networkSecurityGroup": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('name_networkSecurityGroup'))]",
       "ref_subnet": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('name_virtualNetwork'), variables('name_subnet'))]",
@@ -310,44 +303,44 @@
          }
       },
       {
-            "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "[variables('name_storageAccount')]",
-            "location": "[parameters('location')]",
-            "sku": {
-                "name": "[variables('const_storageAccountType')]"
-            },
-            "kind": "Storage",
-            "properties": {
-                "supportsHttpsTrafficOnly": false
-            },
-            "dependsOn": [
-                "[variables('name_networkSecurityGroup')]"
-            ]
+         "type": "Microsoft.Storage/storageAccounts",
+         "apiVersion": "${azure.apiVersion2}",
+         "name": "[variables('name_storageAccount')]",
+         "location": "[parameters('location')]",
+         "sku": {
+            "name": "[variables('const_storageAccountType')]"
+         },
+         "kind": "Storage",
+         "properties": {
+            "supportsHttpsTrafficOnly": false
+         },
+         "dependsOn": [
+            "[variables('name_networkSecurityGroup')]"
+         ]
       },
       {
-            "type": "Microsoft.Storage/storageAccounts/fileServices",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "[concat(variables('name_storageAccount'), '/default')]",
-            "dependsOn": [
-                "[variables('ref_storage')]"
-            ],
-            "sku": {
-                "name": "Standard_LRS",
-                "tier": "Standard"
-            }
+         "type": "Microsoft.Storage/storageAccounts/fileServices",
+         "apiVersion": "${azure.apiVersion2}",
+         "name": "[concat(variables('name_storageAccount'), '/default')]",
+         "dependsOn": [
+            "[variables('ref_storage')]"
+         ],
+         "sku": {
+            "name": "Standard_LRS",
+            "tier": "Standard"
+         }
       },
       {
-            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-            "apiVersion": "${azure.apiVersion}",
-            "name": "[concat(variables('name_storageAccount'), '/default/', variables('name_share'))]",
-            "dependsOn": [
-                "[variables('ref_fileService')]",
-                "[variables('ref_storage')]"
-            ],
-            "properties": {
-                "shareQuota": 10
-            }
+         "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+         "apiVersion": "${azure.apiVersion2}",
+         "name": "[concat(variables('name_storageAccount'), '/default/', variables('name_share'))]",
+         "dependsOn": [
+            "[variables('ref_fileService')]",
+            "[variables('ref_storage')]"
+         ],
+         "properties": {
+            "shareQuota": 10
+         }
       },
       {
          "type": "Microsoft.Network/publicIPAddresses",
@@ -470,7 +463,7 @@
             "diagnosticsProfile": {
                "bootDiagnostics": {
                   "enabled": true,
-                  "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount')), '2019-06-01').primaryEndpoints.blob]"
+                  "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount')), '${azure.apiVersion2}').primaryEndpoints.blob]"
                }
             }
          },
@@ -500,7 +493,7 @@
                ]
             },
             "protectedSettings": {
-               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '2019-04-01').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn),' ',string(parameters('enableCustomSSL')),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoretDataSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStorePassPhraseSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoretDataSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyAliasSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyPassPhraseSecretName')),''),' ')]"
+               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '${azure.apiVersion2}').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn),' ',string(parameters('enableCustomSSL')),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreDataSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStorePassPhraseSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreDataSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyAliasSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyPassPhraseSecretName')),''),' ')]"
             }
          }
       },
@@ -522,10 +515,10 @@
          }
       },
       {
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-122130-8u131-ol74}",
          "type": "Microsoft.Resources/deployments",
-         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122130-8u131-ol74'), bool('true'), bool('false'))]",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${from.owls-122130-jdk8-ol74}",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-122130-jdk8-ol74'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
@@ -540,10 +533,10 @@
          }
       },
       {
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-122130-8u131-ol73}",
          "type": "Microsoft.Resources/deployments",
-         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122130-8u131-ol73'), bool('true'), bool('false'))]",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${from.owls-122130-jdk8-ol73}",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122130-jdk8-ol73'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
@@ -558,10 +551,10 @@
          }
       },
       {
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-122140-8u251-ol76}",
          "type": "Microsoft.Resources/deployments",
-         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122140-8u251-ol76'), bool('true'), bool('false'))]",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${from.owls-122140-jdk8-ol76}",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'from.owls-122140-jdk8-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
@@ -576,10 +569,10 @@
          }
       },
       {
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-141100-8u251-ol76}",
          "type": "Microsoft.Resources/deployments",
-         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-8u251-ol76'), bool('true'), bool('false'))]",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${from.owls-141100-jdk8-ol76}",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk8-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
@@ -594,10 +587,10 @@
          }
       },
       {
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${from.owls-141100-11_07-ol76}",
          "type": "Microsoft.Resources/deployments",
-         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-11_07-ol76'), bool('true'), bool('false'))]",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "${from.owls-141100-jdk11-ol76}",
+         "condition": "[if(contains(variables('name_linuxImageOfferSKU'), 'owls-141100-jdk11-ol76'), bool('true'), bool('false'))]",
          "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
@@ -611,7 +604,6 @@
             }
          }
       }
-
    ],
    "outputs": {
       "_adminPublicIPId": {
@@ -640,4 +632,3 @@
       }
    }
 }
-

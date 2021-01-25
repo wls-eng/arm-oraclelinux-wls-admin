@@ -341,7 +341,7 @@
                                 }
                             },
                             {
-                                "name": "keyVaultCustomIdentityKeyStoretDataSecretName",
+                                "name": "keyVaultCustomIdentityKeyStoreDataSecretName",
                                 "type": "Microsoft.Common.TextBox",
                                 "visible": "true",
                                 "label": "The name of the secret in the specified KeyVault whose value is the Identity KeyStore Data",
@@ -388,7 +388,7 @@
                                 }
                             },
                             {
-                                "name": "keyVaultCustomTrustKeyStoretDataSecretName",
+                                "name": "keyVaultCustomTrustKeyStoreDataSecretName",
                                 "type": "Microsoft.Common.TextBox",
                                 "visible": "true",
                                 "label": "The name of the secret in the specified KeyVault whose value is the Trust KeyStore Data",
@@ -1105,10 +1105,10 @@
             "enableCustomSSL": "[steps('section_sslConfiguration').enableCustomSSL]",
             "adminSSLKeyVaultResourceGroup": "[steps('section_sslConfiguration').customSSLSettings.keyVaultResourceGroup]",
             "adminSSLKeyVaultName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultName]",
-            "keyVaultCustomIdentityKeyStoretDataSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomIdentityKeyStoretDataSecretName]",
+            "keyVaultCustomIdentityKeyStoreDataSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomIdentityKeyStoreDataSecretName]",
             "keyVaultCustomIdentityKeyStorePassPhraseSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomIdentityKeyStorePassPhraseSecretName]",
             "keyVaultCustomIdentityKeyStoreType": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomIdentityKeyStoreType]",
-            "keyVaultCustomTrustKeyStoretDataSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomTrustKeyStoretDataSecretName]",
+            "keyVaultCustomTrustKeyStoreDataSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomTrustKeyStoreDataSecretName]",
             "keyVaultCustomTrustKeyStorePassPhraseSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomTrustKeyStorePassPhraseSecretName]",
             "keyVaultCustomTrustKeyStoreType": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomTrustKeyStoreType]",
             "keyVaultPrivateKeyAliasSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultPrivateKeyAliasSecretName]",

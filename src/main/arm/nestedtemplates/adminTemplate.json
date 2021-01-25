@@ -71,6 +71,13 @@
             "description": "Boolean value indicating, if custom DNS Name is available or not"
          }
       },
+      "enableHTTPAdminListenPort": {
+         "type": "bool",
+         "defaultValue": true,
+         "metadata": {
+            "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
+         }
+      },
       "guidValue": {
          "type": "string",
          "defaultValue": "[newGuid()]"
@@ -132,13 +139,6 @@
          "type": "string",
          "metadata": {
             "description": "Username for your Weblogic domain name"
-         }
-      },
-      "enableHTTPAdminListenPort": {
-         "type": "bool",
-         "defaultValue": true,
-         "metadata": {
-            "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
          }
       }
    },
