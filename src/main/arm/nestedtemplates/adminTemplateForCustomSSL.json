@@ -51,10 +51,24 @@
             "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
          }
       },
+      "customDNSName": {
+         "defaultValue": "console.contoso.xyz",
+         "type": "string",
+         "metadata": {
+            "description": "Custom DNS Zone domain name for Oracle WebLogic Administration Console"
+         }
+      },
       "dnsLabelPrefix": {
          "type": "string",
          "metadata": {
             "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+         }
+      },
+      "enableCustomDNS": {
+         "defaultValue": false,
+         "type": "bool",
+         "metadata": {
+            "description": "Boolean value indicating, if custom DNS Name is available or not"
          }
       },
       "guidValue": {
@@ -126,20 +140,6 @@
          "metadata": {
             "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
          }
-        },
-        "enableCustomDNS":{
-           "defaultValue":false,
-           "type": "bool",
-           "metadata": {
-              "description": "Boolean value indicating, if custom DNS Name is available or not"
-           }
-        },
-        "customDNSName":{
-           "defaultValue":"noCustomDNS",
-           "type": "string",
-           "metadata": {
-              "description": "Custom DNS Name used to access WebLogic Admin Server"
-           }
         },
         "adminConsoleSubDomain":{
            "defaultValue":"console",
@@ -481,35 +481,6 @@
          }
       },
       {
-          "type": "Microsoft.Network/dnszones",
-          "apiVersion": "${azure.apiVersion}",
-          "condition": "[parameters('enableCustomDNS')]",
-          "name": "[parameters('customDNSName')]",
-          "dependsOn": [
-              "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]"
-          ],
-          "location": "global",
-          "properties": {
-              "zoneType": "Public"
-          }
-      },
-      {
-          "type": "Microsoft.Network/dnszones/A",
-          "apiVersion": "${azure.apiVersion}",
-          "condition": "[parameters('enableCustomDNS')]",
-          "name": "[concat(parameters('customDNSName'), '/', parameters('adminConsoleSubDomain'))]",
-          "dependsOn": [
-              "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]",
-              "[resourceId('Microsoft.Network/dnszones', parameters('customDNSName'))]"
-          ],
-          "properties": {
-              "TTL": 3600,
-              "targetResource": {
-                  "id": "[resourceId('Microsoft.Network/publicIPAddresses/', variables('name_publicIPAddress'))]"
-              }
-          }
-      },
-      {
          "type": "Microsoft.Compute/virtualMachines/extensions",
          "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
          "apiVersion": "${azure.apiVersion}",
@@ -529,7 +500,7 @@
                ]
             },
             "protectedSettings": {
-               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '2019-04-01').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',reference(variables('name_publicIPAddress')).dnsSettings.fqdn,' ',string(parameters('enableCustomSSL')),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoretDataSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStorePassPhraseSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoretDataSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyAliasSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyPassPhraseSecretName')),''),' ')]"
+               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '2019-04-01').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ',if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn),' ',string(parameters('enableCustomSSL')),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoretDataSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStorePassPhraseSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomIdentityKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoretDataSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultCustomTrustKeyStoreType')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyAliasSecretName')),''),' ',if(parameters('enableCustomSSL'),base64(parameters('keyVaultPrivateKeyPassPhraseSecretName')),''),' ')]"
             }
          }
       },
@@ -643,6 +614,10 @@
 
    ],
    "outputs": {
+      "_adminPublicIPId": {
+         "type": "string",
+         "value": "[resourceId('Microsoft.Network/publicIPAddresses',variables('name_publicIPAddress'))]"
+      },
       "hostname": {
          "type": "string",
          "value": "[reference(variables('name_publicIPAddress')).dnsSettings.fqdn]"
@@ -662,11 +637,6 @@
       "adminConsoleSecureURL": {
          "type": "string",
          "value": "[concat('https://',reference(variables('name_publicIPAddress')).dnsSettings.fqdn,':7002/console')]"
-      },
-      "dnsZoneNameServers": {
-         "condition": "[parameters('enableCustomDNS')]",
-         "type": "array",
-         "value": "[reference(parameters('customDNSName')).nameServers]"
       }
    }
 }

@@ -465,6 +465,165 @@
                 ]
             },
             {
+                "name": "section_dnsConfiguration",
+                "type": "Microsoft.Common.Section",
+                "label": "DNS Configuration",
+                "elements": [
+                    {
+                        "name": "dnsConfigurationText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "Selecting 'Yes' here will cause the template to provision Oracle WebLogic Server Administration Console using custom DNS Name (example: console.contoso.com)",
+                            "link": {
+                                "label": "Learn more",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-dns"
+                            }
+                        }
+                    },
+                    {
+                        "name": "enableCustomDNS",
+                        "type": "Microsoft.Common.OptionsGroup",
+                        "visible": true,
+                        "label": "Configure Custom DNS Alias?",
+                        "defaultValue": "No",
+                        "toolTip": "Select 'Yes' to configure Custom DNS Alias.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Yes",
+                                    "value": true
+                                },
+                                {
+                                    "label": "No",
+                                    "value": false
+                                }
+                            ],
+                            "required": false
+                        }
+                    },
+                    {
+                        "name": "customDNSSettings",
+                        "type": "Microsoft.Common.Section",
+                        "label": "DNS Configuration Settings",
+                        "visible": "[bool(steps('section_dnsConfiguration').enableCustomDNS)]",
+                        "elements": [
+                            {
+                                "name": "bringDNSZone",
+                                "type": "Microsoft.Common.OptionsGroup",
+                                "label": "Use an existing Azure DNS Zone",
+                                "defaultValue": "No",
+                                "toolTip": "Select 'Yes' to configure Custom DNS Alias based on an existing Azure DNS Zone. Select 'No' to create an Azure DNS Zone and Custom DNS Alias.",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "Yes",
+                                            "value": true
+                                        },
+                                        {
+                                            "label": "No",
+                                            "value": false
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "createDNSZoneText",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[not(bool(steps('section_dnsConfiguration').customDNSSettings.bringDNSZone))]",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "You must perform DNS Domain Delegation at your DNS Registry after deployment.",
+                                    "uri": "https://aka.ms/dns-domain-delegation"
+                                }
+                            },
+                            {
+                                "name": "deplymentScriptInfo",
+                                "type": "Microsoft.Common.TextBlock",
+                                "options": {
+                                    "text": "Bring Azure DNS Zone option will add records to your DNS Zone to cause Oracle WebLogic Server Administration Console accessible via DNS alias. We need a user-assigned managed identity to update your resource group that has Azure DNS Zone deployed. ",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template"
+                                    }
+                                }
+                            },
+                            {
+                                "name": "dnszoneName",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "DNS Zone Name",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers and periods to separate Domains",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^([0-9a-zA-Z_-]{1,63}\\.){1,33}[0-9a-zA-Z_-]{1,63}$",
+                                    "validationMessage": "There must be between 2 and 34 labels. For example, \"contoso.com\" has 2 labels. Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
+                                }
+                            },
+                            {
+                                "name": "dnsZoneResourceGroup",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Name of the resource group contains the DNS Zone in current subscription",
+                                "defaultValue": "",
+                                "toolTip": "Name of the resource group contains the DNS Zone in current subscription",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
+                                    "validationMessage": "[if(greater(length(steps('section_dnsConfiguration').existingDNSZonesSettings.dnsZoneResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                                },
+                                "visible": "[steps('section_dnsConfiguration').customDNSSettings.bringDNSZone]"
+                            },
+                            {
+                                "name": "dnszoneAdminConsoleLabel",
+                                "type": "Microsoft.Common.TextBox",
+                                "label": "Label for Oracle WebLogic Administration Console",
+                                "defaultValue": "console",
+                                "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Administration Console",
+                                "constraints": {
+                                    "required": true,
+                                    "validations": [
+                                        {
+                                            "regex": "^([0-9a-zA-Z_-]{1,63}\\.){0,33}[0-9a-zA-Z_-]{1,63}$",
+                                            "message": "Each label must contain between 1 and 63 characters. Each label must only contain letters, numbers, underscores, and dashes."
+                                        },
+                                        {
+                                            "isValid": "[less(sub(length(concat(steps('section_dnsConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName)),length(replace(concat(steps('section_dnsConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName), '.', ''))),34)]",
+                                            "message": "Subdomain must be between 2 and 34 labels. For example, \"applications.contoso.com\" has 3 labels."
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "name": "infoDNSIndentity",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "[and(steps('section_dnsConfiguration').customDNSSettings.bringDNSZone, less(length(steps('section_dnsConfiguration').customDNSSettings.dnsIdentity.userAssignedIdentities), 1))]",
+                                "options": {
+                                    "icon": "Error",
+                                    "text": "This option will use Azure deployment scripts to update records to your Azure DNS Zone. You have to add at least one user assigned identity to access Azure resources.",
+                                    "uri": "https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template"
+                                }
+                            },
+                            {
+                                "name": "dnsIdentity",
+                                "type": "Microsoft.ManagedIdentity.IdentitySelector",
+                                "label": "Managed Identity Configuration",
+                                "toolTip": {
+                                    "userAssignedIdentity": "Add user assigned identities to grant the resource access to Azure resources."
+                                },
+                                "defaultValue": {
+                                    "systemAssignedIdentity": "Off"
+                                },
+                                "options": {
+                                    "hideSystemAssignedIdentity": true,
+                                    "hideUserAssignedIdentity": false
+                                },
+                                "visible": "[steps('section_dnsConfiguration').customDNSSettings.bringDNSZone]"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
                 "name": "section_database",
                 "type": "Microsoft.Common.Section",
                 "label": "Database",
@@ -900,100 +1059,6 @@
                         "visible": "[bool(steps('section_elk').enableELK)]"
                     }
                 ]
-            },
-            {
-                "name": "section_dnsConfiguration",
-                "type": "Microsoft.Common.Section",
-                "label": "DNS Configuration",
-                "elements": [
-                    {
-                        "name": "dnsConfigurationText",
-                        "type": "Microsoft.Common.TextBlock",
-                        "visible": true,
-                        "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) Port, using custom DNS Name (example: console.contoso.com)",
-                            "link": {
-                                "label": "Learn more",
-                                "uri": "https://aka.ms/dns-web-sites-custom-domain"
-                            }
-                        }
-                    },
-                    {
-                        "name": "enableCustomDNS",
-                        "type": "Microsoft.Common.OptionsGroup",
-                        "visible": true,
-                        "label": "Configure Custom DNS Alias for the WebLogic Administration Server?",
-                        "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to configure Custom DNS Alias for the WebLogic Administration Server.",
-                        "constraints": {
-                            "allowedValues": [
-                                {
-                                    "label": "Yes",
-                                    "value": true
-                                },
-                                {
-                                    "label": "No",
-                                    "value": false
-                                }
-                            ],
-                            "required": false
-                        }
-                    },
-                    {
-                        "name": "customDNSSettings",
-                        "type": "Microsoft.Common.Section",
-                        "visible": "[steps('section_dnsConfiguration').enableCustomDNS]",
-                        "label": "DNS Configuration Settings",
-                        "elements": [
-                            {
-                                "name": "enableCustomDNSText",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": "[steps('section_dnsConfiguration').enableCustomDNS]",
-                                "options": {
-                                    "text": "Enabling a Custom DNS for the WebLogic Administration Console will require you to perform DNS Domain Delegation at your DNS Registry.",
-                                    "link": {
-                                        "label": "Learn more",
-                                        "uri": "https://aka.ms/dns-domain-delegation"
-                                    }
-                                }
-                            },
-                            {
-                                "name": "customDNSName",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": true,
-                                "label": "Root Domain Name (For example, contoso.com)",
-                                "defaultValue": "",
-                                "toolTip": "Use only letters and numbers and periods to separate Domains",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^(?=.{4,255}$)([a-zA-Z0-9_]([a-zA-Z0-9_-]{0,41}[a-zA-Z0-9_])?\\.){1,126}[a-zA-Z0-9][a-zA-Z0-9-]{0,41}[a-zA-Z0-9]$",
-                                    "validationMessage": "[if(greater(length(steps('section_dnsConfiguration').customDNSSettings.customDNSName), 41),'The root domain name should be between 1 and 41 characters long', 'Domain Names only allow alphanumeric characters, periods, hyphens')]"
-                                }
-                            },
-                            {
-                                "name": "adminConsoleSubDomain",
-                                "type": "Microsoft.Common.TextBox",
-                                "visible": true,
-                                "label": "Sub Domain Name for the WebLogic Administration Console",
-                                "defaultValue": "console",
-                                "toolTip": "Use only letters and numbers and periods to separate Sub Domains",
-                                "constraints": {
-                                    "required": true,
-                                    "regex": "^[a-z0-9A-Z]{1,20}$",
-                                    "validationMessage": "[if(greater(length(steps('section_dnsConfiguration').customDNSSettings.adminConsoleSubDomain), 20),'The sub domain name should be between 1 and 20 characters long','Sub Domain Names only allow alphanumeric characters')]"
-                                }
-                            },
-                            {
-                                "name": "adminConsoleSubDomainHelpText",
-                                "type": "Microsoft.Common.TextBlock",
-                                "visible": true,
-                                "options": {
-                                    "text": "Combined with the Root Domain Name value, the WebLogic Administration Server sub domain will provide the complete HTTPS URL for accessing the WebLogic Administration Console. (For example, https://console.contoso.com)"
-                                }
-                            }
-                        ]
-                    }
-                ]
             }
         ],
         "outputs": {
@@ -1009,13 +1074,19 @@
             "dbPassword": "[steps('section_database').databaseConnectionInfo.dbPassword]",
             "dbUser": "[steps('section_database').databaseConnectionInfo.dbUser]",
             "dnsLabelPrefix": "[basics('basicsOptional').dnsLabelPrefix]",
+            "dnszoneIdentity": "[steps('section_dnsConfiguration').customDNSSettings.dnsIdentity]",
+            "dnszoneName": "[steps('section_dnsConfiguration').customDNSSettings.dnszoneName]",
+            "dnszoneResourceGroup": "[steps('section_dnsConfiguration').customDNSSettings.dnsZoneResourceGroup]",
+            "dnszoneAdminConsoleLabel": "[steps('section_dnsConfiguration').customDNSSettings.dnszoneAdminConsoleLabel]",
             "dsConnectionURL": "[steps('section_database').databaseConnectionInfo.dsConnectionURL]",
             "elasticsearchEndpoint": "[steps('section_elk').elkInfo.elasticsearchEndpoint]",
             "elasticsearchPassword": "[steps('section_elk').elkInfo.elasticsearchPassword]",
             "elasticsearchUserName": "[steps('section_elk').elkInfo.elasticsearchUserName]",
             "enableAAD": "[bool(steps('section_aad').enableAAD)]",
             "enableDB": "[bool(steps('section_database').enableDB)]",
+            "enableCustomDNS": "[bool(steps('section_dnsConfiguration').enableCustomDNS)]",
             "enableELK": "[bool(steps('section_elk').enableELK)]",
+            "hasDNSZones": "[bool(if(bool(steps('section_dnsConfiguration').enableCustomDNS), steps('section_dnsConfiguration').customDNSSettings.bringDNSZone, 'false'))]",
             "jdbcDataSourceName": "[steps('section_database').databaseConnectionInfo.jdbcDataSourceName]",
             "logsToIntegrate": "[steps('section_elk').elkInfo.logsToIntegrate]",
             "portsToExpose": "[basics('basicsOptional').portsToExpose]",
@@ -1031,9 +1102,6 @@
             "wlsPassword": "[basics('basicsRequired').wlsPassword]",
             "wlsUserName": "[basics('basicsRequired').wlsUserName]",
             "enableHTTPAdminListenPort": "[basics('basicsOptional').enableAdminHTTPListenPort]",
-            "enableCustomDNS": "[steps('section_dnsConfiguration').enableCustomDNS]",
-            "customDNSName": "[steps('section_dnsConfiguration').customDNSSettings.customDNSName]",
-            "adminConsoleSubDomain": "[steps('section_dnsConfiguration').customDNSSettings.adminConsoleSubDomain]",
             "enableCustomSSL": "[steps('section_sslConfiguration').enableCustomSSL]",
             "adminSSLKeyVaultResourceGroup": "[steps('section_sslConfiguration').customSSLSettings.keyVaultResourceGroup]",
             "adminSSLKeyVaultName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultName]",
