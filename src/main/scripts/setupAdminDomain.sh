@@ -474,20 +474,20 @@ export isHTTPAdminListenPortEnabled="${9}"
 export adminPublicHostName="${10}"
 isHTTPAdminListenPortEnabled="${isHTTPAdminListenPortEnabled,,}";
 
-export isCustomSSLEnabled="${10}"
+export isCustomSSLEnabled="${11}"
 
 #case insensitive check
 if [ "${isCustomSSLEnabled,,}" == "true" ];
 then
     echo "custom ssl enabled. Reading keystore information"
-    export customIdentityKeyStoreData="${11}"
-    export customIdentityKeyStorePassPhrase="${12}"
-    export customIdentityKeyStoreType="${13}"
-    export customTrustKeyStoreData="${14}"
-    export customTrustKeyStorePassPhrase="${15}"
-    export customTrustKeyStoreType="${16}"
-    export serverPrivateKeyAlias="${17}"
-    export serverPrivateKeyPassPhrase="${18}"
+    export customIdentityKeyStoreData="${12}"
+    export customIdentityKeyStorePassPhrase="${13}"
+    export customIdentityKeyStoreType="${14}"
+    export customTrustKeyStoreData="${15}"
+    export customTrustKeyStorePassPhrase="${16}"
+    export customTrustKeyStoreType="${17}"
+    export serverPrivateKeyAlias="${18}"
+    export serverPrivateKeyPassPhrase="${19}"
 fi
 
 export DOMAIN_PATH="/u01/domains"
