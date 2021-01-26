@@ -472,29 +472,6 @@
          }
       },
       {
-         "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "networkSecurityLinkedTemplate",
-         "properties": {
-            "mode": "Incremental",
-            "templateLink": {
-               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_nsgLinkedTemplateName')))]",
-               "contentVersion": "1.0.0.0"
-            },
-            "parameters": {
-               "denyPublicTrafficForAdminServer": {
-                  "value": "[parameters('denyPublicTrafficForAdminServer')]"
-               },
-               "networkSecurityGroupName": {
-                  "value": "[concat(parameters('dnsLabelPrefix'), '-nsg')]"
-               }
-            }
-         },
-         "dependsOn": [
-            "[resourceId('Microsoft.Resources/deployments', 'adminLinkedTemplate')]"
-         ]
-      },
-      {
          "name": "adminCustomSSLLinkedTemplate",
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersion}",
@@ -625,6 +602,30 @@
                }
             }
          }
+      },
+      {
+         "type": "Microsoft.Resources/deployments",
+         "apiVersion": "${azure.apiVersion}",
+         "name": "networkSecurityLinkedTemplate",
+         "properties": {
+            "mode": "Incremental",
+            "templateLink": {
+               "uri": "[uri(parameters('_artifactsLocation'), concat('nestedtemplates/', variables('name_nsgLinkedTemplateName')))]",
+               "contentVersion": "1.0.0.0"
+            },
+            "parameters": {
+               "denyPublicTrafficForAdminServer": {
+                  "value": "[parameters('denyPublicTrafficForAdminServer')]"
+               },
+               "networkSecurityGroupName": {
+                  "value": "[concat(parameters('dnsLabelPrefix'), '-nsg')]"
+               }
+            }
+         },
+         "dependsOn": [
+            "[resourceId('Microsoft.Resources/deployments', 'adminLinkedTemplate')]",
+            "[resourceId('Microsoft.Resources/deployments', 'adminCustomSSLLinkedTemplate')]"
+         ]
       },
       {
          "name": "dbLinkedTemplate",
