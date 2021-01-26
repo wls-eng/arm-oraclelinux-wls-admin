@@ -51,10 +51,31 @@
             "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
          }
       },
+      "customDNSName": {
+         "defaultValue": "console.contoso.xyz",
+         "type": "string",
+         "metadata": {
+            "description": "Custom DNS Zone domain name for Oracle WebLogic Administration Console"
+         }
+      },
       "dnsLabelPrefix": {
          "type": "string",
          "metadata": {
             "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+         }
+      },
+      "enableCustomDNS": {
+         "defaultValue": false,
+         "type": "bool",
+         "metadata": {
+            "description": "Boolean value indicating, if custom DNS Name is available or not"
+         }
+      },
+      "enableHTTPAdminListenPort": {
+         "type": "bool",
+         "defaultValue": true,
+         "metadata": {
+            "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
          }
       },
       "guidValue": {
@@ -118,34 +139,6 @@
          "type": "string",
          "metadata": {
             "description": "Username for your Weblogic domain name"
-         }
-      },
-      "enableHTTPAdminListenPort": {
-         "type": "bool",
-         "defaultValue": true,
-         "metadata": {
-            "description": "Boolean value indicating, if WebLogic Admin Server HTTP Listen Port is enabled or not"
-         }
-      },
-      "enableCustomDNS": {
-         "defaultValue": false,
-         "type": "bool",
-         "metadata": {
-            "description": "Boolean value indicating, if custom DNS Name is available or not"
-         }
-      },
-      "customDNSName": {
-         "defaultValue": "noCustomDNS",
-         "type": "string",
-         "metadata": {
-            "description": "Custom DNS Name used to access WebLogic Admin Server"
-         }
-      },
-      "adminConsoleSubDomain": {
-         "defaultValue": "console",
-         "type": "string",
-         "metadata": {
-            "description": "WebLogic Admin Server Console Subdomain Name which will be appended to the custom DNS Name to get the complete URL of the Weblogic Admin Console"
          }
       }
    },
@@ -424,35 +417,6 @@
          }
       },
       {
-         "type": "Microsoft.Network/dnszones",
-         "apiVersion": "${azure.apiVersion}",
-         "condition": "[parameters('enableCustomDNS')]",
-         "name": "[parameters('customDNSName')]",
-         "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]"
-         ],
-         "location": "global",
-         "properties": {
-            "zoneType": "Public"
-         }
-      },
-      {
-         "type": "Microsoft.Network/dnszones/A",
-         "apiVersion": "${azure.apiVersion}",
-         "condition": "[parameters('enableCustomDNS')]",
-         "name": "[concat(parameters('customDNSName'), '/', parameters('adminConsoleSubDomain'))]",
-         "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]",
-            "[resourceId('Microsoft.Network/dnszones', parameters('customDNSName'))]"
-         ],
-         "properties": {
-            "TTL": 3600,
-            "targetResource": {
-               "id": "[resourceId('Microsoft.Network/publicIPAddresses/', variables('name_publicIPAddress'))]"
-            }
-         }
-      },
-      {
          "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
          "type": "Microsoft.Compute/virtualMachines/extensions",
          "apiVersion": "${azure.apiVersion}",
@@ -472,7 +436,7 @@
                ]
             },
             "protectedSettings": {
-               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '2019-04-01').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ', reference(variables('name_publicIPAddress')).dnsSettings.fqdn, ' ')]"
+               "commandToExecute": "[concat('sh',' ',variables('name_scriptFile'),' ',parameters('wlsDomainName'),' ',parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('adminVMName'),' ', variables('const_wlsHome'),' ',variables('name_storageAccount'),' ',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('name_storageAccount')), '2019-04-01').keys[0].value,' ',variables('const_mountPointPath'),' ',string(parameters('enableHTTPAdminListenPort')),' ', if(parameters('enableCustomDNS'), parameters('customDNSName'), reference(variables('name_publicIPAddress')).dnsSettings.fqdn), ' ')]"
             }
          }
       },
@@ -586,6 +550,10 @@
 
    ],
    "outputs": {
+      "_adminPublicIPId": {
+         "type": "string",
+         "value": "[resourceId('Microsoft.Network/publicIPAddresses',variables('name_publicIPAddress'))]"
+      },
       "hostname": {
          "type": "string",
          "value": "[reference(variables('name_publicIPAddress')).dnsSettings.fqdn]"
@@ -605,11 +573,6 @@
       "adminConsoleSecureURL": {
          "type": "string",
          "value": "[concat('https://',reference(variables('name_publicIPAddress')).dnsSettings.fqdn,':7002/console')]"
-      },
-      "dnsZoneNameServers": {
-         "condition": "[parameters('enableCustomDNS')]",
-         "type": "array",
-         "value": "[reference(parameters('customDNSName')).nameServers]"
       }
    }
 }

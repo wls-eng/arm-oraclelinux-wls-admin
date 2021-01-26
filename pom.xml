@@ -26,12 +26,12 @@
 
     <groupId>com.oracle.weblogic.azure</groupId>
     <artifactId>arm-oraclelinux-wls-admin</artifactId>
-    <version>1.0.24</version>
+    <version>1.0.25</version>
     
     <parent>
         <groupId>com.microsoft.azure.iaas</groupId>
         <artifactId>azure-javaee-iaas-parent</artifactId>
-        <version>1.0.6</version>
+        <version>1.0.7</version>
         <relativePath></relativePath>
     </parent>
     <packaging>jar</packaging>
