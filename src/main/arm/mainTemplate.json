@@ -411,8 +411,8 @@
    "resources": [
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${admin.start}",
+         "apiVersion": "2020-06-01",
+         "name": "pid-18f4b80a-6ca2-5840-8f88-4e7156ed6db0",
          "properties": {
             "mode": "Incremental",
             "template": {
@@ -426,7 +426,7 @@
       {
          "name": "adminLinkedTemplate",
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "condition": "[not(parameters('enableCustomSSL'))]",
          "properties": {
             "mode": "Incremental",
@@ -495,7 +495,7 @@
       {
          "name": "adminCustomSSLLinkedTemplate",
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "condition": "[parameters('enableCustomSSL')]",
          "properties": {
             "mode": "Incremental",
@@ -620,7 +620,7 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "name": "networkSecurityLinkedTemplate",
          "properties": {
             "mode": "Incremental",
@@ -644,7 +644,7 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "name": "dnszonesLinkedTemplate",
          "condition": "[parameters('enableCustomDNS')]",
          "dependsOn": [
@@ -685,7 +685,7 @@
                },
                "targetResources": {
                   "value": [
-                     "[reference(variables('name_adminLinkedTemplateDeployment'), '${azure.apiVersion}').outputs._adminPublicIPId.value]"
+                     "[reference(variables('name_adminLinkedTemplateDeployment'), '2020-06-01').outputs._adminPublicIPId.value]"
                   ]
                }
             }
@@ -697,7 +697,7 @@
             "[resourceId('Microsoft.Resources/deployments', 'dnszonesLinkedTemplate')]"
          ],
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "condition": "[parameters('enableDB')]",
          "properties": {
             "mode": "Incremental",
@@ -749,7 +749,7 @@
             "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
          ],
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "condition": "[parameters('enableAAD')]",
          "properties": {
             "mode": "Incremental",
@@ -815,7 +815,7 @@
             "[resourceId('Microsoft.Resources/deployments', 'aadLinkedTemplate')]"
          ],
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
+         "apiVersion": "2020-06-01",
          "condition": "[parameters('enableELK')]",
          "properties": {
             "mode": "Incremental",
@@ -862,8 +862,8 @@
       },
       {
          "type": "Microsoft.Resources/deployments",
-         "apiVersion": "${azure.apiVersion}",
-         "name": "${admin.end}",
+         "apiVersion": "2020-06-01",
+         "name": "pid-057f09cd-6f90-5c1c-b655-3aba168aef35",
          "dependsOn": [
             "[resourceId('Microsoft.Resources/deployments', variables('name_adminLinkedTemplateDeployment'))]",
             "[resourceId('Microsoft.Resources/deployments', 'networkSecurityLinkedTemplate')]",
@@ -886,32 +886,32 @@
    "outputs": {
       "hostname": {
          "type": "string",
-         "value": "[reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersion}').outputs.hostname.value]"
+         "value": "[reference(variables('name_adminLinkedTemplateDeployment'),'2020-06-01').outputs.hostname.value]"
       },
       "sshCommand": {
          "type": "string",
-         "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersion}').outputs.hostname.value)]"
+         "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('name_adminLinkedTemplateDeployment'),'2020-06-01').outputs.hostname.value)]"
       },
       "wlsDomainLocation": {
          "type": "string",
-         "value": "[reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersion}').outputs.wlsDomainLocation.value]"
+         "value": "[reference(variables('name_adminLinkedTemplateDeployment'),'2020-06-01').outputs.wlsDomainLocation.value]"
       },
       "adminConsoleURL": {
          "type": "string",
-         "value": "[if(parameters('enableCustomDNS'),format('http://{0}.{1}:7001/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersion}').outputs.adminConsoleURL.value)]"
+         "value": "[if(parameters('enableCustomDNS'),format('http://{0}.{1}:7001/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),reference(variables('name_adminLinkedTemplateDeployment'),'2020-06-01').outputs.adminConsoleURL.value)]"
       },
       "adminConsoleSecureURL": {
          "type": "string",
-         "value": "[if(parameters('enableCustomDNS'),format('https://{0}.{1}:7002/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),reference(variables('name_adminLinkedTemplateDeployment'),'${azure.apiVersion}').outputs.adminConsoleSecureURL.value)]"
+         "value": "[if(parameters('enableCustomDNS'),format('https://{0}.{1}:7002/console',parameters('dnszoneAdminConsoleLabel'),parameters('dnszoneName')),reference(variables('name_adminLinkedTemplateDeployment'),'2020-06-01').outputs.adminConsoleSecureURL.value)]"
       },
       "logIndex": {
          "type": "string",
-         "value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '${azure.apiVersion}').outputs.logIndex.value, '')]"
+         "value": "[if(parameters('enableELK'), reference('elkLinkedTemplate', '2020-06-01').outputs.logIndex.value, '')]"
       },
       "dnsZoneNameServers": {
          "type": "array",
          "condition": "[and(parameters('enableCustomDNS'), not(parameters('hasDNSZones')))]",
-         "value": "[reference('dnszonesLinkedTemplate','${azure.apiVersion}').outputs.dnsZoneNameServers.value]"
+         "value": "[reference('dnszonesLinkedTemplate','2020-06-01').outputs.dnsZoneNameServers.value]"
       }
    }
 }
