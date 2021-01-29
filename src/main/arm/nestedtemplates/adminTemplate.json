@@ -116,6 +116,13 @@
             "description": "Bool value, if it's set to true, will deploy with preview weblogic image."
          }
       },
+      "useSystemAssignedManagedIdentity": {
+         "type": "bool",
+         "defaultValue": true,
+         "metadata": {
+            "description": "Bool value, if it's set to true, a system assigned managed identity will to be created for the VM(s)"
+         }
+      },
       "vmSizeSelect": {
          "type": "string",
          "defaultValue": "Standard_A3",
@@ -362,6 +369,7 @@
             "[resourceId('Microsoft.Storage/storageAccounts/', variables('name_storageAccount'))]",
             "[resourceId('Microsoft.Network/networkInterfaces/', variables('name_nic'))]"
          ],
+         "identity": "[if(parameters('useSystemAssignedManagedIdentity'), json('{\"type\":\"SystemAssigned\"}'), null())]",
          "properties": {
             "hardwareProfile": {
                "vmSize": "[variables('const_vmSize')]"

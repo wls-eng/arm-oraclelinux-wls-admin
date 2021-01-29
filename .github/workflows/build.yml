@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - develop
-      - 20201202-hotfix
+      - sys-id
   schedule:
       - cron:  '0 7 * * *'
   repository_dispatch:
