@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - develop
-      - keyvaultautomation-rebase
   schedule:
       - cron:  '0 7 * * *'
   repository_dispatch:
@@ -406,7 +405,8 @@ jobs:
           ${{ env.wlsUserName }} \
           ${{ env.wlsPassword }} \
           ${{ env.userName }} \
-          ${{ env.testbranchName }}
+          ${{ env.testbranchName }} \
+          ${{ github.run_id }}${{ github.run_number }}
           echo "Deploy ELK Template..."
           az group deployment create \
           --debug \
@@ -423,6 +423,10 @@ jobs:
         inlineScript: |
           echo "delete... " $resourceGroup
           az group delete --yes --no-wait --verbose --name $resourceGroup
+    - name: Delete ELK index
+      id: delete-elk-index
+      run: |
+        curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-admin-${{ github.run_id }}${{ github.run_number }}
   
   cleanup:
     needs: deploy-weblogic-admin
