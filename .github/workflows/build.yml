@@ -6,6 +6,12 @@ on:
       - develop
   schedule:
       - cron:  '0 7 * * *'
+  workflow_dispatch:
+    inputs:
+      enableELK:
+        description: 'Specify whether to enable ELK depoyment or not.'
+        required: true
+        default: 'false'
   repository_dispatch:
 
 env:
@@ -389,6 +395,7 @@ jobs:
           
     - name: Set up ELK by deploying sub template
       id: enable-elk
+      if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
       uses: azure/CLI@v1
       with:
         azcliversion: ${{ env.azCliVersion }}
@@ -425,6 +432,7 @@ jobs:
           az group delete --yes --no-wait --verbose --name $resourceGroup
     - name: Delete ELK index
       id: delete-elk-index
+      if: ${{github.event_name == 'workflow_dispatch' && github.event.inputs.enableELK == 'true'}}
       run: |
         curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-admin-${{ github.run_id }}${{ github.run_number }}
   
