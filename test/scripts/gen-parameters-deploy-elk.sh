@@ -12,6 +12,7 @@ wlsusername=$8
 wlspassword=$9
 gitUserName=${10}
 testbranchName=${11}
+guidValue=${12}
 
 cat <<EOF > ${parametersPath}
 {
@@ -26,6 +27,9 @@ cat <<EOF > ${parametersPath}
       },
       "elasticsearchUserName": {
         "value": "${elasticsearchUserName}"
+      },
+      "guidValue": {
+        "value": "${guidValue}"
       },
       "location": {
         "value": "${location}"
