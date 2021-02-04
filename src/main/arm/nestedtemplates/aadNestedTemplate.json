@@ -112,10 +112,31 @@
             "metadata": {
                 "description": "Username for your Weblogic domain name"
             }
+        },
+        "enableCustomSSL": {
+           "type": "bool",
+           "defaultValue": false,
+           "metadata": {
+              "description": "Boolean value indicating, if custom SSL is enabled or not"
+           }
+        },
+        "keyVaultCustomTrustKeyStorePassPhrase": {
+           "type": "string",
+           "defaultValue": "null",
+           "metadata": {
+              "description": "Weblogic Custom Trust Store Passphrase"
+           }
+        },
+        "keyVaultCustomTrustKeyStoreType": {
+           "type": "string",
+           "defaultValue": "null",
+           "metadata": {
+              "description": "Weblogic Custom Trust Store Type (JKS or PKCS12)"
+           }
         }
     },
     "variables": {
-        "const_aadParameters": "[concat(parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsLDAPProviderName'), ' ',  parameters('aadsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsLDAPSSLCertificate'), ' ', parameters('aadsPublicIP'), ' ', variables('const_adminServerName'), ' ', variables('const_wlsDomainPath'))]",
+        "const_aadParameters": "[concat(parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsLDAPProviderName'), ' ',  parameters('aadsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsLDAPSSLCertificate'), ' ', parameters('aadsPublicIP'), ' ', variables('const_adminServerName'), ' ', variables('const_wlsDomainPath'),' ',parameters('enableCustomSSL'),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')))]",
         "const_adminServerName": "admin",
         "const_wlsAdminPort": "7005",
         "const_wlsDomainPath": "[concat('/u01/domains/', parameters('wlsDomainName'))]",

@@ -14,7 +14,6 @@ function usage()
 
 function setupKeyStoreDir()
 {
-    KEYSTORE_PATH="/u01/app/keystores"
     sudo mkdir -p $KEYSTORE_PATH
     sudo rm -rf $KEYSTORE_PATH/*
 }
@@ -194,6 +193,8 @@ function create_adminDomain()
     else
         echo "Deploy tool already available at $DOMAIN_PATH/weblogic-deploy"
     fi
+
+    storeCustomSSLCerts
 
     create_admin_model
     sudo chown -R $username:$groupname $DOMAIN_PATH
@@ -398,8 +399,8 @@ function storeCustomSSLCerts()
         setupKeyStoreDir
 
         echo "Custom SSL is enabled. Storing CertInfo as files..."
-        export customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.jks"
-        export customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.jks"
+        export customIdentityKeyStoreFileName="$KEYSTORE_PATH/identity.keystore"
+        export customTrustKeyStoreFileName="$KEYSTORE_PATH/trust.keystore"
 
         customIdentityKeyStoreData=$(echo "$customIdentityKeyStoreData" | base64 --decode)
         customIdentityKeyStorePassPhrase=$(echo "$customIdentityKeyStorePassPhrase" | base64 --decode)
@@ -500,7 +501,7 @@ installUtilities
 
 mountFileShare
 
-
+export KEYSTORE_PATH="${DOMAIN_PATH}/${wlsDomainName}/keystores"
 export WEBLOGIC_DEPLOY_TOOL=https://github.com/oracle/weblogic-deploy-tooling/releases/download/weblogic-deploy-tooling-1.8.1/weblogic-deploy.zip
 export samplApp="https://www.oracle.com/webfolder/technetwork/tutorials/obe/fmw/wls/10g/r3/cluster/session_state/files/shoppingcart.zip"
 export wlsAdminPort=7001
@@ -518,8 +519,6 @@ export username="oracle"
 export groupname="oracle"
 
 export SCRIPT_PWD=`pwd`
-
-storeCustomSSLCerts
 
 create_adminDomain
 

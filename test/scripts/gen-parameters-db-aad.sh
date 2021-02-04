@@ -74,6 +74,9 @@ cat <<EOF > ${parametersPath}
         },
         "wlsUserName": {
             "value": "GEN-UNIQUE"
+        },
+        "enableCustomSSL": {
+            "value": false
         }
     }
 }
