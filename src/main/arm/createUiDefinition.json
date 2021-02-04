@@ -318,9 +318,179 @@
                         }
                     },
                     {
-                        "name": "customSSLSettings",
-                        "type": "Microsoft.Common.Section",
+                        "name": "sslConfigurationAccessOption",
+                        "type": "Microsoft.Common.OptionsGroup",
                         "visible": "[steps('section_sslConfiguration').enableCustomSSL]",
+                        "label": "How would you like to provide required configuration",
+                        "defaultValue": "Upload existing KeyStores",
+                        "toolTip": "Select 'Upload existing KeyStores' to use local stored KeyStores.",
+                        "constraints": {
+                            "allowedValues": [
+                                {
+                                    "label": "Upload existing KeyStores",
+                                    "value": "uploadConfig"
+                                },
+                                {
+                                    "label": "Use KeyStores stored in Azure Key Vault",
+                                    "value": "keyVaultStoredConfig"
+                                }
+                            ],
+                            "required": false
+                        }
+                    },
+                    {
+                        "name": "uploadedCustomSSLSettings",
+                        "type": "Microsoft.Common.Section",
+                        "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'uploadConfig'))]",
+                        "label": "SSL Configuration Settings",
+                        "elements": [
+                            {
+                                "name": "uploadedCustomIdentityKeyStoreData",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Custom Identity KeyStore Data file(.jks,.p12)",
+                                "toolTip": "Custom Identity KeyStore for SSL configuration",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".jks,.p12"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "file",
+                                    "openMode": "binary"
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "uploadedCustomIdentityKeyStorePassphrase",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": " The passphrase for the Custom Identity KeyStore",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
+                                    "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
+                                },
+                                "options": {
+                                    "hideConfirmation": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "uploadedCustomIdentityKeyStoreType",
+                                "type": "Microsoft.Common.DropDown",
+                                "visible": "true",
+                                "label": "The Custom Identity KeyStore type (JKS,PKCS12)",
+                                "defaultValue": "JKS",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "JKS",
+                                            "value": "JKS"
+                                        },
+                                        {
+                                            "label": "PKCS12",
+                                            "value": "PKCS12"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
+                            {
+                                "name": "uploadedCustomTrustKeyStoreData",
+                                "type": "Microsoft.Common.FileUpload",
+                                "label": "Custom Trust KeyStore Data file(.jks,.p12)",
+                                "toolTip": "Custom Trust KeyStore for SSL configuration.",
+                                "constraints": {
+                                    "required": true,
+                                    "accept": ".jks,.p12"
+                                },
+                                "options": {
+                                    "multiple": false,
+                                    "uploadMode": "file",
+                                    "openMode": "binary"
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "uploadedCustomTrustKeyStorePassPhrase",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "label": {
+                                    "password": "Password",
+                                    "confirmPassword": "Confirm password"
+                                },
+                                "toolTip": " The passphrase for the Custom Trust KeyStore",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
+                                    "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
+                                },
+                                "options": {
+                                    "hideConfirmation": false
+                                },
+                                "visible": true
+                            },
+                            {
+                                "name": "uploadedCustomTrustKeyStoreType",
+                                "type": "Microsoft.Common.DropDown",
+                                "visible": "true",
+                                "label": "The Custom Trust KeyStore type (JKS,PKCS12)",
+                                "defaultValue": "JKS",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "allowedValues": [
+                                        {
+                                            "label": "JKS",
+                                            "value": "JKS"
+                                        },
+                                        {
+                                            "label": "PKCS12",
+                                            "value": "PKCS12"
+                                        }
+                                    ],
+                                    "required": true
+                                }
+                            },
+                            {
+                                "name": "uploadedPrivateKeyAlias",
+                                "type": "Microsoft.Common.TextBox",
+                                "visible": "true",
+                                "label": "The private Key Alias",
+                                "defaultValue": "",
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^[a-z0-9A-Z]{1,30}$",
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                }
+                            },
+                            {
+                                "name": "uploadedPrivateKeyPassPhrase",
+                                "type": "Microsoft.Common.PasswordBox",
+                                "visible": "true",
+                                "label": {
+                                    "password": "The passphrase for the Private Key",
+                                    "confirmPassword": "Confirm passphrase"
+                                },
+                                "toolTip": "Use only letters and numbers",
+                                "constraints": {
+                                    "required": true,
+                                    "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
+                                    "validationMessage": "The passphrase must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
+                                },
+                                "options": {
+                                    "hideConfirmation": false
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "keyVaultStoredCustomSSLSettings",
+                        "type": "Microsoft.Common.Section",
+                        "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'keyVaultStoredConfig'))]",
                         "label": "SSL Configuration Settings",
                         "elements": [
                             {
@@ -345,7 +515,7 @@
                                 "constraints": {
                                     "required": true,
                                     "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
-                                    "validationMessage": "[if(greater(length(steps('section_sslConfiguration').customSSLSettings.keyVaultResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
+                                    "validationMessage": "[if(greater(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultResourceGroup), 90),'Resource group names only allow up to 90 characters.', 'Resource group names only allow alphanumeric characters, periods, underscores, hyphens and parenthesis and cannot end in a period.')]"
                                 }
                             },
                             {
@@ -358,7 +528,7 @@
                                 "constraints": {
                                     "required": true,
                                     "regex": "^(?=.{3,24}$)[a-zA-Z](([a-z0-9A-Z]*|(?:\\-[^\\-][a-z0-9A-Z]*))*)$",
-                                    "validationMessage": "[if(or(greater(length(steps('section_sslConfiguration').customSSLSettings.keyVaultName), 24), less(length(steps('section_sslConfiguration').customSSLSettings.keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
+                                    "validationMessage": "[if(or(greater(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultName), 24), less(length(steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultName), 3)),'Vault name must be between 3-24 alphanumeric characters. The name must begin with a letter, end with a letter or digit, and not contain consecutive hyphens.','Vault name must only contain alphanumeric characters and dashes and cannot start with a number')]"
                                 }
                             },
                             {
@@ -1125,16 +1295,25 @@
             "wlsUserName": "[basics('basicsRequired').wlsUserName]",
             "enableHTTPAdminListenPort": "[basics('basicsOptional').enableAdminHTTPListenPort]",
             "enableCustomSSL": "[steps('section_sslConfiguration').enableCustomSSL]",
-            "adminSSLKeyVaultResourceGroup": "[steps('section_sslConfiguration').customSSLSettings.keyVaultResourceGroup]",
-            "adminSSLKeyVaultName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultName]",
-            "keyVaultCustomIdentityKeyStoreDataSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomIdentityKeyStoreDataSecretName]",
-            "keyVaultCustomIdentityKeyStorePassPhraseSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomIdentityKeyStorePassPhraseSecretName]",
-            "keyVaultCustomIdentityKeyStoreType": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomIdentityKeyStoreType]",
-            "keyVaultCustomTrustKeyStoreDataSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomTrustKeyStoreDataSecretName]",
-            "keyVaultCustomTrustKeyStorePassPhraseSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomTrustKeyStorePassPhraseSecretName]",
-            "keyVaultCustomTrustKeyStoreType": "[steps('section_sslConfiguration').customSSLSettings.keyVaultCustomTrustKeyStoreType]",
-            "keyVaultPrivateKeyAliasSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultPrivateKeyAliasSecretName]",
-            "keyVaultPrivateKeyPassPhraseSecretName": "[steps('section_sslConfiguration').customSSLSettings.keyVaultPrivateKeyPassPhraseSecretName]"
+            "sslConfigurationAccessOption": "[steps('section_sslConfiguration').sslConfigurationAccessOption]",
+            "adminSSLKeyVaultResourceGroup": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultResourceGroup]",
+            "adminSSLKeyVaultName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultName]",
+            "keyVaultCustomIdentityKeyStoreDataSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomIdentityKeyStoreDataSecretName]",
+            "keyVaultCustomIdentityKeyStorePassPhraseSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomIdentityKeyStorePassPhraseSecretName]",
+            "keyVaultCustomIdentityKeyStoreType": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomIdentityKeyStoreType]",
+            "keyVaultCustomTrustKeyStoreDataSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomTrustKeyStoreDataSecretName]",
+            "keyVaultCustomTrustKeyStorePassPhraseSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomTrustKeyStorePassPhraseSecretName]",
+            "keyVaultCustomTrustKeyStoreType": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultCustomTrustKeyStoreType]",
+            "keyVaultPrivateKeyAliasSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultPrivateKeyAliasSecretName]",
+            "keyVaultPrivateKeyPassPhraseSecretName": "[steps('section_sslConfiguration').keyVaultStoredCustomSSLSettings.keyVaultPrivateKeyPassPhraseSecretName]",
+            "uploadedCustomIdentityKeyStoreData": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStoreData]",
+            "uploadedCustomIdentityKeyStorePassphrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStorePassphrase]",
+            "uploadedCustomIdentityKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomIdentityKeyStoreType]",
+            "uploadedCustomTrustKeyStoreData": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreData]",
+            "uploadedCustomTrustKeyStorePassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStorePassPhrase]",
+            "uploadedCustomTrustKeyStoreType": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedCustomTrustKeyStoreType]",
+            "uploadedPrivateKeyAlias": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyAlias]",
+            "uploadedPrivateKeyPassPhrase": "[steps('section_sslConfiguration').uploadedCustomSSLSettings.uploadedPrivateKeyPassPhrase]"
         }
     }
 }
