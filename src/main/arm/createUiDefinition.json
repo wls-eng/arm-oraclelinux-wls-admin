@@ -293,7 +293,7 @@
                             "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) Port, with your own SSL Certificate provided by a Certifying Authority.",
                             "link": {
                                 "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-overview"
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
                             }
                         }
                     },
