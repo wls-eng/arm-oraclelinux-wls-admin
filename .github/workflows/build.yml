@@ -131,6 +131,7 @@ jobs:
         path: ${{steps.artifact_path.outputs.artifactPath}}
 
   deploy-dependencies:
+    if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
     needs: preflight
     runs-on: ubuntu-latest
     steps:
@@ -173,6 +174,7 @@ jobs:
             --end-ip-address "0.0.0.0"
 
   deploy-weblogic-admin:
+   if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
    needs: deploy-dependencies
    runs-on: ubuntu-latest
    strategy:
@@ -436,9 +438,23 @@ jobs:
       run: |
         curl -XDELETE --user ${{ env.elkUser }}:${{ env.elkPassword }}  ${{ env.elkURI }}/azure-weblogic-admin-${{ github.run_id }}${{ github.run_number }}
   
-  cleanup:
+  cleanup-github-resource:
     needs: deploy-weblogic-admin
     if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ${{ env.offerName }}
+        uses: actions/checkout@v2
+        with:
+          path: ${{ env.offerName }}
+      - name: Delete testing branch
+        run: |
+          cd ${{ env.offerName }}
+          git push https://$git_token@github.com/$userName/${{ env.offerName }}.git -f --delete $testbranchName
+
+  cleanup-az-resource:
+    needs: deploy-weblogic-admin
+    if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout ${{ env.offerName }}
