@@ -227,9 +227,9 @@
                     {
                         "name": "enableAdminHTTPListenPort",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Enable HTTP Listen Port on WebLogic Administration Server?",
+                        "label": "Enable HTTP listen port on WebLogic Administration Server?",
                         "defaultValue": "Yes",
-                        "toolTip": "Select 'No' to disable HTTP Listen Port on WebLogic Administration Server.",
+                        "toolTip": "Select 'No' to disable HTTP listen port on WebLogic Administration Server.",
                         "constraints": {
                             "allowedValues": [
                                 {
@@ -247,7 +247,7 @@
                     },
                     {
                         "name": "useSystemAssignedManagedIdentity",
-                        "label": "Cause a system assigned managed identity to be created for the VM(s).",
+                        "label": "Create a system assigned managed identity to be created for the VM(s).",
                         "type": "Microsoft.Common.OptionsGroup",
                         "toolTip": "System assigned managed identities enable credential-free secure access to many Azure resources from this VM.",
                         "constraints": {
@@ -277,20 +277,64 @@
                     }
                 ],
                 "visible": true
-            }
+            },
+            {
+                "name": "howToReportIssues",
+                "type": "Microsoft.Common.Section",
+                "label": "Report issues, get help, and share feedback",
+                "elements": [
+                    {
+                        "name": "howToReportIssueText",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "If you encounter problems during the deployment of Oracle WebLogic Server, report them here.",
+                            "link": {
+                                "label": "Issue tracker",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-issues"
+                            }
+                        }   
+                    },
+                    {
+                        "name": "howToJoinSlack",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "If you want to interact directly with the Oracle WebLogic community, join the public Slack channel named 'oracle-weblogic'.",
+                            "link": {
+                                "label": "Join Slack",
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-slack"
+                            }
+                        }
+                    },
+                    {
+                        "name": "survey",
+                        "type": "Microsoft.Common.TextBlock",
+                        "visible": true,
+                        "options": {
+                            "text": "To get free help with Azure migration from the development team, fill out this survey.",
+                            "link": {
+                                "label": "Take survey",
+                                "uri": "https://aka.ms/wls-on-azure-survey"
+                            }
+                        }
+                    }                    
+                ],
+                "visible": true
+            }            
         ],
         "steps": [
             {
                 "name": "section_sslConfiguration",
                 "type": "Microsoft.Common.Section",
-                "label": "SSL Configuration",
+                "label": "TLS/SSL Configuration",
                 "elements": [
                     {
                         "name": "sslConfigurationText",
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) Port, with your own SSL Certificate provided by a Certifying Authority.",
+                            "text": "Selecting 'Yes' here will cause the template to provision WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL certificate.",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-config"
@@ -300,9 +344,9 @@
                     {
                         "name": "enableCustomSSL",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Configure WebLogic Administration Console on HTTPS (Secure) Port, with your own SSL Certificate provided by a Certifying Authority?",
+                        "label": "Configure WebLogic Administration Console on HTTPS (Secure) port, with your own TLS/SSL certificate?",
                         "defaultValue": "No",
-                        "toolTip": "Select 'Yes' to configure WebLogic Administration Console on HTTPS (Secure) Port with your own SSL Certificate provided by a Certifying Authority.",
+                        "toolTip": "Select 'Yes' to configure WebLogic Administration Console on HTTPS (Secure) port with your own TLS/SSL certificate.",
                         "constraints": {
                             "allowedValues": [
                                 {
@@ -342,13 +386,13 @@
                         "name": "uploadedCustomSSLSettings",
                         "type": "Microsoft.Common.Section",
                         "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'uploadConfig'))]",
-                        "label": "SSL Configuration Settings",
+                        "label": "TLS/SSL Configuration Settings",
                         "elements": [
                             {
                                 "name": "uploadedCustomIdentityKeyStoreData",
                                 "type": "Microsoft.Common.FileUpload",
                                 "label": "Custom Identity KeyStore Data file(.jks,.p12)",
-                                "toolTip": "Custom Identity KeyStore for SSL configuration",
+                                "toolTip": "Custom Identity KeyStore for TLS/SSL configuration",
                                 "constraints": {
                                     "required": true,
                                     "accept": ".jks,.p12"
@@ -403,7 +447,7 @@
                                 "name": "uploadedCustomTrustKeyStoreData",
                                 "type": "Microsoft.Common.FileUpload",
                                 "label": "Custom Trust KeyStore Data file(.jks,.p12)",
-                                "toolTip": "Custom Trust KeyStore for SSL configuration.",
+                                "toolTip": "Custom Trust KeyStore for TLS/SSL configuration.",
                                 "constraints": {
                                     "required": true,
                                     "accept": ".jks,.p12"
@@ -491,14 +535,14 @@
                         "name": "keyVaultStoredCustomSSLSettings",
                         "type": "Microsoft.Common.Section",
                         "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'keyVaultStoredConfig'))]",
-                        "label": "SSL Configuration Settings",
+                        "label": "TLS/SSL Configuration Settings",
                         "elements": [
                             {
                                 "name": "keyVaultText",
                                 "type": "Microsoft.Common.TextBlock",
                                 "visible": "true",
                                 "options": {
-                                    "text": "Enabling a HTTPS (Secure) Port for the Administration Console requires you to obtain a valid SSL Certificate from a Certifying Authority (CA). The template will look for the certificate and other configuration items in the Azure KeyVault specified here.",
+                                    "text": "Enabling a HTTPS (Secure) port for the Administration Console requires you to obtain a valid TLS/SSL certificate. The template will look for the certificate and other configuration items in the Azure KeyVault specified here.",
                                     "link": {
                                         "label": "Learn more",
                                         "uri": "https://aka.ms/arm-oraclelinux-wls-cluster-app-gateway-key-vault"
@@ -522,7 +566,7 @@
                                 "name": "keyVaultName",
                                 "type": "Microsoft.Common.TextBox",
                                 "visible": "true",
-                                "label": "Name of the Azure KeyVault containing secrets for the SSL Certificate",
+                                "label": "Name of the Azure KeyVault containing secrets for the TLS/SSL certificate",
                                 "defaultValue": "",
                                 "toolTip": "Use only letters and numbers",
                                 "constraints": {
@@ -754,9 +798,9 @@
                             {
                                 "name": "dnsZoneResourceGroup",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "Name of the resource group contains the DNS Zone in current subscription",
+                                "label": "Name of the resource group which contains the DNS Zone in current subscription",
                                 "defaultValue": "",
-                                "toolTip": "Name of the resource group contains the DNS Zone in current subscription",
+                                "toolTip": "Name of the resource group which contains the DNS Zone in current subscription",
                                 "constraints": {
                                     "required": true,
                                     "regex": "^[a-z0-9A-Z.\\-_()]{0,89}([a-z0-9A-Z\\-_()]{1})$",
@@ -790,7 +834,7 @@
                                 "visible": "[and(steps('section_dnsConfiguration').customDNSSettings.bringDNSZone, less(length(steps('section_dnsConfiguration').customDNSSettings.dnsIdentity.userAssignedIdentities), 1))]",
                                 "options": {
                                     "icon": "Error",
-                                    "text": "This option will use Azure deployment scripts to update records to your Azure DNS Zone. You have to add at least one user assigned identity to access Azure resources.",
+                                    "text": "This option will use Azure deployment scripts to update records to your Azure DNS Zone. You have to add at least one user-assigned identity to access Azure resources.",
                                     "uri": "https://docs.microsoft.com/en-us/azure/azure-resource-manager/templates/deployment-script-template"
                                 }
                             },
@@ -799,7 +843,7 @@
                                 "type": "Microsoft.ManagedIdentity.IdentitySelector",
                                 "label": "Managed Identity Configuration",
                                 "toolTip": {
-                                    "userAssignedIdentity": "Add user assigned identities to grant the resource access to Azure resources."
+                                    "userAssignedIdentity": "Add user-assigned identities to grant the resource access to Azure resources."
                                 },
                                 "defaultValue": {
                                     "systemAssignedIdentity": "Off"
@@ -819,7 +863,7 @@
                 "type": "Microsoft.Common.Section",
                 "label": "Database",
                 "subLabel": {
-                    "preValidation": "Configure integrations to Database",
+                    "preValidation": "Configure integrations to database",
                     "postValidation": "Done"
                 },
                 "bladeTitle": "Database",
@@ -829,13 +873,13 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the WebLogic Server to connect to the desired pre-existing Database.  The database must be network accessible to the VNET and subnets created by the template."
+                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the WebLogic Server to connect to the desired pre-existing database.  The database must be network accessible to the VNET and subnets created by the template."
                         }
                     },
                     {
                         "name": "enableDB",
                         "type": "Microsoft.Common.OptionsGroup",
-                        "label": "Connect to Database?",
+                        "label": "Connect to database?",
                         "defaultValue": "No",
                         "toolTip": "Select 'Yes' and provide required info to configure the connection to a database.",
                         "constraints": {
@@ -862,15 +906,15 @@
                                 "type": "Microsoft.Common.DropDown",
                                 "label": "Choose database type",
                                 "toolTip": "Choose database type",
-                                "defaultValue": "Oracle Database",
+                                "defaultValue": "Oracle database",
                                 "constraints": {
                                     "allowedValues": [
                                         {
-                                            "label": "Azure Database for PostgreSQL",
+                                            "label": "Azure database for PostgreSQL",
                                             "value": "postgresql"
                                         },
                                         {
-                                            "label": "Oracle Database",
+                                            "label": "Oracle database",
                                             "value": "oracle"
                                         },
                                         {
@@ -911,13 +955,13 @@
                             {
                                 "name": "dbUser",
                                 "type": "Microsoft.Common.TextBox",
-                                "label": "Database Username",
+                                "label": "Database username",
                                 "toolTip": "Use only letters and numbers",
                                 "defaultValue": "",
                                 "constraints": {
                                     "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "^(?!\\-)([a-z0-9A-Z@\\-]{1,128})([^\\-])$",
-                                    "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of Database Username."
+                                    "validationMessage": "The value must be 1-128 characters long and must only contain letters, numbers, hyphen(-) and the at sign, no hyphen allowed at the beginning and the end of database username."
                                 },
                                 "visible": true
                             },
@@ -1086,8 +1130,8 @@
                             {
                                 "name": "wlsLDAPSSLCertificate",
                                 "type": "Microsoft.Common.FileUpload",
-                                "label": "Trust Keystore for SSL Configuration",
-                                "toolTip": "Custom Trust Keystore of WebLogic Server, used to enable SSL.",
+                                "label": "Trust Keystore for TLS/SSL Configuration",
+                                "toolTip": "Custom Trust Keystore of WebLogic Server, used to enable TLS/SSL.",
                                 "constraints": {
                                     "required": true,
                                     "accept": ".cer"
@@ -1118,10 +1162,10 @@
                         "visible": true,
                         "options": {
                             "icon": "None",
-                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure the Elasticsearch and Kibana, the WebLogic Server logs will be exported to Elasticsearch server. To ensure Logstash works correctly, the selected Virtual Machines have at least 2.5GB memory.",
+                            "text": "Selecting 'Yes' here and providing the configuration will cause the template to configure Elasticsearch and Kibana to store WLS logs.",
                             "link": {
                                 "label": "Learn more",
-                                "uri": "https://aka.ms/arm-oraclelinux-wls-elk"
+                                "uri": "https://aka.ms/arm-oraclelinux-wls-elk-tutorial"
                             }
                         }
                     },
@@ -1150,6 +1194,19 @@
                         "type": "Microsoft.Common.Section",
                         "label": "Connection settings",
                         "elements": [
+                            {
+                                "name": "elkMemoryRequiredText",
+                                "type": "Microsoft.Common.TextBlock",
+                                "visible": true,
+                                "options": {
+                                    "icon": "None",
+                                    "text": "To ensure Logstash works correctly, the selected Virtual Machines have at least 2.5GB memory.",
+                                    "link": {
+                                        "label": "Learn more",
+                                        "uri": "https://aka.ms/arm-oraclelinux-wls-elk"
+                                    }
+                                }
+                            },
                             {
                                 "name": "elkMemoryRequired",
                                 "type": "Microsoft.Common.InfoBox",
