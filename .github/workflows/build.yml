@@ -461,11 +461,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: ${{ env.offerName }}
-      - name: Delete testing branch
-        run: |
-          cd ${{ env.offerName }}
-          git push https://$git_token@github.com/$userName/${{ env.offerName }}.git -f --delete $testbranchName
-      
       - uses: azure/login@v1
         id: azure-login
         with:
@@ -481,7 +476,7 @@ jobs:
             
   summary:
     needs: deploy-weblogic-admin
-    if: always()
+    if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
     runs-on: ubuntu-latest
     steps:
       - name: summarize jobs
@@ -504,3 +499,4 @@ jobs:
                 "text":"$failed_job_num jobs failed in Admin Offer's workflow, please take a look at: https://github.com/wls-eng/arm-oraclelinux-wls-admin/actions/runs/${{ github.run_id }}"
                 }
             EOF
+            fi
