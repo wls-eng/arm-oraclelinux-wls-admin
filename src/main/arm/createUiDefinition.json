@@ -389,6 +389,16 @@
                         "label": "TLS/SSL Configuration Settings",
                         "elements": [
                             {
+                                "name": "sslKeystoreInfo0",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "true",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "It's not allowed to use the same keystore for identity and trust. Click the link for how to obtain and store certificates for development and production environments.",
+                                    "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-configuration"
+                                }
+                            },
+                            {
                                 "name": "uploadedCustomIdentityKeyStoreData",
                                 "type": "Microsoft.Common.FileUpload",
                                 "label": "Custom Identity KeyStore Data file(.jks,.p12)",
@@ -537,6 +547,16 @@
                         "visible": "[and(steps('section_sslConfiguration').enableCustomSSL, equals(steps('section_sslConfiguration').sslConfigurationAccessOption, 'keyVaultStoredConfig'))]",
                         "label": "TLS/SSL Configuration Settings",
                         "elements": [
+                            {
+                                "name": "sslKeystoreInfo1",
+                                "type": "Microsoft.Common.InfoBox",
+                                "visible": "true",
+                                "options": {
+                                    "icon": "Info",
+                                    "text": "It's not allowed to use the same keystore for identity and trust. Click the link for how to obtain and store certificates for development and production environments.",
+                                    "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-configuration"
+                                }
+                            },
                             {
                                 "name": "keyVaultText",
                                 "type": "Microsoft.Common.TextBlock",
@@ -709,7 +729,7 @@
                         "type": "Microsoft.Common.TextBlock",
                         "visible": true,
                         "options": {
-                            "text": "Selecting 'Yes' here will cause the template to provision Oracle WebLogic Server Administration Console using custom DNS Name (example: console.contoso.com)",
+                            "text": "Selecting 'Yes' here will cause the template to provision Oracle WebLogic Server Administration Console using custom DNS Name (example: admin.contoso.com)",
                             "link": {
                                 "label": "Learn more",
                                 "uri": "https://aka.ms/arm-oraclelinux-wls-dns"
@@ -812,7 +832,7 @@
                                 "name": "dnszoneAdminConsoleLabel",
                                 "type": "Microsoft.Common.TextBox",
                                 "label": "Label for Oracle WebLogic Administration Console",
-                                "defaultValue": "console",
+                                "defaultValue": "admin",
                                 "toolTip": "Specify a label to generate subdomain of Oracle WebLogic Administration Console",
                                 "constraints": {
                                     "required": true,
@@ -823,7 +843,7 @@
                                         },
                                         {
                                             "isValid": "[less(sub(length(concat(steps('section_dnsConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName)),length(replace(concat(steps('section_dnsConfiguration').customDNSSettings.dnszoneAdminConsoleLabel,'.',steps('section_dnsConfiguration').customDNSSettings.dnszoneName), '.', ''))),34)]",
-                                            "message": "Subdomain must be between 2 and 34 labels. For example, \"applications.contoso.com\" has 3 labels."
+                                            "message": "Subdomain must be between 2 and 34 labels. For example, \"admin.contoso.com\" has 3 labels."
                                         }
                                     ]
                                 }
