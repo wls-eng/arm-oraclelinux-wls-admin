@@ -626,7 +626,7 @@ function create_temp_folder()
 function validate_elastic_server()
 {
     timestamp=$(date +%s)
-    testIndex="azure-weblogic-validate-elastic-server-${timestamp}"
+    testIndex="${logIndex}-validate-elk-server-from-admin-server-${timestamp}"
     output=$(curl -XPUT --user ${elasticUserName}:${elasticPassword}  ${elasticURI}/${testIndex})
     if [[ $? -eq 1 ||  -z `echo $output | grep "\"acknowledged\":true"` ]];then
         echo $output
