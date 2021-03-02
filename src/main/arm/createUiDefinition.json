@@ -1130,8 +1130,8 @@
                             {
                                 "name": "wlsLDAPSSLCertificate",
                                 "type": "Microsoft.Common.FileUpload",
-                                "label": "Trust Keystore for TLS/SSL Configuration",
-                                "toolTip": "Custom Trust Keystore of WebLogic Server, used to enable TLS/SSL.",
+                                "label": "Client certificate for TLS/SSL Configuration (.cer)",
+                                "toolTip": "Client certificate of AAD LADP server, used to configure the Trust Keystore to enable TLS/SSL in Oracle WebLogic Server.",
                                 "constraints": {
                                     "required": true,
                                     "accept": ".cer"
