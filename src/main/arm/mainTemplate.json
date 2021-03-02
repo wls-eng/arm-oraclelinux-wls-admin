@@ -954,7 +954,8 @@
       {
          "name": "aadLinkedTemplateWithCustomSSL",
          "dependsOn": [
-            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]"
+            "[resourceId('Microsoft.Resources/deployments', 'dbLinkedTemplate')]",
+            "[resourceId('Microsoft.Resources/deployments', 'keyVaultNestedTemplate')]"
          ],
          "type": "Microsoft.Resources/deployments",
          "apiVersion": "${azure.apiVersion}",
@@ -1020,13 +1021,13 @@
                "keyVaultCustomTrustKeyStorePassPhrase": {
                   "reference": {
                      "keyVault": {
-                        "id": "[resourceId(variables('const_currentSubscription'),  parameters('adminSSLKeyVaultResourceGroup'), 'Microsoft.KeyVault/vaults', parameters('adminSSLKeyVaultName'))]"
+                        "id": "[resourceId(variables('const_currentSubscription'), if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultResourceGroup'),resourceGroup().name), 'Microsoft.KeyVault/vaults', if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('adminSSLKeyVaultName'),reference('keyVaultNestedTemplate', '${azure.apiVersion}').outputs.keyVaultName.value))]"
                      },
-                     "secretName": "[parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName')]"
+                     "secretName": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStorePassPhraseSecretName'), reference('keyVaultNestedTemplate', '${azure.apiVersion}').outputs.customTrustKeyStorePassPhraseSecretName.value)]"
                   }
                },
                "keyVaultCustomTrustKeyStoreType": {
-                  "value": "[parameters('keyVaultCustomTrustKeyStoreType')]"
+                  "value": "[if(equals(parameters('sslConfigurationAccessOption'), variables('const_sslConfigurationAccessOptionKeyVaultStoredConfig')),parameters('keyVaultCustomTrustKeyStoreType'), parameters('uploadedCustomTrustKeyStoreType'))]"
                }
             }
          }
