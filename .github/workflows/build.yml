@@ -454,20 +454,23 @@ jobs:
 
   cleanup-az-resource:
     needs: deploy-weblogic-admin
-    if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Checkout ${{ env.offerName }}
         uses: actions/checkout@v2
+        if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
         with:
           path: ${{ env.offerName }}
       - uses: azure/login@v1
+        if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
         id: azure-login
         with:
          creds: ${{ secrets.AZURE_CREDENTIALS }}
       - name: Delete DB Resource Group
         id: delete-db-resource-group
         uses: azure/CLI@v1
+        if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
         with:
           azcliversion: ${{ env.azCliVersion }}
           inlineScript: |
@@ -476,10 +479,11 @@ jobs:
             
   summary:
     needs: deploy-weblogic-admin
-    if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: summarize jobs
+        if: ${{!(github.event_name == 'schedule' && github.repository_owner != 'wls-eng')}}
         run: |
             workflow_jobs=$(curl -H "Accept: application/vnd.github.v3+json" https://api.github.com/repos/wls-eng/arm-oraclelinux-wls-admin/actions/runs/${{ github.run_id }}/jobs)
             critical_job_num=$(echo $workflow_jobs | jq '.jobs | map(select(.name|test("^deploy-weblogic-admin."))) | length')
