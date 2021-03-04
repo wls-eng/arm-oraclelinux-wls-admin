@@ -394,7 +394,7 @@
                                 "visible": "true",
                                 "options": {
                                     "icon": "Info",
-                                    "text": "It's not allowed to use the same keystore for identity and trust. Click the link for how to obtain and store certificates for development and production environments.",
+                                    "text": "You must provide different files for identity and trust KeyStores. Select here for more details.",
                                     "uri": "https://aka.ms/arm-oraclelinux-wls-ssl-configuration"
                                 }
                             },
