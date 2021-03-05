@@ -47,9 +47,11 @@ jobs:
         run: |
           cd ${{ env.repoName }}
           pidType=${{ github.event.inputs.pidType }}
-          if [[ '${pidType}' == 'oracle' ]];then
+          if [[ "${pidType}" == "oracle" ]];then
+            echo "using oracle pid"
             mvn -Ptemplate-validation-tests clean install
           else
+            echo "using ms pid"
             mvn -Ptemplate-validation-tests clean install -Ddev
           fi
 
