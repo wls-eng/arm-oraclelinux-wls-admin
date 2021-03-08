@@ -135,10 +135,12 @@ destroyEditSession("$wlsServerName")
 disconnect()
 EOF
 
+sudo chown -R $username:$groupname $wlsDomainPath/configureSSL.py
+
 echo "Running wlst script to configure SSL on $wlsServerName"
 runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $wlsDomainPath/configureSSL.py"
 if [[ $? != 0 ]]; then
-     echo "Error : SSL Configuratio for server $wlsServerName failed"
+     echo "Error : SSL Configuration for server $wlsServerName failed"
      exit 1
 fi
 
@@ -212,7 +214,7 @@ function importAADCertificateIntoWLSCustomTrustKeyStore()
 
         echo "Importing AAD Certificate into WLS Custom Trust Key Store: "
 
-        sudo ${JAVA_HOME}/bin/keytool -noprompt -import -trustcacerts -keystore {KEYSTORE_PATH}/trust.keystore -storepass ${customTrustKeyStorePassPhrase} -alias aadtrust -file ${addsCertificate} -storetype ${customTrustKeyStoreType}
+        sudo ${JAVA_HOME}/bin/keytool -noprompt -import -trustcacerts -keystore $customSSLTrustKeyStoreFile -storepass $customTrustKeyStorePassPhrase -alias aadtrust -file ${addsCertificate} -storetype $customTrustKeyStoreType
     else
         echo "customSSL not enabled. Not required to configure AAD for WebLogic Custom SSL"
     fi
@@ -302,6 +304,8 @@ export oracleHome=$5
 export wlsDomainPath=$6
 
 export enableAAD="${7}"
+enableAAD="${enableAAD,,}"
+
 export wlsADSSLCer="${8}"
 
 export isCustomSSLEnabled="${9}"
@@ -335,7 +339,6 @@ cleanup
 
     if [ "$enableAAD" == "true" ];then
         parseLDAPCertificate
-        importAADCertificate
         importAADCertificateIntoWLSCustomTrustKeyStore
     fi
     
