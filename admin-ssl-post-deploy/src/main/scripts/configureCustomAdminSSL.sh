@@ -71,12 +71,7 @@ function validateInput()
         fi
     fi
 
-    if [ -z "$elasticUserName" ];
-    then
-        echo_stderr "elasticUserName is required. "
-    fi
-
-    if [ ! -z "$isCustomSSLEnabled" == "true" ];
+    if [ "$isCustomSSLEnabled" == "true" ];
     then
         if [[ -z "$customIdentityKeyStoreBase64String" || -z "$customIdentityKeyStorePassPhrase"  || -z "$customIdentityKeyStoreType" ||
               -z "$customTrustKeyStoreBase64String" || -z "$customTrustKeyStorePassPhrase"  || -z "$customTrustKeyStoreType" ||
@@ -85,6 +80,9 @@ function validateInput()
             echo_stderr "customIdentityKeyStoreBase64String, customIdentityKeyStorePassPhrase, customIdentityKeyStoreType, customTrustKeyStoreBase64String, customTrustKeyStorePassPhrase, customTrustKeyStoreType, privateKeyAlias and privateKeyPassPhrase are required. "
             exit 1
         fi
+    else
+        echo "SSL configuration not enabled as iscustomSSLEnabled was set to false. Please set the flag to true and retry."
+        exit 1
     fi
 }
 
@@ -104,6 +102,9 @@ function configureSSL()
 {
     echo "Configuring SSL on Admin Server: $wlsServerName"
     cat <<EOF >$wlsDomainPath/configureSSL.py
+
+isCustomSSLEnabled='${isCustomSSLEnabled}'
+
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 edit("$wlsServerName")
 startEdit()
@@ -133,6 +134,14 @@ activate()
 destroyEditSession("$wlsServerName")
 disconnect()
 EOF
+
+echo "Running wlst script to configure SSL on $wlsServerName"
+runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST $wlsDomainPath/configureSSL.py"
+if [[ $? != 0 ]]; then
+     echo "Error : SSL Configuratio for server $wlsServerName failed"
+     exit 1
+fi
+
 }
 
 
@@ -279,7 +288,7 @@ for (( i=0;i<$ELEMENTS;i++)); do
     echo "ARG[${args[${i}]}]"
 done
 
-if [ $# -lt 23 ]
+if [ $# -lt 9 ]
 then
     usage
     exit 1
@@ -322,8 +331,6 @@ export KEYSTORE_PATH="$wlsDomainPath/$wlsDomainName/keystores"
 validateInput
 cleanup
 
-if [ "$isCustomSSLEnabled" == "true" ];
-then
     parseAndSaveCustomSSLKeyStoreData
 
     if [ "$enableAAD" == "true" ];then
@@ -336,10 +343,5 @@ then
     configureSSL
     restartAdminServerService
     wait_for_admin
-
-else
-    echo "SSL configuration not enabled as iscustomSSLEnabled was set to false. Please set the flag to true and retry."
-    exit 1
-fi
 
 cleanup

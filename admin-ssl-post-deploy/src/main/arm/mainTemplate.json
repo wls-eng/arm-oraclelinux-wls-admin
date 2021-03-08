@@ -16,6 +16,13 @@
          },
          "defaultValue": ""
       },
+      "adminVMName": {
+         "type": "string",
+         "defaultValue": "adminVM",
+         "metadata": {
+            "description": "Admin Server hosting VM name."
+         }
+      },
       "aadsSettings": {
          "type": "object",
          "defaultValue": {
@@ -66,7 +73,14 @@
             "privateKeyPassPhrase":"null"
          },
          "metadata": {
-            "description": "If enable is true, must specify all customSSLSettings. customIdentityKeyStoreBase64String & customTrustKeyStoreBase64String are the custom identity & trust keystore data repectively, i.e., contents of identity.jks, trust.jks keystore files in base64 encoding. Similarly, all other custom ssl settings are also required to configure SSL settings"
+            "description": "If enable is true, must specify all customSSLSettings. customIdentityKeyStoreBase64String and customTrustKeyStoreBase64String are the custom identity and trust keystore data repectively, i.e., contents of identity.jks, trust.jks keystore files in base64 encoding. Similarly, all other custom ssl settings are also required to configure SSL settings"
+         }
+      },
+      "deploy_timestamp": {
+          "type": "string",
+          "defaultValue": "[utcNow('yyMMddHHmm')]",
+          "metadata": {
+              "description": "Timestamp required for uniquely identifying and executing custom extension script multiple times"
          }
       }
    },
@@ -74,7 +88,7 @@
       "const_hyphen": "-",
       "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
       "const_wlsDomainPath": "/u01/domains",
-      "name_scriptFile": "configureCustomAdminSSL.sh",
+      "name_scriptFile": "configureCustomAdminSSL.sh"
    },
    "resources": [
       {
@@ -95,15 +109,13 @@
          "name": "[concat(parameters('adminVMName'),'/newuserscript')]",
          "apiVersion": "${azure.apiVersion}",
          "location": "[parameters('location')]",
-         "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines/', parameters('adminVMName'))]"
-         ],
          "properties": {
             "publisher": "Microsoft.Azure.Extensions",
             "type": "CustomScript",
             "typeHandlerVersion": "2.1",
             "autoUpgradeMinorVersion": true,
             "settings": {
+               "timestamp": "[int(parameters('deploy_timestamp'))]",
                "fileUris": [
                   "[uri(parameters('_artifactsLocation'), concat('scripts/', variables('name_scriptFile'), parameters('_artifactsLocationSasToken')))]"
                ]
@@ -117,7 +129,7 @@
          "apiVersion": "${azure.apiVersion}",
          "name": "${post.deploy.ssl.config.end}",
          "dependsOn": [
-            "virtualMachineExtensionLoop"
+            "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
          ],
          "properties": {
             "mode": "Incremental",
