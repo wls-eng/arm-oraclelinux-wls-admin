@@ -332,8 +332,11 @@ then
         importAADCertificateIntoWLSCustomTrustKeyStore
     fi
     
+    wait_for_admin
     configureSSL
     restartAdminServerService
+    wait_for_admin
+
 else
     echo "SSL configuration not enabled as iscustomSSLEnabled was set to false. Please set the flag to true and retry."
     exit 1
