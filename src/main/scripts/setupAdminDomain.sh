@@ -392,10 +392,34 @@ sudo chmod -R 750 ${stopWebLogicScript}
 
 }
 
+function validateSSLKeyStores()
+{
+   sudo chown -R $username:$groupname $KEYSTORE_PATH
+
+   #validate identity keystore
+   runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; keytool -list -v -keystore $customIdentityKeyStoreFileName -storepass $customIdentityKeyStorePassPhrase -storetype $customIdentityKeyStoreType | grep 'Entry type:' | grep 'PrivateKeyEntry'"
+
+   if [[ $? != 0 ]]; then
+       echo "Error : Identity Keystore Validation Failed !!"
+       exit 1
+   fi
+
+   #validate Trust keystore
+   runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; keytool -list -v -keystore $customTrustKeyStoreFileName -storepass $customTrustKeyStorePassPhrase -storetype $customTrustKeyStoreType | grep 'Entry type:' | grep 'trustedCertEntry'"
+
+   if [[ $? != 0 ]]; then
+       echo "Error : Trust Keystore Validation Failed !!"
+       exit 1
+   fi
+
+   echo "ValidateSSLKeyStores Successfull !!"
+}
+
 function storeCustomSSLCerts()
 {
     if [ "${isCustomSSLEnabled,,}" == "true" ];
     then
+
         setupKeyStoreDir
 
         echo "Custom SSL is enabled. Storing CertInfo as files..."
@@ -416,6 +440,8 @@ function storeCustomSSLCerts()
         #decode cert data once again as it would got base64 encoded while  storing in azure keyvault
         echo "$customIdentityKeyStoreData" | base64 --decode > $customIdentityKeyStoreFileName
         echo "$customTrustKeyStoreData" | base64 --decode > $customTrustKeyStoreFileName
+
+        validateSSLKeyStores
 
     else
         echo "Custom SSL is not enabled"
