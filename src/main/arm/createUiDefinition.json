@@ -436,7 +436,7 @@
                                 "name": "uploadedCustomIdentityKeyStoreType",
                                 "type": "Microsoft.Common.DropDown",
                                 "visible": "true",
-                                "label": "The Custom Identity KeyStore type (JKS,PKCS12)",
+                                "label": "The Identity KeyStore type (JKS,PKCS12)",
                                 "defaultValue": "JKS",
                                 "toolTip": "Use only letters and numbers",
                                 "constraints": {
