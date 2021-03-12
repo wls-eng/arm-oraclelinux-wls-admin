@@ -249,7 +249,7 @@ function importAADCertificateIntoWLSCustomTrustKeyStore()
         . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
 
         #validate Trust keystore
-        sudo ${JAVA_HOME}/bin/keytool keytool -list -v -keystore ${DOMAIN_PATH}/${wlsDomainName}/keystores/trust.keystore -storepass ${customTrustKeyStorePassPhrase} -storetype ${customTrustKeyStoreType} | grep 'Entry type:' | grep 'trustedCertEntry'
+        sudo ${JAVA_HOME}/bin/keytool -list -v -keystore ${DOMAIN_PATH}/${wlsDomainName}/keystores/trust.keystore -storepass ${customTrustKeyStorePassPhrase} -storetype ${customTrustKeyStoreType} | grep 'Entry type:' | grep 'trustedCertEntry'
 
         if [[ $? != 0 ]]; then
            echo "Error : Trust Keystore Validation Failed !!"
