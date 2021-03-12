@@ -457,7 +457,7 @@
                                 "name": "uploadedPrivateKeyAlias",
                                 "type": "Microsoft.Common.TextBox",
                                 "visible": "true",
-                                "label": "The alias of the server's private key witin the Identity KeyStore",
+                                "label": "The alias of the server's private key within the Identity KeyStore",
                                 "defaultValue": "",
                                 "toolTip": "Use only letters and numbers",
                                 "constraints": {
@@ -471,7 +471,7 @@
                                 "type": "Microsoft.Common.PasswordBox",
                                 "visible": "true",
                                 "label": {
-                                    "password": "The passphrase for server's the private key within the Identity KeyStore",
+                                    "password": "The passphrase for the server's private key within the Identity KeyStore",
                                     "confirmPassword": "Confirm passphrase"
                                 },
                                 "toolTip": "Use only letters and numbers",
