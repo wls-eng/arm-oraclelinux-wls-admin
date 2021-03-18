@@ -952,7 +952,7 @@
                                 "constraints": {
                                     "required": "[bool(steps('section_database').enableDB)]",
                                     "regex": "^[a-z0-9A-Z/]{1,30}$",
-                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters and numbers."
+                                    "validationMessage": "The value must be 1-30 characters long and must only contain letters, numbers, and slashes (/)."
                                 },
                                 "visible": true
                             },
