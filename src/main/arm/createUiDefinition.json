@@ -992,8 +992,8 @@
                                 "toolTip": "Database Password",
                                 "constraints": {
                                     "required": "[bool(steps('section_database').enableDB)]",
-                                    "regex": "^((?=.*[0-9])(?=.*[a-z])|(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])|(?=.*[0-9])(?=.*[a-z])(?=.*[!@#$%^&*])|(?=.*[0-9])(?=.*[A-Z])(?=.*[!@#$%^&*])|(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])).{6,128}$",
-                                    "validationMessage": "The password must contain at least 6 characters, with at least 1 uppercase letter, 1 lowercase letter and 1 number."
+                                    "regex": "^((?=.*[0-9])(?=.*[a-zA-Z!@#$%^&*])).{5,128}$",
+                                    "validationMessage": "The password must be between five and 128 characters long and have at least one number."
                                 },
                                 "options": {
                                     "hideConfirmation": false
