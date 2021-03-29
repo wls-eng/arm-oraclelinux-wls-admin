@@ -13,8 +13,8 @@ on:
 env:
   tagbranch: "tagbranch"
   gitToken: ${{ secrets.GIT_TOKEN }}
-  refArmttk: 8e08a92dbb0a22b8560ec854a60e9a8a7b71c68f
-  refJavaee: 0f04aab7fc41be640bd22191d7a16054863cfe91
+  refArmttk: d97aa57d259e2fc8562e11501b1cf902265129d9
+  refJavaee: 6addd99d8bc3f472e040f11c053a37e1ac370229
   repoName: "arm-oraclelinux-wls-admin"
   userEmail: ${{ secrets.USER_EMAIL }}
   userName: ${{ secrets.USER_NAME }}
