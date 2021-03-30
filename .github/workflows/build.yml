@@ -34,8 +34,8 @@ env:
   adminVMName: adminServerVM
   offerName: arm-oraclelinux-wls-admin
   testbranchName: cicd-${{ github.run_id }}-${{ github.run_number }}
-  ref_javaee: 0f04aab7fc41be640bd22191d7a16054863cfe91
-  ref_armttk: 8e08a92dbb0a22b8560ec854a60e9a8a7b71c68f
+  ref_javaee: 6addd99d8bc3f472e040f11c053a37e1ac370229
+  ref_armttk: d97aa57d259e2fc8562e11501b1cf902265129d9
   git_token: ${{ secrets.GIT_TOKEN }} 
   
 jobs:
