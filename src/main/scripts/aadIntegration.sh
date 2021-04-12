@@ -7,7 +7,7 @@ function echo_stderr ()
 #Function to display usage message
 function usage()
 {
-  echo_stderr "./aadIntegration.sh <wlsUserName> <wlsPassword> <wlsDomainName> <wlsLDAPProviderName> <addsServerHost> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <oracleHome> <adminVMName> <wlsAdminPort> <wlsLDAPSSLCertificate> <addsPublicIP> <adminPassword> <wlsAdminServerName>"  
+  echo_stderr "./aadIntegration.sh <wlsUserName> <wlsPassword> <wlsDomainName> <wlsLDAPProviderName> <addsServerHost> <aadsPortNumber> <wlsLDAPPrincipal> <wlsLDAPPrincipalPassword> <wlsLDAPUserBaseDN> <wlsLDAPGroupBaseDN> <oracleHome> <adminVMName> <wlsAdminPort> <wlsLDAPSSLCertificate> <addsPublicIP> <wlsAdminServerName> <wlsDomainPath> <isCustomSSLEnabled> <customTrustKeyStorePassPhrase> <customTrustKeyStoreType>"
 }
 
 function validateInput()
@@ -73,11 +73,6 @@ function validateInput()
         echo_stderr "wlsAdminPort is required. "
     fi
 
-    if [ -z "$vituralMachinePassword" ];
-    then
-        echo_stderr "vituralMachinePassword is required. "
-    fi
-
     if [ -z "$wlsADSSLCer" ];
     then
         echo_stderr "wlsADSSLCer is required. "
@@ -88,20 +83,32 @@ function validateInput()
         echo_stderr "wlsLDAPPublicIP is required. "
     fi
 
-    if [ -z "$vituralMachinePassword" ];
+    if [ -z "$wlsDomainPath" ];
     then
-        echo_stderr "vituralMachinePassword is required. "
+        echo_stderr "wlsDomainPath is required. "
     fi
 
     if [ -z "$wlsAdminServerName" ];
     then
         echo_stderr "wlsAdminServerName is required. "
     fi
+
+    if [ "${isCustomSSLEnabled,,}" != "true" ];
+    then
+        echo_stderr "Custom SSL value is not provided. Defaulting to false"
+        isCustomSSLEnabled="false"
+    else
+        if   [ -z "$customTrustKeyStorePassPhrase" ];
+        then
+            echo "customTrustKeyStorePassPhrase is required "
+            exit 1
+        fi
+    fi
 }
 
 function createAADProvider_model()
 {
-    cat <<EOF >${SCRIPT_PWD}/configure-active-directory.py
+    cat <<EOF >${SCRIPT_PATH}/configure-active-directory.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 try:
    edit()
@@ -161,7 +168,7 @@ EOF
 
 function createSSL_model()
 {
-    cat <<EOF >${SCRIPT_PWD}/configure-ssl.py
+    cat <<EOF >${SCRIPT_PATH}/configure-ssl.py
 # Connect to the AdminServer.
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 try:
@@ -184,9 +191,7 @@ EOF
 function mapLDAPHostWithPublicIP()
 {
     echo "map LDAP host with pubilc IP"
-    # change to superuser
-    echo "${vituralMachinePassword}"
-    sudo -S su -
+    sudo sed -i '/${adServerHost}/d' /etc/hosts
     sudo echo "${wlsLDAPPublicIP}  ${adServerHost}" >> /etc/hosts
 }
 
@@ -213,16 +218,60 @@ function importAADCertificate()
 {
     # import the key to java security 
     . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
-    java_cacerts_path=${JAVA_HOME}/jre/lib/security/cacerts
+
+    # For AAD failure: exception happens when importing certificate to JDK 11.0.7
+    # ISSUE: https://github.com/wls-eng/arm-oraclelinux-wls/issues/109
+    # JRE was removed since JDK 11.
+    java_version=$(java -version 2>&1 | sed -n ';s/.* version "\(.*\)\.\(.*\)\..*"/\1\2/p;')
+    if [ ${java_version:0:3} -ge 110 ]; 
+    then 
+        java_cacerts_path=${JAVA_HOME}/lib/security/cacerts
+    else
+        java_cacerts_path=${JAVA_HOME}/jre/lib/security/cacerts
+    fi
+
+   # remove existing certificate.
+    queryAADTrust=$(${JAVA_HOME}/bin/keytool -list -keystore ${java_cacerts_path} -storepass changeit | grep "aadtrust")
+    if [ -n "$queryAADTrust" ];
+    then
+        sudo ${JAVA_HOME}/bin/keytool -delete -alias aadtrust -keystore ${java_cacerts_path} -storepass changeit  
+    fi
+    
     sudo ${JAVA_HOME}/bin/keytool -noprompt -import -alias aadtrust -file ${addsCertificate} -keystore ${java_cacerts_path} -storepass changeit
 
+}
+
+function importAADCertificateIntoWLSCustomTrustKeyStore()
+{
+    if [ "${isCustomSSLEnabled,,}" == "true" ];
+    then
+        # set java home
+        . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
+
+        #validate Trust keystore
+        sudo ${JAVA_HOME}/bin/keytool -list -v -keystore ${DOMAIN_PATH}/${wlsDomainName}/keystores/trust.keystore -storepass ${customTrustKeyStorePassPhrase} -storetype ${customTrustKeyStoreType} | grep 'Entry type:' | grep 'trustedCertEntry'
+
+        if [[ $? != 0 ]]; then
+           echo "Error : Trust Keystore Validation Failed !!"
+           exit 1
+        fi
+
+        # For SSL enabled causes AAD failure #225
+        # ISSUE: https://github.com/wls-eng/arm-oraclelinux-wls/issues/225
+
+        echo "Importing AAD Certificate into WLS Custom Trust Key Store: "
+
+        sudo ${JAVA_HOME}/bin/keytool -noprompt -import -trustcacerts -keystore ${DOMAIN_PATH}/${wlsDomainName}/keystores/trust.keystore -storepass ${customTrustKeyStorePassPhrase} -alias aadtrust -file ${addsCertificate} -storetype ${customTrustKeyStoreType}
+    else
+        echo "customSSL not enabled. Not required to configure AAD for WebLogic Custom SSL"
+    fi
 }
 
 function configureSSL()
 {
     echo "configure ladp ssl"
-    . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
-    java $WLST_ARGS weblogic.WLST ${SCRIPT_PWD}/configure-ssl.py 
+    sudo chown -R ${USER_ORACLE}:${GROUP_ORACLE} ${SCRIPT_PATH}
+    runuser -l ${USER_ORACLE} -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST ${SCRIPT_PATH}/configure-ssl.py" 
 
     errorCode=$?
     if [ $errorCode -eq 1 ]
@@ -235,8 +284,8 @@ function configureSSL()
 function configureAzureActiveDirectory()
 {
     echo "create Azure Active Directory provider"
-    . $oracleHome/oracle_common/common/bin/setWlstEnv.sh
-    java $WLST_ARGS weblogic.WLST ${SCRIPT_PWD}/configure-active-directory.py 
+    sudo chown -R ${USER_ORACLE}:${GROUP_ORACLE} ${SCRIPT_PATH}
+    runuser -l ${USER_ORACLE} -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST  ${SCRIPT_PATH}/configure-active-directory.py" 
 
     errorCode=$?
     if [ $errorCode -eq 1 ]
@@ -284,17 +333,46 @@ function wait_for_admin()
 function cleanup()
 {
     echo "Cleaning up temporary files..."
-    rm -f ${SCRIPT_PWD}/configure-ssl.py
-    rm -f ${SCRIPT_PWD}/configure-active-directory.py 
+    rm -f -r ${SCRIPT_PATH} 
     rm -rf ${SCRIPT_PWD}/security/*
     echo "Cleanup completed."
 }
 
+function enableTLSv12onJDK8()
+{
+    if ! grep -q "${STRING_ENABLE_TLSV12}" ${wlsDomainPath}/bin/setDomainEnv.sh; then
+        cat <<EOF >>${wlsDomainPath}/bin/setDomainEnv.sh
+# Append -Djdk.tls.client.protocols to JAVA_OPTIONS in jdk8
+# Enable TLSv1.2
+\${JAVA_HOME}/bin/java -version  2>&1  | grep -e "1[.]8[.][0-9]*_"  > /dev/null 
+javaStatus=$?
+
+if [[ "\${javaStatus}" = "0" && "\${JAVA_OPTIONS}"  != *"${JAVA_OPTIONS_TLS_V12}"* ]]; then
+    JAVA_OPTIONS="\${JAVA_OPTIONS} ${JAVA_OPTIONS_TLS_V12}"
+    export JAVA_OPTIONS
+fi
+EOF
+fi
+}
+
+function createTempFolder()
+{
+    export SCRIPT_PATH="/u01/tmp"
+    sudo rm -f -r ${SCRIPT_PATH}
+    sudo mkdir ${SCRIPT_PATH}
+    sudo rm -rf $SCRIPT_PATH/*
+}
+
 export LDAP_USER_NAME='sAMAccountName'
 export LDAP_USER_FROM_NAME_FILTER='(&(sAMAccountName=%u)(objectclass=user))'
+export JAVA_OPTIONS_TLS_V12="-Djdk.tls.client.protocols=TLSv1.2"
+export STRING_ENABLE_TLSV12="Append -Djdk.tls.client.protocols to JAVA_OPTIONS in jdk8"
 export SCRIPT_PWD=`pwd`
+export USER_ORACLE="oracle"
+export GROUP_ORACLE="oracle"
+export DOMAIN_PATH="/u01/domains"
 
-if [ $# -ne 17 ]
+if [ $# -ne 20 ]
 then
     usage
 	exit 1
@@ -315,20 +393,35 @@ export wlsAdminHost=${12}
 export wlsAdminPort=${13}
 export wlsADSSLCer="${14}"
 export wlsLDAPPublicIP="${15}"
-export vituralMachinePassword="${16}"
-export wlsAdminServerName=${17}
+export wlsAdminServerName=${16}
+export wlsDomainPath=${17}
+export isCustomSSLEnabled=${18}
+export customTrustKeyStorePassPhrase="${19}"
+export customTrustKeyStoreType="${20}"
+
+export isCustomSSLEnabled="${isCustomSSLEnabled,,}"
+
+if [ "${isCustomSSLEnabled,,}" == "true" ];
+then
+    customTrustKeyStorePassPhrase=$(echo "$customTrustKeyStorePassPhrase" | base64 --decode)
+    customTrustKeyStoreType=$(echo "$customTrustKeyStoreType" | base64 --decode)
+fi
+
 export wlsAdminURL=$wlsAdminHost:$wlsAdminPort
 
-
+validateInput
+createTempFolder
 echo "check status of admin server"
 wait_for_admin
 
 echo "start to configure Azure Active Directory"
+enableTLSv12onJDK8
 createAADProvider_model
 createSSL_model
 mapLDAPHostWithPublicIP
 parseLDAPCertificate
 importAADCertificate
+importAADCertificateIntoWLSCustomTrustKeyStore
 configureSSL
 configureAzureActiveDirectory
 restartAdminServerService
@@ -337,3 +430,4 @@ echo "Waiting for admin server to be available"
 wait_for_admin
 echo "Weblogic admin server is up and running"
 
+cleanup

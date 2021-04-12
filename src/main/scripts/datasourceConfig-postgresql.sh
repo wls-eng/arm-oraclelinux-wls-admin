@@ -91,7 +91,7 @@ function validateInput()
 function createJDBCSource_model()
 {
 echo "Creating JDBC data source with name $jdbcDataSourceName"
-cat <<EOF >create_datasource.py
+cat <<EOF >${scriptPath}/create_datasource.py
 connect('$wlsUserName','$wlsPassword','t3://$wlsAdminURL')
 edit("$hostName")
 startEdit()
@@ -122,10 +122,23 @@ try:
   resolve()
   activate()
 except Exception, e:
-  print "Already datasource with name $jdbcDataSourceName exists"
+  e.printStackTrace()
+  dumpStack()
+  undo('true',defaultAnswer='y')
+  cancelEdit('y')
+  destroyEditSession("$hostName",force = true)
+  raise("$jdbcDataSourceName configuration failed")
 destroyEditSession("$hostName",force = true)
 disconnect()
 EOF
+}
+
+function createTempFolder()
+{
+    export scriptPath="/u01/tmp"
+    sudo rm -f -r ${scriptPath}
+    sudo mkdir ${scriptPath}
+    sudo rm -rf $scriptPath/*
 }
 
 
@@ -147,12 +160,20 @@ then
     exit 1
 fi
 
+createTempFolder
 validateInput
 createJDBCSource_model
 
-. $oracleHome/oracle_common/common/bin/setWlstEnv.sh
+sudo chown -R oracle:oracle ${scriptPath}
+runuser -l oracle -c ". $oracleHome/oracle_common/common/bin/setWlstEnv.sh; java $WLST_ARGS weblogic.WLST ${scriptPath}/create_datasource.py"
 
+errorCode=$?
+if [ $errorCode -eq 1 ]
+then 
+    echo "Exception occurs during DB configuration, please check."
+    exit 1
+fi
 
-java $WLST_ARGS weblogic.WLST create_datasource.py $wlsUserName $wlsPassword $wlsAdminURL $jdbcDataSourceName $dsConnectionURL $dsUser $dsPassword $wlsClusterName
-
+echo "Cleaning up temporary files..."
+rm -f -r ${scriptPath}
 

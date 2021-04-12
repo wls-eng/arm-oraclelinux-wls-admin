@@ -8,7 +8,7 @@
                 "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
             }
         },
-        "_artifactsLocationAADTemplate": {
+        "_artifactsLocationELKTemplate": {
             "defaultValue": "[if(contains(parameters('_artifactsLocation'), 'githubusercontent'), parameters('_artifactsLocation'), deployment().properties.templateLink.uri)]",
             "type": "string",
             "metadata": {
@@ -16,28 +16,10 @@
             }
         },
         "_artifactsLocationSasToken": {
-            "defaultValue":"",
+            "defaultValue": "",
             "type": "securestring",
             "metadata": {
                 "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
-            }
-        },
-        "aadsPortNumber": {
-            "type": "string",
-            "defaultValue": "636",
-            "metadata": {
-                "description": "Accessible port of the LDAP server."
-            }
-        },
-        "aadsPublicIP": {
-            "type": "string",
-            "defaultValue": "The LDAP server public IP address"
-        },
-        "aadsServerHost": {
-            "type": "string",
-            "defaultValue": "ldaps.example.com",
-            "metadata": {
-                "description": "The LDAP server host."
             }
         },
         "adminVMName": {
@@ -47,58 +29,50 @@
                 "description": "Admin Server hosting VM name."
             }
         },
+        "elasticsearchEndpoint": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Endpoint of the Elasticsearch instance."
+            }
+        },
+        "elasticsearchPassword": {
+            "type": "securestring",
+            "defaultValue": "[newGuid()]",
+            "metadata": {
+                "description": "The credentials to distibute message with REST API to Elasticsearch instance."
+            }
+        },
+        "elasticsearchUserName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The credentials to distibute message with REST API to Elasticsearch instance."
+            }
+        },
+        "guidValue": {
+            "type": "string",
+            "defaultValue": "[newGuid()]"
+        },
         "location": {
             "type": "string",
             "metadata": {
                 "description": "Location for all resources."
             }
         },
+        "logsToIntegrate": {
+            "type": "array",
+            "defaultValue": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput" ],
+            "allowedValues": [ "HTTPAccessLog", "ServerLog", "DomainLog", "DataSourceLog", "StandardErrorAndOutput" ],
+            "metadata": {
+                "description": "Specify the expeted logs to integrate, you must input at least one log."
+            }
+        },
         "wlsDomainName": {
             "type": "string",
+            "defaultValue": "adminDomain",
             "metadata": {
                 "description": "Provide Weblogic domain name"
-            }
-        },
-        "wlsLDAPGroupBaseDN": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains groups."
-            }
-        },
-        "wlsLDAPPrincipal": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "The Distinguished Name (DN) of the LDAP user that WebLogic Server should use to connect to the LDAP server."
-            }
-        },
-        "wlsLDAPPrincipalPassword": {
-            "type": "securestring",
-            "defaultValue": "[newGuid()]",
-            "metadata": {
-                "description": "The credential (usually a password) used to connect to the LDAP server."
-            }
-        },
-        "wlsLDAPProviderName": {
-            "type": "string",
-            "defaultValue": "AzureActiveDirectoryProvider",
-            "metadata": {
-                "description": "The value used for creating authentication provider name of WebLogic Server."
-            }
-        },
-        "wlsLDAPSSLCertificate": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "Client certificate that will be imported to trust store of SSL."
-            }
-        },
-        "wlsLDAPUserBaseDN": {
-            "type": "string",
-            "defaultValue": "",
-            "metadata": {
-                "description": "The base distinguished name (DN) of the tree in the LDAP directory that contains users."
             }
         },
         "wlsPassword": {
@@ -112,42 +86,40 @@
             "metadata": {
                 "description": "Username for your Weblogic domain name"
             }
-        },
-        "enableCustomSSL": {
-           "type": "bool",
-           "defaultValue": false,
-           "metadata": {
-              "description": "Boolean value indicating, if custom SSL is enabled or not"
-           }
-        },
-        "keyVaultCustomTrustKeyStorePassPhrase": {
-           "type": "string",
-           "defaultValue": "null",
-           "metadata": {
-              "description": "Weblogic Custom Trust Store Passphrase"
-           }
-        },
-        "keyVaultCustomTrustKeyStoreType": {
-           "type": "string",
-           "defaultValue": "null",
-           "metadata": {
-              "description": "Weblogic Custom Trust Store Type (JKS or PKCS12)"
-           }
         }
     },
     "variables": {
-        "const_aadParameters": "[concat(parameters('wlsUserName'),' ',parameters('wlsPassword'),' ',parameters('wlsDomainName'),' ',parameters('wlsLDAPProviderName'), ' ',  parameters('aadsServerHost'), ' ', parameters('aadsPortNumber'), ' ', concat('\"',parameters('wlsLDAPPrincipal'),'\"'), ' ', parameters('wlsLDAPPrincipalPassword'), ' ', concat('\"',parameters('wlsLDAPUserBaseDN'),'\"'), ' ', concat('\"',parameters('wlsLDAPGroupBaseDN'),'\"'), ' ', variables('const_wlsHome'),' ',parameters('adminVMName'),' ',variables('const_wlsAdminPort'),' ',parameters('wlsLDAPSSLCertificate'), ' ', parameters('aadsPublicIP'), ' ', variables('const_adminServerName'), ' ', variables('const_wlsDomainPath'),' ',parameters('enableCustomSSL'),' ',base64(parameters('keyVaultCustomTrustKeyStorePassPhrase')),' ',base64(parameters('keyVaultCustomTrustKeyStoreType')))]",
         "const_adminServerName": "admin",
+        "const_logIndex": "[concat('azure-weblogic-admin-', parameters('guidValue'))]",
         "const_wlsAdminPort": "7005",
         "const_wlsDomainPath": "[concat('/u01/domains/', parameters('wlsDomainName'))]",
         "const_wlsHome": "/u01/app/wls/install/oracle/middleware/oracle_home",
-        "name_scriptAADConfiguration": "aadIntegration.sh"
+        "name_scriptELKConfiguration": "elkIntegration.sh"
     },
+    "functions": [
+        {
+            "namespace": "array",
+            "members": {
+                "join": {
+                    "parameters": [
+                        {
+                            "name": "items",
+                            "type": "array"
+                        }
+                    ],
+                    "output": {
+                        "type": "string",
+                        "value": "[replace(replace(replace(string(parameters('items')), '[\"', ''), '\"]', ''), '\",\"', ',')]"
+                    }
+                }
+            }
+        }
+    ],
     "resources": [
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${admin.aad.start}",
+            "name": "${admin.elk.start}",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -170,18 +142,18 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                     "fileUris": [
-                        "[uri(parameters('_artifactsLocationAADTemplate'), concat('../scripts/', variables('name_scriptAADConfiguration'), parameters('_artifactsLocationSasToken')))]"
+                        "[uri(parameters('_artifactsLocationELKTemplate'), concat('../scripts/', variables('name_scriptELKConfiguration'), parameters('_artifactsLocationSasToken')))]"
                     ]
                 },
                 "protectedSettings": {
-                    "commandToExecute": "[concat('sh',' ',variables('name_scriptAADConfiguration'),' ', variables('const_aadParameters'))]"
+                    "commandToExecute": "[concat('sh',' ',variables('name_scriptELKConfiguration'),' ', variables('const_wlsHome'), ' ', parameters('adminVMName'), ' ', variables('const_wlsAdminPort'), ' ', parameters('wlsUserName'), ' ', parameters('wlsPassword'), ' ', variables('const_adminServerName'), ' ',parameters('elasticsearchEndpoint') ,' ', parameters('elasticsearchUserName'),' ', parameters('elasticsearchPassword'), ' ', parameters('wlsDomainName'),' ', variables('const_wlsDomainPath'),' ', array.join(parameters('logsToIntegrate')),' ', variables('const_logIndex'))]"
                 }
             }
         },
         {
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "${azure.apiVersion}",
-            "name": "${admin.aad.end}",
+            "name": "${admin.elk.end}",
             "dependsOn": [
                 "[resourceId('Microsoft.Compute/virtualMachines/extensions', parameters('adminVMName'), 'newuserscript')]"
             ],
@@ -200,6 +172,10 @@
         "artifactsLocationPassedIn": {
             "type": "string",
             "value": "[parameters('_artifactsLocation')]"
+        },
+        "logIndex": {
+            "type": "string",
+            "value": "[variables('const_logIndex')]"
         }
     }
 }
