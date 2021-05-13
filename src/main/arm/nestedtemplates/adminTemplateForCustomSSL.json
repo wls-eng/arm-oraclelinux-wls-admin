@@ -154,7 +154,7 @@
       },
       "skuUrnVersion": {
          "type": "string",
-         "defaultValue": "owls-122130-8u131-ol74;Oracle:weblogic-122130-jdk8u131-ol74:owls-122130-8u131-ol7;latest",
+         "defaultValue": "owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest",
          "allowedValues": [
             "owls-122130-jdk8-ol73;Oracle:weblogic-122130-jdk8-ol73:owls-122130-jdk8-ol7;latest",
             "owls-122130-jdk8-ol74;Oracle:weblogic-122130-jdk8-ol74:owls-122130-jdk8-ol7;latest",
