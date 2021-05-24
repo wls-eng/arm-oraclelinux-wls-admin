@@ -1,17 +1,16 @@
 name: Build and Test
 
 on: 
-  push:
-    branches:
-      - develop
-  schedule:
-      - cron:  '0 7 * * *'
   workflow_dispatch:
     inputs:
       enableELK:
         description: 'Specify whether to enable ELK depoyment or not.'
         required: true
         default: 'false'
+  # Allows you to run this workflow using GitHub APIs
+  # PERSONAL_ACCESS_TOKEN=<GITHUB_PERSONAL_ACCESS_TOKEN>
+  # REPO_NAME=wls-eng/arm-oraclelinux-wls-admin
+  # curl --verbose -XPOST -u "wls-eng:${PERSONAL_ACCESS_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" -H "Content-Type: application/json" https://api.github.com/repos/${REPO_NAME}/dispatches --data '{"event_type": "production-deploy"}'
   repository_dispatch:
 
 env:
@@ -290,27 +289,45 @@ jobs:
         azcliversion: ${{ env.azCliVersion }}
         inlineScript: |
           echo "query existing source address prefixes"
-          while [ -z `az network nsg show -g $resourceGroup -n ${nsg} | grep "NRMS-Rule-101"` ]
-          do
-            echo "network security group rule NRMS-Rule-101 is not ready"
-            sleep 1m
-          done
-          sourceAddressPrefixes=$(az network nsg rule show \
-            --resource-group $resourceGroup \
-            --nsg-name ${nsg} \
-            --name NRMS-Rule-101 \
-            --query "sourceAddressPrefixes")
-          echo "IP of this machine: " ${myIP}
-          sourceAddressPrefixes=$(echo ${myIP} ${sourceAddressPrefixes} | \
-            sed 's/,/ /g; s/\[//g; s/\]//g; s/"//g')
-          echo ${sourceAddressPrefixes}
-          az network nsg rule update \
-            --resource-group $resourceGroup \
-            --nsg-name ${nsg} \
-            --name NRMS-Rule-101 \
-            --source-address-prefixes $sourceAddressPrefixes \
-            --destination-port-ranges 443 22 ${adminConsolePort}
-          
+            attempt=0
+            toCreateRule101=false
+            while [[ -z `az network nsg show -g $resourceGroup -n ${nsg} | grep "NRMS-Rule-101"` && $attempt -le 5 ]]
+            do
+              if [ $attempt -eq 5 ]; then
+                toCreateRule101=true
+              fi
+              echo "network security group rule NRMS-Rule-101 is not ready"
+              sleep 1m
+              attempt=$((attempt + 1))
+            done
+            if [ $toCreateRule101 == true ]; then
+              az network nsg rule create --name NRMS-Rule-101 \
+                           --nsg-name ${nsg} \
+                           --priority 101 \
+                           --resource-group $resourceGroup \
+                           --access Allow \
+                           --destination-address-prefixes "*" \
+                           --destination-port-ranges 22 43  ${adminConsolePort} \
+                           --direction Inbound \
+                           --protocol Tcp \
+                           --source-address-prefixes $myIP
+            else
+              sourceAddressPrefixes=$(az network nsg rule show \
+                --resource-group $resourceGroup \
+                --nsg-name ${nsg} \
+                --name NRMS-Rule-101 \
+                --query "sourceAddressPrefixes")
+              echo "IP of this machine: " ${myIP}
+              sourceAddressPrefixes=$(echo ${myIP} ${sourceAddressPrefixes} | \
+                sed 's/,/ /g; s/\[//g; s/\]//g; s/"//g')
+              echo ${sourceAddressPrefixes}
+              az network nsg rule update \
+                --resource-group $resourceGroup \
+                --nsg-name ${nsg} \
+                --name NRMS-Rule-101 \
+                --source-address-prefixes $sourceAddressPrefixes \
+                --destination-port-ranges 443 22 ${adminConsolePort}
+            fi
     - name: Restart wls VM
       id: restart-wls-wm
       uses: azure/CLI@v1

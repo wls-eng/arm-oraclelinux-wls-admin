@@ -42,6 +42,9 @@ cat <<EOF > ${parametersPath}
         "jdbcDataSourceName": {
             "value": "jdbc/postgresql"
         },
+        "vmSizeSelect": {
+            "value": "Standard_D2as_v4"
+        },
         "wlsPassword": {
             "value": "GEN-UNIQUE"
         },
