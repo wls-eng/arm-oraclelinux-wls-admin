@@ -36,6 +36,9 @@ cat <<EOF > ${parametersPath}
         "enableDB": {
             "value": false
         },
+        "vmSizeSelect": {
+            "value": "Standard_D2as_v4"
+        },
         "wlsLDAPGroupBaseDN": {
             "value": "GEN-UNIQUE"
         },
